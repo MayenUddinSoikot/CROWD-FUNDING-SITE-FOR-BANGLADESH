@@ -11,7 +11,7 @@ export function CampaignCard({ campaign }: { campaign: Campaign }) {
   return (
     <Link
       href={`/campaigns/${campaign.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-foreground/10 transition hover:border-brand/50 hover:shadow-lg"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-foreground/10 bg-card shadow-sm transition hover:border-brand/50 hover:shadow-lg"
     >
       {campaign.cover_image_url ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -34,7 +34,7 @@ export function CampaignCard({ campaign }: { campaign: Campaign }) {
           ) : null}
         </p>
 
-        <h3 className="text-lg font-semibold leading-snug group-hover:text-brand">
+        <h3 className="font-serif text-lg font-semibold leading-snug group-hover:text-brand">
           {campaign.title}
         </h3>
         {campaign.title_bn ? (

@@ -107,7 +107,7 @@ export default async function CampaignPage({
           ) : null}
         </p>
 
-        <h1 className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">
+        <h1 className="mt-2 font-serif text-3xl font-bold leading-tight sm:text-4xl">
           {campaign.title}
         </h1>
         {campaign.title_bn ? (
@@ -122,7 +122,7 @@ export default async function CampaignPage({
           </p>
         ) : null}
 
-        <div className="mt-6 rounded-2xl border border-foreground/10 p-6">
+        <div className="mt-6 rounded-2xl border border-foreground/10 bg-card p-6 shadow-sm">
           <div className="flex items-baseline justify-between">
             <p className="text-2xl font-bold text-brand">
               {formatTaka(campaign.raised_amount)}
@@ -187,7 +187,7 @@ export default async function CampaignPage({
               {donations.map((donation) => (
                 <li
                   key={donation.id}
-                  className="flex items-start justify-between gap-4 rounded-xl border border-foreground/10 p-4"
+                  className="flex items-start justify-between gap-4 rounded-xl border border-foreground/10 bg-card p-4"
                 >
                   <div>
                     <p className="font-medium">

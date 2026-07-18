@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Noto_Sans_Bengali } from "next/font/google";
+import { Geist, Lora, Noto_Sans_Bengali } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+const lora = Lora({
+  variable: "--font-serif-en",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
 });
 
 const notoBengali = Noto_Sans_Bengali({
@@ -27,7 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${notoBengali.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${lora.variable} ${notoBengali.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

@@ -1,11 +1,13 @@
 @import "tailwindcss";
 
+/* Shohay design language: warm cream, deep green, Bengali-first. */
 :root {
-  --background: #ffffff;
-  --foreground: #14231b;
-  --brand: #00794d;
-  --brand-dark: #005c3b;
-  --accent: #e5304a;
+  --background: #faf6ee;
+  --foreground: #22291f;
+  --brand: #11694a;
+  --brand-dark: #0b4f36;
+  --accent: #b43e2b;
+  --card: #ffffff;
 }
 
 @theme inline {
@@ -14,17 +16,10 @@
   --color-brand: var(--brand);
   --color-brand-dark: var(--brand-dark);
   --color-accent: var(--accent);
+  --color-card: var(--card);
   --font-sans: var(--font-geist-sans);
+  --font-serif: var(--font-serif-en);
   --font-bengali: var(--font-bengali);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0b1310;
-    --foreground: #e8f0ec;
-    --brand: #17a56f;
-    --brand-dark: #0e7d53;
-  }
 }
 
 body {
