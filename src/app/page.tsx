@@ -9,20 +9,27 @@ export const dynamic = "force-dynamic";
 async function getCampaigns(): Promise<Campaign[] | null> {
   if (!isSupabaseConfigured()) return null;
 
-  const supabase = getSupabaseClient();
-  const { data, error } = await supabase
-    .from("campaigns")
-    .select(
-      "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, beneficiary_name, district, ends_at, created_at"
-    )
-    .in("status", ["approved", "completed"])
-    .order("created_at", { ascending: false });
+  // Never crash the page on a bad connection — fall back to the
+  // "database not connected" notice instead.
+  try {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from("campaigns")
+      .select(
+        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, beneficiary_name, district, ends_at, created_at"
+      )
+      .in("status", ["approved", "completed"])
+      .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("Failed to load campaigns:", error.message);
-    return [];
+    if (error) {
+      console.error("Failed to load campaigns:", error.message);
+      return null;
+    }
+    return data as Campaign[];
+  } catch (err) {
+    console.error("Supabase connection failed:", err);
+    return null;
   }
-  return data as Campaign[];
 }
 
 export default async function Home() {

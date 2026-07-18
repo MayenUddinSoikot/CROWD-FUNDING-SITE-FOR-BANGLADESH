@@ -13,37 +13,47 @@ export const dynamic = "force-dynamic";
 async function getCampaign(slug: string): Promise<Campaign | null> {
   if (!isSupabaseConfigured()) return null;
 
-  const supabase = getSupabaseClient();
-  const { data, error } = await supabase
-    .from("campaigns")
-    .select(
-      "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, beneficiary_name, district, ends_at, created_at"
-    )
-    .eq("slug", slug)
-    .in("status", ["approved", "completed"])
-    .maybeSingle();
+  try {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from("campaigns")
+      .select(
+        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, beneficiary_name, district, ends_at, created_at"
+      )
+      .eq("slug", slug)
+      .in("status", ["approved", "completed"])
+      .maybeSingle();
 
-  if (error) {
-    console.error("Failed to load campaign:", error.message);
+    if (error) {
+      console.error("Failed to load campaign:", error.message);
+      return null;
+    }
+    return data as Campaign | null;
+  } catch (err) {
+    console.error("Supabase connection failed:", err);
     return null;
   }
-  return data as Campaign | null;
 }
 
 async function getDonations(campaignId: string): Promise<PublicDonation[]> {
-  const supabase = getSupabaseClient();
-  const { data, error } = await supabase
-    .from("public_donations")
-    .select("id, campaign_id, donor_name, amount, message, paid_at")
-    .eq("campaign_id", campaignId)
-    .order("paid_at", { ascending: false })
-    .limit(25);
+  try {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from("public_donations")
+      .select("id, campaign_id, donor_name, amount, message, paid_at")
+      .eq("campaign_id", campaignId)
+      .order("paid_at", { ascending: false })
+      .limit(25);
 
-  if (error) {
-    console.error("Failed to load donations:", error.message);
+    if (error) {
+      console.error("Failed to load donations:", error.message);
+      return [];
+    }
+    return data as PublicDonation[];
+  } catch (err) {
+    console.error("Supabase connection failed:", err);
     return [];
   }
-  return data as PublicDonation[];
 }
 
 export async function generateMetadata({
