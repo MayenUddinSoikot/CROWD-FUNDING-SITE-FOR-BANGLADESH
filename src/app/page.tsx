@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
+import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/anon";
 import type { Campaign, CampaignCategory } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
-import { CampaignCard } from "@/components/CampaignCard";
+import { RealtimeCampaignGrid } from "@/components/RealtimeCampaignGrid";
 import { SiteHeader } from "@/components/SiteHeader";
 
 // Always show fresh donation totals — never a stale build-time snapshot.
@@ -122,11 +122,11 @@ export default async function Home({
               </span>
             </div>
           ) : (
-            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {campaigns.map((campaign) => (
-                <CampaignCard key={campaign.id} campaign={campaign} />
-              ))}
-            </div>
+            <RealtimeCampaignGrid
+              key={activeCategory ?? "all"}
+              initialCampaigns={campaigns}
+              activeCategory={activeCategory}
+            />
           )}
         </section>
 

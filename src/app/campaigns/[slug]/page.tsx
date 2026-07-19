@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
+import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/anon";
 import type { Campaign, PublicDonation } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
-import { formatTaka, percentRaised, timeAgo } from "@/lib/format";
-import { ProgressBar } from "@/components/ProgressBar";
+import { formatTaka, timeAgo } from "@/lib/format";
+import { RealtimeCampaignStats } from "@/components/RealtimeCampaignStats";
 import { SiteHeader } from "@/components/SiteHeader";
 
 // Always show fresh donation totals — never a stale build-time snapshot.
@@ -81,7 +81,6 @@ export default async function CampaignPage({
 
   const donations = await getDonations(campaign.id);
   const category = CATEGORY_LABELS[campaign.category] ?? CATEGORY_LABELS.other;
-  const percent = percentRaised(campaign.raised_amount, campaign.goal_amount);
 
   return (
     <>
@@ -123,21 +122,13 @@ export default async function CampaignPage({
         ) : null}
 
         <div className="mt-6 rounded-2xl border border-foreground/10 bg-card p-6 shadow-sm">
-          <div className="flex items-baseline justify-between">
-            <p className="text-2xl font-bold text-brand">
-              {formatTaka(campaign.raised_amount)}
-            </p>
-            <p className="text-sm opacity-60">
-              raised of {formatTaka(campaign.goal_amount)} goal
-            </p>
-          </div>
-          <div className="mt-3">
-            <ProgressBar percent={percent} />
-          </div>
-          <p className="mt-2 text-sm opacity-60">
-            {percent}% funded · {donations.length} donation
-            {donations.length === 1 ? "" : "s"}
-          </p>
+          <RealtimeCampaignStats
+            key={campaign.id}
+            campaignId={campaign.id}
+            initialRaised={campaign.raised_amount}
+            goalAmount={campaign.goal_amount}
+            donationCount={donations.length}
+          />
 
           <button
             disabled
