@@ -68,5 +68,42 @@ export async function createCampaign(
     return { error: "Something went wrong saving the campaign. Try again." };
   }
 
+  // Private verification + payout details, stored in a separate table that
+  // has no public read policy. Optional — only saved if the applicant
+  // filled any of it in.
+  const verification = {
+    campaign_id: data.id,
+    applicant_name: str(formData, "applicant_name"),
+    applicant_nid: str(formData, "applicant_nid"),
+    applicant_phone: str(formData, "applicant_phone"),
+    applicant_email: str(formData, "applicant_email"),
+    relationship: str(formData, "relationship"),
+    bank_name: str(formData, "bank_name"),
+    bank_branch: str(formData, "bank_branch"),
+    bank_account_name: str(formData, "bank_account_name"),
+    bank_account_number: str(formData, "bank_account_number"),
+    bkash_number: str(formData, "bkash_number"),
+    notes: str(formData, "notes"),
+  };
+
+  const hasVerification = Object.entries(verification).some(
+    ([key, value]) => key !== "campaign_id" && value !== null
+  );
+
+  if (hasVerification) {
+    const { error: vError } = await supabase
+      .from("campaign_verifications")
+      .insert(verification);
+    if (vError) {
+      // Don't fail the whole submission — the campaign is already saved.
+      console.error("Failed to save verification:", vError.message);
+    }
+  }
+
   redirect(`/account?created=${data.id}`);
+}
+
+function str(formData: FormData, key: string): string | null {
+  const value = String(formData.get(key) ?? "").trim();
+  return value || null;
 }

@@ -162,6 +162,126 @@ export function CampaignWizard() {
         />
       </fieldset>
 
+      <fieldset className="mt-6 rounded-2xl border border-foreground/10 bg-card p-6">
+        <legend className="px-1 text-sm font-bold text-brand">
+          5. Verification · যাচাই (private — admin only)
+        </legend>
+        <p className="mt-2 text-xs opacity-60">
+          This section is never shown publicly. Shohay uses it to verify the
+          campaign before approving. এই তথ্য কখনো প্রকাশ্যে দেখানো হয় না।
+        </p>
+
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium" htmlFor="applicant_name">
+              Your full name (applicant)
+            </label>
+            <input id="applicant_name" name="applicant_name" className={inputClass} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="applicant_nid">
+              Your NID number · জাতীয় পরিচয়পত্র
+            </label>
+            <input id="applicant_nid" name="applicant_nid" className={inputClass} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="applicant_phone">
+              Phone · মোবাইল
+            </label>
+            <input
+              id="applicant_phone"
+              name="applicant_phone"
+              type="tel"
+              placeholder="01XXXXXXXXX"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="applicant_email">
+              Email
+            </label>
+            <input
+              id="applicant_email"
+              name="applicant_email"
+              type="email"
+              className={inputClass}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium" htmlFor="relationship">
+              Your relationship to the beneficiary
+            </label>
+            <input
+              id="relationship"
+              name="relationship"
+              placeholder="e.g. son, neighbour, myself"
+              className={inputClass}
+            />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset className="mt-6 rounded-2xl border border-foreground/10 bg-card p-6">
+        <legend className="px-1 text-sm font-bold text-brand">
+          6. Payout details · পেআউট (private — admin only)
+        </legend>
+        <p className="mt-2 text-xs opacity-60">
+          Where approved funds should be sent. Also never shown publicly.
+        </p>
+
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium" htmlFor="bkash_number">
+              bKash / Nagad number
+            </label>
+            <input
+              id="bkash_number"
+              name="bkash_number"
+              type="tel"
+              placeholder="01XXXXXXXXX"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="bank_name">
+              Bank name
+            </label>
+            <input id="bank_name" name="bank_name" className={inputClass} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="bank_account_name">
+              Account holder name
+            </label>
+            <input
+              id="bank_account_name"
+              name="bank_account_name"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="bank_account_number">
+              Account number
+            </label>
+            <input
+              id="bank_account_number"
+              name="bank_account_number"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="bank_branch">
+              Branch
+            </label>
+            <input id="bank_branch" name="bank_branch" className={inputClass} />
+          </div>
+        </div>
+
+        <label className="mt-4 block text-sm font-medium" htmlFor="notes">
+          Anything else for the reviewer
+        </label>
+        <textarea id="notes" name="notes" rows={3} className={inputClass} />
+      </fieldset>
+
       {state?.error ? (
         <p className="mt-4 text-sm text-accent">{state.error}</p>
       ) : null}

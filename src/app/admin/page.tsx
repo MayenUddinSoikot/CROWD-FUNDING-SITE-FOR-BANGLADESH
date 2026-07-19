@@ -1,127 +1,117 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { getAdminClient } from "@/lib/admin";
 import { SiteHeader } from "@/components/SiteHeader";
 import { formatTaka } from "@/lib/format";
 import { CATEGORY_LABELS } from "@/lib/types";
 import type { Campaign } from "@/lib/types";
-import { approveCampaign, rejectCampaign } from "./actions";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Admin — Shohay সহায়" };
+export const metadata: Metadata = { title: "Admin dashboard — Shohay সহায়" };
 
-export default async function AdminPage() {
-  if (!isSupabaseConfigured()) redirect("/");
+function StatTile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-foreground/10 bg-card p-5">
+      <p className="text-2xl font-bold text-brand">{value}</p>
+      <p className="mt-1 text-sm opacity-60">{label}</p>
+    </div>
+  );
+}
 
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+export default async function AdminDashboard() {
+  const supabase = await getAdminClient();
+  if (!supabase) redirect("/");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", user.id)
-    .single();
-  if (!profile?.is_admin) redirect("/");
-
-  const { data: pending } = await supabase
+  const { data: all } = await supabase
     .from("campaigns")
     .select(
-      "id, slug, title, title_bn, summary, category, goal_amount, beneficiary_name, district, created_at, status"
+      "id, slug, title, title_bn, category, goal_amount, raised_amount, status, beneficiary_name, district, created_at"
     )
-    .eq("status", "pending")
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: false });
 
-  const campaigns = (pending ?? []) as Campaign[];
+  const campaigns = (all ?? []) as Campaign[];
+  const pending = campaigns.filter((c) => c.status === "pending");
+  const live = campaigns.filter((c) => c.status === "approved");
+  const totalRaised = campaigns.reduce((sum, c) => sum + Number(c.raised_amount), 0);
 
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 pb-16">
+      <main className="mx-auto w-full max-w-4xl flex-1 px-6 pb-16">
         <h1 className="mt-10 text-2xl font-bold">
-          Review queue · <span className="font-bengali">পর্যালোচনা</span>
+          Admin dashboard ·{" "}
+          <span className="font-bengali">অ্যাডমিন ড্যাশবোর্ড</span>
         </h1>
-        <p className="mt-1 text-sm opacity-60">
-          Verify the beneficiary and NID before approving. Approved campaigns
-          go live immediately.
-        </p>
 
-        {campaigns.length === 0 ? (
-          <div className="mt-8 rounded-2xl border border-foreground/10 bg-card p-8 text-center text-sm opacity-70">
-            Nothing waiting for review. 🎉
-          </div>
-        ) : (
-          <ul className="mt-6 space-y-4">
-            {campaigns.map((campaign) => {
-              const category =
-                CATEGORY_LABELS[campaign.category] ?? CATEGORY_LABELS.other;
-              return (
-                <li
-                  key={campaign.id}
-                  className="rounded-2xl border border-foreground/10 bg-card p-5"
-                >
-                  <p className="text-xs font-medium uppercase tracking-wide text-brand">
-                    {category.en} ·{" "}
-                    <span className="font-bengali">{category.bn}</span>
-                    {campaign.district ? (
-                      <span className="opacity-70"> · {campaign.district}</span>
-                    ) : null}
-                  </p>
-                  <h2 className="mt-1 font-serif text-lg font-semibold">
-                    {campaign.title}
-                  </h2>
-                  {campaign.title_bn ? (
-                    <p className="font-bengali text-sm opacity-70">
-                      {campaign.title_bn}
-                    </p>
-                  ) : null}
-                  {campaign.beneficiary_name ? (
-                    <p className="mt-1 text-sm opacity-60">
-                      Beneficiary: {campaign.beneficiary_name}
-                    </p>
-                  ) : null}
-                  {campaign.summary ? (
-                    <p className="mt-2 text-sm opacity-80">{campaign.summary}</p>
-                  ) : null}
-                  <p className="mt-2 text-sm font-semibold text-brand">
-                    Goal: {formatTaka(campaign.goal_amount)}
-                  </p>
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <StatTile label="Pending review" value={String(pending.length)} />
+          <StatTile label="Live campaigns" value={String(live.length)} />
+          <StatTile label="Total campaigns" value={String(campaigns.length)} />
+          <StatTile label="Total raised" value={formatTaka(totalRaised)} />
+        </div>
 
-                  <div className="mt-4 flex flex-wrap gap-3">
-                    <form action={approveCampaign}>
-                      <input type="hidden" name="id" value={campaign.id} />
-                      <button
-                        type="submit"
-                        className="rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
-                      >
-                        Approve · অনুমোদন
-                      </button>
-                    </form>
-                    <form action={rejectCampaign}>
-                      <input type="hidden" name="id" value={campaign.id} />
-                      <button
-                        type="submit"
-                        className="rounded-full border border-accent px-5 py-2 text-sm font-semibold text-accent hover:bg-accent/10"
-                      >
-                        Reject · বাতিল
-                      </button>
-                    </form>
-                  </div>
+        <section className="mt-10">
+          <h2 className="text-lg font-bold">
+            Waiting for review · <span className="font-bengali">পর্যালোচনা</span>
+          </h2>
+          <p className="mt-1 text-sm opacity-60">
+            Open each one to see the applicant&rsquo;s NID, contact, and payout
+            details before approving.
+          </p>
+
+          {pending.length === 0 ? (
+            <div className="mt-4 rounded-2xl border border-foreground/10 bg-card p-8 text-center text-sm opacity-70">
+              Nothing waiting for review. 🎉
+            </div>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {pending.map((c) => (
+                <li key={c.id}>
+                  <Link
+                    href={`/admin/${c.id}`}
+                    className="flex items-center justify-between gap-4 rounded-xl border border-foreground/10 bg-card p-4 transition hover:border-brand/50"
+                  >
+                    <div>
+                      <p className="font-serif font-semibold">{c.title}</p>
+                      <p className="mt-0.5 text-xs opacity-60">
+                        {(CATEGORY_LABELS[c.category] ?? CATEGORY_LABELS.other).en}
+                        {c.district ? ` · ${c.district}` : ""} · goal{" "}
+                        {formatTaka(c.goal_amount)}
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-700">
+                      Review →
+                    </span>
+                  </Link>
                 </li>
-              );
-            })}
-          </ul>
-        )}
+              ))}
+            </ul>
+          )}
+        </section>
 
-        <p className="mt-8 text-sm opacity-50">
-          <Link href="/account" className="hover:text-brand">
-            ← My campaigns
-          </Link>
-        </p>
+        <section className="mt-10">
+          <h2 className="text-lg font-bold">All campaigns</h2>
+          {campaigns.length === 0 ? (
+            <p className="mt-4 text-sm opacity-60">No campaigns yet.</p>
+          ) : (
+            <ul className="mt-4 divide-y divide-foreground/10 rounded-2xl border border-foreground/10 bg-card">
+              {campaigns.map((c) => (
+                <li key={c.id}>
+                  <Link
+                    href={`/admin/${c.id}`}
+                    className="flex items-center justify-between gap-4 px-4 py-3 text-sm transition hover:bg-foreground/5"
+                  >
+                    <span className="truncate">{c.title}</span>
+                    <span className="whitespace-nowrap opacity-60">
+                      {formatTaka(c.raised_amount)} · {c.status}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </main>
     </>
   );

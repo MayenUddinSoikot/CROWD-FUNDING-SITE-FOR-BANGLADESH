@@ -25,6 +25,22 @@ export type Campaign = {
   created_at: string;
 };
 
+export type CampaignVerification = {
+  campaign_id: string;
+  applicant_name: string | null;
+  applicant_nid: string | null;
+  applicant_phone: string | null;
+  applicant_email: string | null;
+  relationship: string | null;
+  bank_name: string | null;
+  bank_branch: string | null;
+  bank_account_name: string | null;
+  bank_account_number: string | null;
+  bkash_number: string | null;
+  notes: string | null;
+  created_at: string;
+};
+
 export type PublicDonation = {
   id: string;
   campaign_id: string;

@@ -1,28 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
-
-async function requireAdmin() {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile?.is_admin) return null;
-  return supabase;
-}
+import { getAdminClient } from "@/lib/admin";
 
 export async function approveCampaign(formData: FormData) {
   const id = String(formData.get("id") ?? "");
-  const supabase = await requireAdmin();
+  const supabase = await getAdminClient();
   if (!supabase || !id) return;
 
   const { error } = await supabase
@@ -32,12 +15,13 @@ export async function approveCampaign(formData: FormData) {
 
   if (error) console.error("Approve failed:", error.message);
   revalidatePath("/admin");
+  revalidatePath(`/admin/${id}`);
   revalidatePath("/");
 }
 
 export async function rejectCampaign(formData: FormData) {
   const id = String(formData.get("id") ?? "");
-  const supabase = await requireAdmin();
+  const supabase = await getAdminClient();
   if (!supabase || !id) return;
 
   const { error } = await supabase
@@ -47,4 +31,5 @@ export async function rejectCampaign(formData: FormData) {
 
   if (error) console.error("Reject failed:", error.message);
   revalidatePath("/admin");
+  revalidatePath(`/admin/${id}`);
 }
