@@ -31,6 +31,8 @@ export async function createCampaign(
   const story = String(formData.get("story") ?? "").trim();
   const storyBn = String(formData.get("story_bn") ?? "").trim();
   const coverImageUrl = String(formData.get("cover_image_url") ?? "").trim();
+  const videoUrl = String(formData.get("video_url") ?? "").trim();
+  const durationDays = Number(formData.get("duration_days"));
 
   if (!title || !category || !goalAmount || goalAmount <= 0) {
     return {
@@ -41,6 +43,12 @@ export async function createCampaign(
   if (coverImageUrl && !/^https:\/\/\S+$/.test(coverImageUrl)) {
     return { error: "The cover image link must start with https://" };
   }
+
+  const allowedDurations = new Set([7, 14, 30, 60, 90]);
+  const days = allowedDurations.has(durationDays) ? durationDays : 30;
+  const endsAt = new Date(
+    Date.now() + days * 24 * 60 * 60 * 1000
+  ).toISOString();
 
   const { data, error } = await supabase
     .from("campaigns")
@@ -57,6 +65,8 @@ export async function createCampaign(
       story: story || null,
       story_bn: storyBn || null,
       cover_image_url: coverImageUrl || null,
+      video_url: videoUrl || null,
+      ends_at: endsAt,
       creator_id: user.id,
       status: "pending",
     })

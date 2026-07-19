@@ -5,6 +5,7 @@ import { createCampaign } from "./actions";
 import { CATEGORY_LABELS } from "@/lib/types";
 import type { CampaignCategory } from "@/lib/types";
 import { DocumentUploader } from "@/components/DocumentUploader";
+import { VideoUploader } from "@/components/VideoUploader";
 
 const inputClass =
   "mt-1 w-full rounded-xl border border-foreground/20 bg-card px-4 py-2.5 outline-none focus:border-brand";
@@ -155,20 +156,48 @@ export function CampaignWizard({ userId }: { userId: string }) {
         />
       </Section>
 
-      <Section title="4. Funding goal · লক্ষ্যমাত্রা">
-        <label className="block text-sm font-medium" htmlFor="goal_amount">
-          Goal amount (৳ Taka)
-        </label>
-        <input
-          id="goal_amount"
-          name="goal_amount"
-          type="number"
-          min={1}
-          step={1}
-          required
-          placeholder="350000"
-          className={inputClass}
-        />
+      <Section title="4. Funding goal & duration · লক্ষ্য ও সময়">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium" htmlFor="goal_amount">
+              Goal amount (৳ Taka)
+            </label>
+            <input
+              id="goal_amount"
+              name="goal_amount"
+              type="number"
+              min={1}
+              step={1}
+              required
+              placeholder="350000"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="duration_days">
+              Runs for · কত দিন
+            </label>
+            <select
+              id="duration_days"
+              name="duration_days"
+              defaultValue="30"
+              className={inputClass}
+            >
+              <option value="7">7 days</option>
+              <option value="14">14 days</option>
+              <option value="30">30 days</option>
+              <option value="60">60 days</option>
+              <option value="90">90 days</option>
+            </select>
+          </div>
+        </div>
+      </Section>
+
+      <Section
+        title="4b. Video message · ভিডিও (optional)"
+        subtitle="A short video appeal shown publicly on the campaign page."
+      >
+        <VideoUploader userId={userId} />
       </Section>
 
       <Section

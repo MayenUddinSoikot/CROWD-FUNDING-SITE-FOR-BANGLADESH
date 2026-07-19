@@ -1,12 +1,22 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/anon";
-import type { Campaign, PublicDonation } from "@/lib/types";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import type { Campaign, CampaignUpdate, PublicDonation } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
 import { formatTaka, timeAgo } from "@/lib/format";
 import { RealtimeCampaignStats } from "@/components/RealtimeCampaignStats";
 import { ShareButtons } from "@/components/ShareButtons";
+import { DonationForm } from "@/components/DonationForm";
+import { CampaignUpdateForm } from "@/components/CampaignUpdateForm";
 import { SiteHeader } from "@/components/SiteHeader";
+
+function daysLeft(endsAt: string | null): number | null {
+  if (!endsAt) return null;
+  const ms = new Date(endsAt).getTime() - Date.now();
+  if (Number.isNaN(ms)) return null;
+  return Math.max(0, Math.ceil(ms / (24 * 60 * 60 * 1000)));
+}
 
 // Always show fresh donation totals — never a stale build-time snapshot.
 export const dynamic = "force-dynamic";
@@ -19,7 +29,7 @@ async function getCampaign(slug: string): Promise<Campaign | null> {
     const { data, error } = await supabase
       .from("campaigns")
       .select(
-        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, beneficiary_name, district, ends_at, created_at"
+        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, district, ends_at, created_at"
       )
       .eq("slug", slug)
       .in("status", ["approved", "completed"])
@@ -57,6 +67,26 @@ async function getDonations(campaignId: string): Promise<PublicDonation[]> {
   }
 }
 
+async function getUpdates(campaignId: string): Promise<CampaignUpdate[]> {
+  try {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from("campaign_updates")
+      .select("id, campaign_id, body, created_at")
+      .eq("campaign_id", campaignId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) {
+      console.error("Failed to load updates:", error.message);
+      return [];
+    }
+    return data as CampaignUpdate[];
+  } catch (err) {
+    console.error("Supabase connection failed:", err);
+    return [];
+  }
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -81,7 +111,32 @@ export default async function CampaignPage({
   if (!campaign) notFound();
 
   const donations = await getDonations(campaign.id);
+  const updates = await getUpdates(campaign.id);
   const category = CATEGORY_LABELS[campaign.category] ?? CATEGORY_LABELS.other;
+  const remaining = daysLeft(campaign.ends_at);
+
+  // Can the current viewer post updates? (the creator, or an admin)
+  let canPostUpdate = false;
+  if (isSupabaseConfigured()) {
+    const supabase = await createServerSupabaseClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const { data: owned } = await supabase
+        .from("campaigns")
+        .select("id")
+        .eq("id", campaign.id)
+        .eq("creator_id", user.id)
+        .maybeSingle();
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", user.id)
+        .maybeSingle();
+      canPostUpdate = Boolean(owned) || Boolean(profile?.is_admin);
+    }
+  }
 
   return (
     <>
@@ -122,7 +177,30 @@ export default async function CampaignPage({
           </p>
         ) : null}
 
+        {campaign.video_url ? (
+          <div className="mt-6">
+            <video
+              src={campaign.video_url}
+              controls
+              className="w-full rounded-2xl border border-foreground/10 bg-black"
+            />
+          </div>
+        ) : null}
+
         <div className="mt-6 rounded-2xl border border-foreground/10 bg-card p-6 shadow-sm">
+          {remaining !== null ? (
+            <p className="mb-3 text-sm font-medium">
+              {remaining > 0 ? (
+                <>
+                  ⏳ {remaining} day{remaining === 1 ? "" : "s"} left ·{" "}
+                  <span className="font-bengali">{remaining} দিন বাকি</span>
+                </>
+              ) : (
+                <span className="opacity-60">This campaign has ended.</span>
+              )}
+            </p>
+          ) : null}
+
           <RealtimeCampaignStats
             key={campaign.id}
             campaignId={campaign.id}
@@ -131,16 +209,13 @@ export default async function CampaignPage({
             donationCount={donations.length}
           />
 
-          <button
-            disabled
-            className="mt-5 w-full cursor-not-allowed rounded-xl bg-brand/40 px-6 py-3 font-semibold text-white"
-            title="Online donations open soon"
-          >
-            Donate · <span className="font-bengali">দান করুন</span> — coming
-            soon
-          </button>
+          <div className="mt-6 border-t border-foreground/10 pt-6">
+            <DonationForm campaignId={campaign.id} />
+          </div>
 
-          <ShareButtons title={campaign.title} />
+          <div className="mt-6 border-t border-foreground/10 pt-4">
+            <ShareButtons title={campaign.title} />
+          </div>
         </div>
 
         {campaign.summary ? (
@@ -164,6 +239,41 @@ export default async function CampaignPage({
             {campaign.story_bn}
           </div>
         ) : null}
+
+        <section className="mt-10">
+          <h2 className="text-xl font-bold">
+            Updates · <span className="font-bengali">আপডেট</span>
+          </h2>
+
+          {canPostUpdate ? (
+            <div className="mt-4">
+              <CampaignUpdateForm campaignId={campaign.id} slug={campaign.slug} />
+            </div>
+          ) : null}
+
+          {updates.length === 0 ? (
+            <p className="mt-4 text-sm opacity-60">
+              No updates yet.{" "}
+              <span className="font-bengali">এখনো কোনো আপডেট নেই।</span>
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {updates.map((update) => (
+                <li
+                  key={update.id}
+                  className="rounded-xl border border-foreground/10 bg-card p-4"
+                >
+                  <p className="whitespace-pre-line text-sm leading-relaxed">
+                    {update.body}
+                  </p>
+                  <p className="mt-2 text-xs opacity-50">
+                    {timeAgo(update.created_at)}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
         <section className="mt-10">
           <h2 className="text-xl font-bold">

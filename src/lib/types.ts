@@ -19,9 +19,17 @@ export type Campaign = {
   raised_amount: number;
   status: "draft" | "pending" | "approved" | "rejected" | "completed";
   cover_image_url: string | null;
+  video_url: string | null;
   beneficiary_name: string | null;
   district: string | null;
   ends_at: string | null;
+  created_at: string;
+};
+
+export type CampaignUpdate = {
+  id: string;
+  campaign_id: string;
+  body: string;
   created_at: string;
 };
 
