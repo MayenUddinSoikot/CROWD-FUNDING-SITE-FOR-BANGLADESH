@@ -68,6 +68,21 @@ export function CampaignWizard() {
             />
           </div>
         </div>
+
+        <label className="mt-4 block text-sm font-medium" htmlFor="cover_image_url">
+          Cover image link (optional)
+        </label>
+        <input
+          id="cover_image_url"
+          name="cover_image_url"
+          type="url"
+          placeholder="https://…"
+          className={inputClass}
+        />
+        <p className="mt-1 text-xs opacity-60">
+          Paste a link to a photo (starting with https://). Direct photo
+          uploads are coming soon.
+        </p>
       </fieldset>
 
       <fieldset className="mt-6 rounded-2xl border border-foreground/10 bg-card p-6">

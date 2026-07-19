@@ -130,6 +130,49 @@ export default async function Home({
           )}
         </section>
 
+        <section className="mt-20 w-full max-w-5xl">
+          <h2 className="text-2xl font-bold">
+            How Shohay works ·{" "}
+            <span className="font-bengali">কীভাবে কাজ করে</span>
+          </h2>
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {[
+              {
+                emoji: "✅",
+                en: "Every campaign verified",
+                bn: "প্রতিটি ক্যাম্পেইন যাচাই করা হয়",
+                desc: "We check the beneficiary and NID before a campaign goes live.",
+              },
+              {
+                emoji: "💚",
+                en: "0% platform fee",
+                bn: "কোনো প্ল্যাটফর্ম ফি নেই",
+                desc: "Every taka you give goes straight to the campaign. We take nothing.",
+              },
+              {
+                emoji: "🤝",
+                en: "Direct, transparent payout",
+                bn: "সরাসরি ও স্বচ্ছ পেআউট",
+                desc: "Funds reach the beneficiary directly via bKash, Nagad, or bank.",
+              },
+            ].map((item) => (
+              <div
+                key={item.en}
+                className="rounded-2xl border border-foreground/10 bg-card p-6 text-left"
+              >
+                <div className="text-3xl">{item.emoji}</div>
+                <h3 className="mt-3 font-serif text-lg font-semibold">
+                  {item.en}
+                </h3>
+                <p className="font-bengali mt-1 text-sm text-brand">
+                  {item.bn}
+                </p>
+                <p className="mt-2 text-sm opacity-70">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <footer className="mt-16 text-sm opacity-50">
           © {new Date().getFullYear()} Shohay · 0% platform fee · Made in
           Bangladesh 🇧🇩

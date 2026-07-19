@@ -5,6 +5,7 @@ import type { Campaign, PublicDonation } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
 import { formatTaka, timeAgo } from "@/lib/format";
 import { RealtimeCampaignStats } from "@/components/RealtimeCampaignStats";
+import { ShareButtons } from "@/components/ShareButtons";
 import { SiteHeader } from "@/components/SiteHeader";
 
 // Always show fresh donation totals — never a stale build-time snapshot.
@@ -138,6 +139,8 @@ export default async function CampaignPage({
             Donate · <span className="font-bengali">দান করুন</span> — coming
             soon
           </button>
+
+          <ShareButtons title={campaign.title} />
         </div>
 
         {campaign.summary ? (

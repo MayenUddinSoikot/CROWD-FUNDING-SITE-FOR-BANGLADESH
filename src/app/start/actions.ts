@@ -30,11 +30,16 @@ export async function createCampaign(
   const summaryBn = String(formData.get("summary_bn") ?? "").trim();
   const story = String(formData.get("story") ?? "").trim();
   const storyBn = String(formData.get("story_bn") ?? "").trim();
+  const coverImageUrl = String(formData.get("cover_image_url") ?? "").trim();
 
   if (!title || !category || !goalAmount || goalAmount <= 0) {
     return {
       error: "Please fill in the title, category, and a goal amount above 0.",
     };
+  }
+
+  if (coverImageUrl && !/^https:\/\/\S+$/.test(coverImageUrl)) {
+    return { error: "The cover image link must start with https://" };
   }
 
   const { data, error } = await supabase
@@ -51,6 +56,7 @@ export async function createCampaign(
       summary_bn: summaryBn || null,
       story: story || null,
       story_bn: storyBn || null,
+      cover_image_url: coverImageUrl || null,
       creator_id: user.id,
       status: "pending",
     })
