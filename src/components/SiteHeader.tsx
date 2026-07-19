@@ -5,6 +5,7 @@ import { logout } from "@/app/login/actions";
 
 export async function SiteHeader() {
   let isLoggedIn = false;
+  let isAdmin = false;
 
   if (isSupabaseConfigured()) {
     const supabase = await createServerSupabaseClient();
@@ -12,6 +13,15 @@ export async function SiteHeader() {
       data: { user },
     } = await supabase.auth.getUser();
     isLoggedIn = Boolean(user);
+
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", user.id)
+        .single();
+      isAdmin = Boolean(profile?.is_admin);
+    }
   }
 
   return (
@@ -35,6 +45,11 @@ export async function SiteHeader() {
               <Link href="/account" className="hover:text-brand">
                 My campaigns
               </Link>
+              {isAdmin ? (
+                <Link href="/admin" className="font-semibold hover:text-brand">
+                  Admin
+                </Link>
+              ) : null}
               <form action={logout}>
                 <button type="submit" className="hover:text-brand">
                   Log out
