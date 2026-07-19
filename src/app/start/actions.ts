@@ -100,7 +100,46 @@ export async function createCampaign(
     }
   }
 
+  // Documents were already uploaded to the private vault from the browser;
+  // here we just record which files belong to this campaign.
+  const documents = parseDocuments(formData.get("documents"));
+  if (documents.length > 0) {
+    const { error: dError } = await supabase.from("campaign_documents").insert(
+      documents.map((doc) => ({
+        campaign_id: data.id,
+        doc_type: doc.docType,
+        storage_path: doc.path,
+        file_name: doc.fileName,
+      }))
+    );
+    if (dError) console.error("Failed to save documents:", dError.message);
+  }
+
   redirect(`/account?created=${data.id}`);
+}
+
+type UploadedDoc = { docType: string; path: string; fileName: string };
+
+const ALLOWED_DOC_TYPES = new Set(["nid", "medical", "cheque", "other"]);
+
+function parseDocuments(raw: FormDataEntryValue | null): UploadedDoc[] {
+  if (typeof raw !== "string" || !raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(
+        (d): d is UploadedDoc =>
+          d &&
+          typeof d.path === "string" &&
+          typeof d.fileName === "string" &&
+          typeof d.docType === "string" &&
+          ALLOWED_DOC_TYPES.has(d.docType)
+      )
+      .slice(0, 20);
+  } catch {
+    return [];
+  }
 }
 
 function str(formData: FormData, key: string): string | null {

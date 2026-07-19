@@ -4,21 +4,38 @@ import { useActionState } from "react";
 import { createCampaign } from "./actions";
 import { CATEGORY_LABELS } from "@/lib/types";
 import type { CampaignCategory } from "@/lib/types";
+import { DocumentUploader } from "@/components/DocumentUploader";
 
 const inputClass =
   "mt-1 w-full rounded-xl border border-foreground/20 bg-card px-4 py-2.5 outline-none focus:border-brand";
 
-export function CampaignWizard() {
+function Section({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="mt-6 rounded-2xl border border-foreground/10 bg-card p-5 sm:p-6">
+      <h2 className="text-sm font-bold text-brand">{title}</h2>
+      {subtitle ? (
+        <p className="mt-1 text-xs leading-relaxed opacity-60">{subtitle}</p>
+      ) : null}
+      <div className="mt-4">{children}</div>
+    </section>
+  );
+}
+
+export function CampaignWizard({ userId }: { userId: string }) {
   const [state, action, pending] = useActionState(createCampaign, undefined);
 
   return (
-    <form action={action} className="mt-10 w-full max-w-2xl text-left">
-      <fieldset className="rounded-2xl border border-foreground/10 bg-card p-6">
-        <legend className="px-1 text-sm font-bold text-brand">
-          1. Basics · মূল তথ্য
-        </legend>
-
-        <label className="mt-2 block text-sm font-medium" htmlFor="title">
+    <form action={action} className="mt-8 w-full max-w-2xl text-left">
+      <Section title="1. Basics · মূল তথ্য">
+        <label className="block text-sm font-medium" htmlFor="title">
           Campaign title (English)
         </label>
         <input
@@ -35,13 +52,16 @@ export function CampaignWizard() {
         </label>
         <select id="category" name="category" required className={inputClass}>
           <option value="">Choose a category</option>
-          {(Object.entries(CATEGORY_LABELS) as [CampaignCategory, (typeof CATEGORY_LABELS)[CampaignCategory]][]).map(
-            ([key, label]) => (
-              <option key={key} value={key}>
-                {label.en} · {label.bn}
-              </option>
-            )
-          )}
+          {(
+            Object.entries(CATEGORY_LABELS) as [
+              CampaignCategory,
+              (typeof CATEGORY_LABELS)[CampaignCategory],
+            ][]
+          ).map(([key, label]) => (
+            <option key={key} value={key}>
+              {label.en} · {label.bn}
+            </option>
+          ))}
         </select>
 
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -80,16 +100,12 @@ export function CampaignWizard() {
           className={inputClass}
         />
         <p className="mt-1 text-xs opacity-60">
-          Paste a link to a photo (starting with https://). Direct photo
-          uploads are coming soon.
+          A public photo for the campaign card (starts with https://).
         </p>
-      </fieldset>
+      </Section>
 
-      <fieldset className="mt-6 rounded-2xl border border-foreground/10 bg-card p-6">
-        <legend className="px-1 text-sm font-bold text-brand">
-          2. Bangla title · বাংলা শিরোনাম
-        </legend>
-        <label className="font-bengali mt-2 block text-sm font-medium" htmlFor="title_bn">
+      <Section title="2. Bangla title · বাংলা শিরোনাম">
+        <label className="font-bengali block text-sm font-medium" htmlFor="title_bn">
           একই শিরোনাম বাংলায় (ঐচ্ছিক)
         </label>
         <input
@@ -98,14 +114,10 @@ export function CampaignWizard() {
           className={`font-bengali ${inputClass}`}
           placeholder="রহিমের হার্ট সার্জারিতে সাহায্য করুন"
         />
-      </fieldset>
+      </Section>
 
-      <fieldset className="mt-6 rounded-2xl border border-foreground/10 bg-card p-6">
-        <legend className="px-1 text-sm font-bold text-brand">
-          3. Story · বিবরণ
-        </legend>
-
-        <label className="mt-2 block text-sm font-medium" htmlFor="summary">
+      <Section title="3. Story · বিবরণ">
+        <label className="block text-sm font-medium" htmlFor="summary">
           Short summary (1-2 sentences, English)
         </label>
         <textarea
@@ -141,13 +153,10 @@ export function CampaignWizard() {
           rows={5}
           className={`font-bengali ${inputClass}`}
         />
-      </fieldset>
+      </Section>
 
-      <fieldset className="mt-6 rounded-2xl border border-foreground/10 bg-card p-6">
-        <legend className="px-1 text-sm font-bold text-brand">
-          4. Funding goal · লক্ষ্যমাত্রা
-        </legend>
-        <label className="mt-2 block text-sm font-medium" htmlFor="goal_amount">
+      <Section title="4. Funding goal · লক্ষ্যমাত্রা">
+        <label className="block text-sm font-medium" htmlFor="goal_amount">
           Goal amount (৳ Taka)
         </label>
         <input
@@ -160,18 +169,13 @@ export function CampaignWizard() {
           placeholder="350000"
           className={inputClass}
         />
-      </fieldset>
+      </Section>
 
-      <fieldset className="mt-6 rounded-2xl border border-foreground/10 bg-card p-6">
-        <legend className="px-1 text-sm font-bold text-brand">
-          5. Verification · যাচাই (private — admin only)
-        </legend>
-        <p className="mt-2 text-xs opacity-60">
-          This section is never shown publicly. Shohay uses it to verify the
-          campaign before approving. এই তথ্য কখনো প্রকাশ্যে দেখানো হয় না।
-        </p>
-
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <Section
+        title="5. Verification · যাচাই (private — admin only)"
+        subtitle="This section is never shown publicly. Shohay uses it to verify the campaign before approving. এই তথ্য কখনো প্রকাশ্যে দেখানো হয় না।"
+      >
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-medium" htmlFor="applicant_name">
               Your full name (applicant)
@@ -219,17 +223,13 @@ export function CampaignWizard() {
             />
           </div>
         </div>
-      </fieldset>
+      </Section>
 
-      <fieldset className="mt-6 rounded-2xl border border-foreground/10 bg-card p-6">
-        <legend className="px-1 text-sm font-bold text-brand">
-          6. Payout details · পেআউট (private — admin only)
-        </legend>
-        <p className="mt-2 text-xs opacity-60">
-          Where approved funds should be sent. Also never shown publicly.
-        </p>
-
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <Section
+        title="6. Payout details · পেআউট (private — admin only)"
+        subtitle="Where approved funds should be sent. Also never shown publicly."
+      >
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-medium" htmlFor="bkash_number">
               bKash / Nagad number
@@ -252,21 +252,13 @@ export function CampaignWizard() {
             <label className="block text-sm font-medium" htmlFor="bank_account_name">
               Account holder name
             </label>
-            <input
-              id="bank_account_name"
-              name="bank_account_name"
-              className={inputClass}
-            />
+            <input id="bank_account_name" name="bank_account_name" className={inputClass} />
           </div>
           <div>
             <label className="block text-sm font-medium" htmlFor="bank_account_number">
               Account number
             </label>
-            <input
-              id="bank_account_number"
-              name="bank_account_number"
-              className={inputClass}
-            />
+            <input id="bank_account_number" name="bank_account_number" className={inputClass} />
           </div>
           <div>
             <label className="block text-sm font-medium" htmlFor="bank_branch">
@@ -280,7 +272,14 @@ export function CampaignWizard() {
           Anything else for the reviewer
         </label>
         <textarea id="notes" name="notes" rows={3} className={inputClass} />
-      </fieldset>
+      </Section>
+
+      <Section
+        title="7. Documents · কাগজপত্র (private — admin only)"
+        subtitle="Upload photos or PDFs of the NID, medical reports, and bank cheque so Shohay can verify. Stored privately — only admins can open them."
+      >
+        <DocumentUploader userId={userId} />
+      </Section>
 
       {state?.error ? (
         <p className="mt-4 text-sm text-accent">{state.error}</p>

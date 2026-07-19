@@ -11,17 +11,17 @@ export const metadata: Metadata = {
 };
 
 export default async function StartCampaignPage() {
-  let isLoggedIn = false;
+  let userId: string | null = null;
 
   if (isSupabaseConfigured()) {
     const supabase = await createServerSupabaseClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    isLoggedIn = Boolean(user);
+    userId = user?.id ?? null;
   }
 
-  if (!isLoggedIn) {
+  if (!userId) {
     return (
       <>
         <SiteHeader />
@@ -53,7 +53,7 @@ export default async function StartCampaignPage() {
           ক্যাম্পেইন শুরু করুন
         </h1>
         <p className="mt-2 text-xl font-semibold">Start a campaign</p>
-        <CampaignWizard />
+        <CampaignWizard userId={userId} />
       </main>
     </>
   );

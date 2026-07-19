@@ -41,6 +41,24 @@ export type CampaignVerification = {
   created_at: string;
 };
 
+export type DocType = "nid" | "medical" | "cheque" | "other";
+
+export type CampaignDocument = {
+  id: string;
+  campaign_id: string;
+  doc_type: DocType;
+  storage_path: string;
+  file_name: string | null;
+  created_at: string;
+};
+
+export const DOC_TYPE_LABELS: Record<DocType, string> = {
+  nid: "NID (national ID)",
+  medical: "Medical report",
+  cheque: "Bank cheque / statement",
+  other: "Other document",
+};
+
 export type PublicDonation = {
   id: string;
   campaign_id: string;

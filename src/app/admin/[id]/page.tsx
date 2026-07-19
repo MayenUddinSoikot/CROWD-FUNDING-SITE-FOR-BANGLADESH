@@ -5,7 +5,12 @@ import { getAdminClient } from "@/lib/admin";
 import { SiteHeader } from "@/components/SiteHeader";
 import { formatTaka } from "@/lib/format";
 import { CATEGORY_LABELS } from "@/lib/types";
-import type { Campaign, CampaignVerification } from "@/lib/types";
+import type {
+  Campaign,
+  CampaignVerification,
+  CampaignDocument,
+} from "@/lib/types";
+import { DOC_TYPE_LABELS } from "@/lib/types";
 import { approveCampaign, rejectCampaign } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -49,6 +54,23 @@ export default async function AdminCampaignDetail({
     .eq("campaign_id", id)
     .maybeSingle();
   const v = verificationRow as CampaignVerification | null;
+
+  const { data: documentRows } = await supabase
+    .from("campaign_documents")
+    .select("*")
+    .eq("campaign_id", id)
+    .order("created_at", { ascending: true });
+  const documents = (documentRows ?? []) as CampaignDocument[];
+
+  // Time-limited private links (valid ~10 min) — only generated for admins.
+  const docLinks = await Promise.all(
+    documents.map(async (doc) => {
+      const { data: signed } = await supabase.storage
+        .from("campaign-docs")
+        .createSignedUrl(doc.storage_path, 600);
+      return { doc, url: signed?.signedUrl ?? null };
+    })
+  );
 
   const category = CATEGORY_LABELS[c.category] ?? CATEGORY_LABELS.other;
 
@@ -161,10 +183,47 @@ export default async function AdminCampaignDetail({
           </section>
         ) : null}
 
-        <p className="mt-6 text-xs opacity-50">
-          Documents (NID photo, medical records) upload is coming in the next
-          update.
-        </p>
+        {/* Private documents */}
+        <section className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6">
+          <h2 className="text-sm font-bold text-amber-700">
+            🔒 Private — documents
+          </h2>
+          {docLinks.length === 0 ? (
+            <p className="mt-2 text-sm opacity-60">
+              No documents were uploaded with this campaign.
+            </p>
+          ) : (
+            <ul className="mt-3 space-y-2">
+              {docLinks.map(({ doc, url }) => (
+                <li
+                  key={doc.id}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-foreground/10 bg-background px-3 py-2 text-sm"
+                >
+                  <span className="truncate">
+                    <span className="opacity-60">
+                      {DOC_TYPE_LABELS[doc.doc_type] ?? "Document"}:{" "}
+                    </span>
+                    {doc.file_name ?? "file"}
+                  </span>
+                  {url ? (
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 font-semibold text-brand hover:underline"
+                    >
+                      Open →
+                    </a>
+                  ) : (
+                    <span className="shrink-0 text-xs opacity-50">
+                      unavailable
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </main>
     </>
   );
