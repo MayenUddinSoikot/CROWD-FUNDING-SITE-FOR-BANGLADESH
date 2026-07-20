@@ -47,6 +47,25 @@ export type CampaignUpdate = {
   created_at: string;
 };
 
+export type MediaType = "image" | "video" | "youtube";
+
+export type CampaignMedia = {
+  id: string;
+  campaign_id: string;
+  media_type: MediaType;
+  url: string;
+  position: number;
+};
+
+// Turn any YouTube URL into an embeddable one; null if not YouTube.
+export function youtubeEmbedUrl(url: string): string | null {
+  const match =
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/.exec(
+      url
+    );
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+}
+
 export type CampaignVerification = {
   campaign_id: string;
   applicant_name: string | null;

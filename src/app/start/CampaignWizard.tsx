@@ -5,7 +5,7 @@ import { createCampaign } from "./actions";
 import { CATEGORY_LABELS } from "@/lib/types";
 import type { CampaignCategory } from "@/lib/types";
 import { DocumentUploader } from "@/components/DocumentUploader";
-import { VideoUploader } from "@/components/VideoUploader";
+import { MediaUploader } from "@/components/MediaUploader";
 import { RELATIONSHIP_LABELS } from "@/lib/types";
 
 const inputClass =
@@ -136,19 +136,6 @@ export function CampaignWizard({ userId }: { userId: string }) {
           </div>
         </div>
 
-        <label className="mt-4 block text-sm font-medium" htmlFor="cover_image_url">
-          Cover image link (optional)
-        </label>
-        <input
-          id="cover_image_url"
-          name="cover_image_url"
-          type="url"
-          placeholder="https://…"
-          className={inputClass}
-        />
-        <p className="mt-1 text-xs opacity-60">
-          A public photo for the campaign card (starts with https://).
-        </p>
       </Section>
 
       <Section title="2. Bangla title · বাংলা শিরোনাম">
@@ -240,10 +227,10 @@ export function CampaignWizard({ userId }: { userId: string }) {
       </Section>
 
       <Section
-        title="4b. Video message · ভিডিও (optional)"
-        subtitle="A short video appeal shown publicly on the campaign page."
+        title="4b. Photos & video · ছবি ও ভিডিও"
+        subtitle="Add up to 4 photos and one video (upload or a YouTube link). Shown publicly as a swipeable gallery."
       >
-        <VideoUploader userId={userId} />
+        <MediaUploader userId={userId} />
       </Section>
 
       <Section

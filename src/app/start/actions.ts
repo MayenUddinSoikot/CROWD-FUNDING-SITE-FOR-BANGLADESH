@@ -31,8 +31,8 @@ export async function createCampaign(
   const summaryBn = String(formData.get("summary_bn") ?? "").trim();
   const story = String(formData.get("story") ?? "").trim();
   const storyBn = String(formData.get("story_bn") ?? "").trim();
-  const coverImageUrl = String(formData.get("cover_image_url") ?? "").trim();
-  const videoUrl = String(formData.get("video_url") ?? "").trim();
+  const media = parseMedia(formData.get("media"));
+  const firstPhoto = media.find((m) => m.type === "image")?.url ?? null;
   const durationDays = Number(formData.get("duration_days"));
   const organizerName = String(formData.get("organizer_name") ?? "").trim();
   const organizerRelationship = String(
@@ -43,10 +43,6 @@ export async function createCampaign(
     return {
       error: "Please fill in the title, category, and a goal amount above 0.",
     };
-  }
-
-  if (coverImageUrl && !/^https:\/\/\S+$/.test(coverImageUrl)) {
-    return { error: "The cover image link must start with https://" };
   }
 
   const allowedDurations = new Set([7, 14, 30, 60, 90]);
@@ -74,8 +70,7 @@ export async function createCampaign(
       summary_bn: summaryBn || null,
       story: story || null,
       story_bn: storyBn || null,
-      cover_image_url: coverImageUrl || null,
-      video_url: videoUrl || null,
+      cover_image_url: firstPhoto,
       organizer_name: organizerName || null,
       organizer_relationship: relationship,
       ends_at: endsAt,
@@ -120,6 +115,20 @@ export async function createCampaign(
       // Don't fail the whole submission — the campaign is already saved.
       console.error("Failed to save verification:", vError.message);
     }
+  }
+
+  // Public gallery media (photos + video / YouTube), already uploaded to
+  // the public bucket from the browser.
+  if (media.length > 0) {
+    const { error: mError } = await supabase.from("campaign_media").insert(
+      media.map((m) => ({
+        campaign_id: data.id,
+        media_type: m.type,
+        url: m.url,
+        position: m.position,
+      }))
+    );
+    if (mError) console.error("Failed to save media:", mError.message);
   }
 
   // Documents were already uploaded to the private vault from the browser;
@@ -167,4 +176,29 @@ function parseDocuments(raw: FormDataEntryValue | null): UploadedDoc[] {
 function str(formData: FormData, key: string): string | null {
   const value = String(formData.get(key) ?? "").trim();
   return value || null;
+}
+
+type MediaItem = { type: "image" | "video" | "youtube"; url: string; position: number };
+
+const ALLOWED_MEDIA_TYPES = new Set(["image", "video", "youtube"]);
+
+function parseMedia(raw: FormDataEntryValue | null): MediaItem[] {
+  if (typeof raw !== "string" || !raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(
+        (m): m is MediaItem =>
+          m &&
+          typeof m.url === "string" &&
+          /^https?:\/\//.test(m.url) &&
+          typeof m.type === "string" &&
+          ALLOWED_MEDIA_TYPES.has(m.type)
+      )
+      .slice(0, 6)
+      .map((m, i) => ({ ...m, position: Number(m.position) || i }));
+  } catch {
+    return [];
+  }
 }

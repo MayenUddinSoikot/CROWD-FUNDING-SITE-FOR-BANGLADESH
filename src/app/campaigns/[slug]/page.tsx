@@ -3,11 +3,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/anon";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import type { Campaign, CampaignUpdate, PublicDonation } from "@/lib/types";
+import type {
+  Campaign,
+  CampaignMedia,
+  CampaignUpdate,
+  PublicDonation,
+} from "@/lib/types";
 import { CATEGORY_LABELS, RELATIONSHIP_LABELS } from "@/lib/types";
 import { formatTaka, timeAgo } from "@/lib/format";
 import { RealtimeCampaignStats } from "@/components/RealtimeCampaignStats";
 import { ShareButtons } from "@/components/ShareButtons";
+import { MediaCarousel } from "@/components/MediaCarousel";
 import { CampaignUpdateForm } from "@/components/CampaignUpdateForm";
 import { SiteHeader } from "@/components/SiteHeader";
 
@@ -67,6 +73,25 @@ async function getDonations(campaignId: string): Promise<PublicDonation[]> {
   }
 }
 
+async function getMedia(campaignId: string): Promise<CampaignMedia[]> {
+  try {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from("campaign_media")
+      .select("id, campaign_id, media_type, url, position")
+      .eq("campaign_id", campaignId)
+      .order("position", { ascending: true });
+    if (error) {
+      console.error("Failed to load media:", error.message);
+      return [];
+    }
+    return data as CampaignMedia[];
+  } catch (err) {
+    console.error("Supabase connection failed:", err);
+    return [];
+  }
+}
+
 async function getUpdates(campaignId: string): Promise<CampaignUpdate[]> {
   try {
     const supabase = getSupabaseClient();
@@ -112,6 +137,7 @@ export default async function CampaignPage({
 
   const donations = await getDonations(campaign.id);
   const updates = await getUpdates(campaign.id);
+  const media = await getMedia(campaign.id);
   const category = CATEGORY_LABELS[campaign.category] ?? CATEGORY_LABELS.other;
   const remaining = daysLeft(campaign.ends_at);
 
@@ -142,18 +168,9 @@ export default async function CampaignPage({
     <>
       <SiteHeader />
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 pb-16">
-        {campaign.cover_image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={campaign.cover_image_url}
-            alt=""
-            className="mt-8 h-64 w-full rounded-2xl object-cover"
-          />
-        ) : (
-          <div className="mt-8 flex h-48 w-full items-center justify-center rounded-2xl bg-gradient-to-br from-brand/20 to-brand/5 text-6xl">
-            {category.emoji}
-          </div>
-        )}
+        <div className="mt-8">
+          <MediaCarousel media={media} fallbackEmoji={category.emoji} />
+        </div>
 
         <p className="mt-6 text-xs font-medium uppercase tracking-wide text-brand">
           {category.en} · <span className="font-bengali">{category.bn}</span>
@@ -202,16 +219,6 @@ export default async function CampaignPage({
                 {RELATIONSHIP_LABELS[campaign.organizer_relationship]}
               </p>
             ) : null}
-          </div>
-        ) : null}
-
-        {campaign.video_url ? (
-          <div className="mt-6">
-            <video
-              src={campaign.video_url}
-              controls
-              className="w-full rounded-2xl border border-foreground/10 bg-black"
-            />
           </div>
         ) : null}
 

@@ -3,55 +3,127 @@
 import { useState } from "react";
 
 export function ShareButtons({ title }: { title: string }) {
+  const [open, setOpen] = useState(false);
+  const [url, setUrl] = useState("");
   const [copied, setCopied] = useState(false);
 
-  const shareUrl =
-    typeof window !== "undefined" ? window.location.href : "";
-  const text = `${title} — Shohay সহায়`;
+  function openModal() {
+    setUrl(typeof window !== "undefined" ? window.location.href : "");
+    setOpen(true);
+  }
 
-  const whatsapp = `https://wa.me/?text=${encodeURIComponent(`${text} ${shareUrl}`)}`;
-  const facebook = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+  const text = `${title} — Shohay সহায়`;
+  const e = encodeURIComponent;
+
+  const links: { label: string; href: string; color: string }[] = [
+    {
+      label: "Facebook",
+      href: `https://www.facebook.com/sharer/sharer.php?u=${e(url)}`,
+      color: "bg-[#1877F2]",
+    },
+    {
+      label: "WhatsApp",
+      href: `https://wa.me/?text=${e(`${text} ${url}`)}`,
+      color: "bg-[#25D366]",
+    },
+    {
+      label: "Messenger",
+      href: `https://www.facebook.com/dialog/send?link=${e(url)}&app_id=0&redirect_uri=${e(url)}`,
+      color: "bg-[#0084FF]",
+    },
+    {
+      label: "Email",
+      href: `mailto:?subject=${e(text)}&body=${e(`${text}\n${url}`)}`,
+      color: "bg-foreground/70",
+    },
+    {
+      label: "LinkedIn",
+      href: `https://www.linkedin.com/sharing/share-offsite/?url=${e(url)}`,
+      color: "bg-[#0A66C2]",
+    },
+    {
+      label: "X",
+      href: `https://twitter.com/intent/tweet?text=${e(text)}&url=${e(url)}`,
+      color: "bg-black",
+    },
+  ];
 
   async function copyLink() {
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      // Clipboard blocked — no-op; the share links still work.
+      /* clipboard blocked */
     }
   }
 
   return (
-    <div className="mt-4">
-      <p className="text-sm font-medium opacity-70">
-        Share this campaign · <span className="font-bengali">শেয়ার করুন</span>
-      </p>
-      <div className="mt-2 flex flex-wrap gap-2">
-        <a
-          href={whatsapp}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-full bg-[#25D366] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+    <>
+      <button
+        type="button"
+        onClick={openModal}
+        className="w-full rounded-xl border border-foreground/20 bg-card px-6 py-3 font-semibold transition hover:border-brand hover:text-brand"
+      >
+        Share · <span className="font-bengali">শেয়ার করুন</span>
+      </button>
+
+      {open ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setOpen(false)}
         >
-          WhatsApp
-        </a>
-        <a
-          href={facebook}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-full bg-[#1877F2] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
-        >
-          Facebook
-        </a>
-        <button
-          type="button"
-          onClick={copyLink}
-          className="rounded-full border border-foreground/20 px-4 py-2 text-sm font-semibold hover:border-brand hover:text-brand"
-        >
-          {copied ? "Link copied ✓" : "Copy link"}
-        </button>
-      </div>
-    </div>
+          <div
+            className="w-full max-w-md rounded-2xl bg-background p-6 shadow-xl"
+            onClick={(ev) => ev.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold">Quick share</h2>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Close"
+                className="text-xl opacity-60 hover:opacity-100"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-4 flex items-center gap-2 rounded-xl border border-foreground/15 bg-card p-2">
+              <span className="flex-1 truncate px-2 text-sm opacity-70">
+                {url}
+              </span>
+              <button
+                type="button"
+                onClick={copyLink}
+                className="shrink-0 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
+              >
+                {copied ? "Copied ✓" : "Copy link"}
+              </button>
+            </div>
+
+            <p className="mt-5 text-sm font-semibold">Reach more donors</p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {links.map((l) => (
+                <a
+                  key={l.label}
+                  href={l.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 rounded-xl border border-foreground/10 p-3 text-sm font-medium transition hover:border-brand"
+                >
+                  <span
+                    className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white ${l.color}`}
+                  >
+                    {l.label[0]}
+                  </span>
+                  {l.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
