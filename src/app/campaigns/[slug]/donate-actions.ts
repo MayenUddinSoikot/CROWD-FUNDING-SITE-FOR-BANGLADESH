@@ -17,6 +17,8 @@ export async function startDonation(
 
   const campaignId = String(formData.get("campaign_id") ?? "");
   const amount = Number(formData.get("amount"));
+  const tipRaw = Number(formData.get("tip_amount"));
+  const tip = Number.isFinite(tipRaw) && tipRaw > 0 ? Math.round(tipRaw) : 0;
   const donorName = String(formData.get("donor_name") ?? "").trim();
   const contact = String(formData.get("contact") ?? "").trim();
   const message = String(formData.get("message") ?? "").trim().slice(0, 25);
@@ -36,6 +38,7 @@ export async function startDonation(
   const { error } = await supabase.from("donations").insert({
     campaign_id: campaignId,
     amount,
+    tip_amount: tip,
     donor_name: donorName || null,
     donor_email: isEmail ? contact : null,
     donor_phone: isEmail ? null : contact,

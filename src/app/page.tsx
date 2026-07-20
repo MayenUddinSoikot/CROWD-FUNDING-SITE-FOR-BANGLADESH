@@ -55,24 +55,40 @@ export default async function Home({
   return (
     <>
       <SiteHeader />
-      <main className="flex flex-1 flex-col items-center px-6 pb-16 text-center">
-        <section className="flex max-w-3xl flex-col items-center pb-10 pt-14">
-          <h1 className="font-bengali text-4xl font-bold leading-tight sm:text-5xl">
-            মানুষের পাশে দাঁড়ানোর সবচেয়ে সহজ জায়গা
-          </h1>
+      <main className="flex flex-1 flex-col items-center pb-16 text-center">
+        {/* Hero */}
+        <section className="w-full bg-gradient-to-b from-brand/10 to-transparent px-6 py-16 sm:py-20">
+          <div className="mx-auto flex max-w-3xl flex-col items-center">
+            <span className="rounded-full border border-brand/30 bg-card px-4 py-1 text-xs font-semibold text-brand">
+              0% platform fee · every taka reaches the campaign
+            </span>
+            <h1 className="font-bengali mt-5 text-4xl font-bold leading-tight sm:text-5xl">
+              মানুষের পাশে দাঁড়ানোর সবচেয়ে সহজ জায়গা
+            </h1>
+            <p className="mt-5 max-w-xl text-lg leading-relaxed opacity-80">
+              Bangladesh&rsquo;s trusted home for help. Raise or donate for
+              medical care, education, and disaster relief — via bKash, Nagad,
+              and cards.
+            </p>
 
-          <p className="mt-5 max-w-xl text-lg leading-relaxed opacity-80">
-            Bangladesh&rsquo;s trusted home for help —{" "}
-            <span className="font-semibold text-brand">0% platform fee</span>.
-            Every taka goes straight to the campaign, via bKash, Nagad, and
-            cards.
-          </p>
-          <p className="font-bengali mt-2 max-w-xl leading-relaxed opacity-80">
-            প্রতিটি টাকা যায় সরাসরি ক্যাম্পেইনে — বিকাশ, নগদ ও কার্ডের মাধ্যমে।
-          </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Link
+                href="/start"
+                className="rounded-full bg-brand px-6 py-3 font-semibold text-white transition hover:bg-brand-dark"
+              >
+                Start a campaign · <span className="font-bengali">শুরু করুন</span>
+              </Link>
+              <Link
+                href="#campaigns"
+                className="rounded-full border border-foreground/20 bg-card px-6 py-3 font-semibold transition hover:border-brand hover:text-brand"
+              >
+                Browse campaigns · <span className="font-bengali">দেখুন</span>
+              </Link>
+            </div>
+          </div>
         </section>
 
-        <section id="campaigns" className="w-full max-w-5xl">
+        <section id="campaigns" className="mt-4 w-full max-w-5xl px-6">
           <h2 className="text-2xl font-bold">
             Live campaigns ·{" "}
             <span className="font-bengali">চলমান ক্যাম্পেইন</span>
@@ -130,7 +146,7 @@ export default async function Home({
           )}
         </section>
 
-        <section className="mt-20 w-full max-w-5xl">
+        <section className="mt-20 w-full max-w-5xl px-6">
           <h2 className="text-2xl font-bold">
             How Shohay works ·{" "}
             <span className="font-bengali">কীভাবে কাজ করে</span>
@@ -173,7 +189,7 @@ export default async function Home({
           </div>
         </section>
 
-        <footer className="mt-16 text-sm opacity-50">
+        <footer className="mt-16 px-6 text-sm opacity-50">
           © {new Date().getFullYear()} Shohay · 0% platform fee · Made in
           Bangladesh 🇧🇩
         </footer>

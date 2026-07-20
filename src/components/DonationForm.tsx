@@ -1,20 +1,34 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import Link from "next/link";
 import { startDonation } from "@/app/campaigns/[slug]/donate-actions";
 import { formatTaka } from "@/lib/format";
 
 const PRESETS = [50, 100, 500, 1000, 5000, 100000];
+const TIP_PERCENTS = [0, 5, 10, 15];
 
 const inputClass =
   "mt-1 w-full rounded-xl border border-foreground/20 bg-card px-4 py-2.5 outline-none focus:border-brand";
 
-export function DonationForm({ campaignId }: { campaignId: string }) {
+export function DonationForm({
+  campaignId,
+  slug,
+}: {
+  campaignId: string;
+  slug: string;
+}) {
   const [state, action, pending] = useActionState(startDonation, undefined);
   const [amount, setAmount] = useState<number>(500);
   const [custom, setCustom] = useState<string>("");
+  const [tipPercent, setTipPercent] = useState<number>(5);
+  const [customTip, setCustomTip] = useState<string>("");
 
-  const effectiveAmount = custom ? Number(custom) : amount;
+  const effectiveAmount = custom ? Math.max(0, Math.round(Number(custom))) : amount;
+  const tip = customTip
+    ? Math.max(0, Math.round(Number(customTip)))
+    : Math.round((effectiveAmount * tipPercent) / 100);
+  const total = effectiveAmount + tip;
 
   if (state?.pledged) {
     return (
@@ -27,6 +41,12 @@ export function DonationForm({ campaignId }: { campaignId: string }) {
           (bKash / Nagad / card) is being connected — you&rsquo;ll be able to
           complete it here very soon.
         </p>
+        <Link
+          href={`/campaigns/${slug}`}
+          className="mt-4 inline-block rounded-full border border-foreground/20 px-5 py-2 text-sm font-semibold hover:border-brand hover:text-brand"
+        >
+          ← Back to campaign
+        </Link>
       </div>
     );
   }
@@ -35,9 +55,29 @@ export function DonationForm({ campaignId }: { campaignId: string }) {
     <form action={action}>
       <input type="hidden" name="campaign_id" value={campaignId} />
       <input type="hidden" name="amount" value={effectiveAmount || 0} />
+      <input type="hidden" name="tip_amount" value={tip} />
 
-      <p className="text-sm font-medium">Choose an amount · টাকার পরিমাণ</p>
-      <div className="mt-2 grid grid-cols-3 gap-2">
+      <p className="text-sm font-semibold">
+        Enter your donation · দানের পরিমাণ
+      </p>
+
+      {/* Big amount display */}
+      <div className="mt-2 flex items-center rounded-2xl border-2 border-foreground/15 bg-card px-4 py-4 focus-within:border-brand">
+        <span className="text-3xl font-bold opacity-40">৳</span>
+        <input
+          type="number"
+          min={10}
+          inputMode="numeric"
+          aria-label="Donation amount"
+          value={custom || String(amount)}
+          onChange={(e) => {
+            setCustom(e.target.value);
+          }}
+          className="w-full bg-transparent pl-2 text-right text-4xl font-bold outline-none"
+        />
+      </div>
+
+      <div className="mt-3 grid grid-cols-3 gap-2">
         {PRESETS.map((value) => {
           const active = !custom && amount === value;
           return (
@@ -60,21 +100,47 @@ export function DonationForm({ campaignId }: { campaignId: string }) {
         })}
       </div>
 
-      <label className="mt-3 block text-sm font-medium" htmlFor="custom-amount">
-        Or enter a custom amount
-      </label>
-      <input
-        id="custom-amount"
-        type="number"
-        min={10}
-        inputMode="numeric"
-        placeholder="৳ …"
-        value={custom}
-        onChange={(e) => setCustom(e.target.value)}
-        className={inputClass}
-      />
+      {/* Tip */}
+      <div className="mt-6 rounded-2xl border border-foreground/10 bg-card p-4">
+        <p className="text-sm font-semibold">Support Shohay (optional)</p>
+        <p className="mt-1 text-xs opacity-60">
+          Shohay charges creators a <b>0% platform fee</b>. An optional tip
+          keeps the platform running. শহায় বিনামূল্যে — চাইলে সামান্য টিপ দিন।
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {TIP_PERCENTS.map((p) => {
+            const active = !customTip && tipPercent === p;
+            return (
+              <button
+                type="button"
+                key={p}
+                onClick={() => {
+                  setTipPercent(p);
+                  setCustomTip("");
+                }}
+                className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
+                  active
+                    ? "border-brand bg-brand text-white"
+                    : "border-foreground/20 hover:border-brand"
+                }`}
+              >
+                {p}%
+              </button>
+            );
+          })}
+          <input
+            type="number"
+            min={0}
+            placeholder="৳ custom"
+            value={customTip}
+            onChange={(e) => setCustomTip(e.target.value)}
+            className="w-28 rounded-full border border-foreground/20 bg-background px-3 py-1.5 text-sm outline-none focus:border-brand"
+          />
+        </div>
+      </div>
 
-      <label className="mt-4 block text-sm font-medium" htmlFor="donor_name">
+      {/* Donor details */}
+      <label className="mt-6 block text-sm font-medium" htmlFor="donor_name">
         Your name (optional)
       </label>
       <input id="donor_name" name="donor_name" className={inputClass} />
@@ -106,6 +172,22 @@ export function DonationForm({ campaignId }: { campaignId: string }) {
         Donate anonymously · নাম গোপন রাখুন
       </label>
 
+      {/* Totals */}
+      <div className="mt-5 rounded-2xl border border-foreground/10 bg-card p-4 text-sm">
+        <div className="flex justify-between">
+          <span className="opacity-70">Donation</span>
+          <span className="font-medium">{formatTaka(effectiveAmount || 0)}</span>
+        </div>
+        <div className="mt-1 flex justify-between">
+          <span className="opacity-70">Shohay tip</span>
+          <span className="font-medium">{formatTaka(tip)}</span>
+        </div>
+        <div className="mt-2 flex justify-between border-t border-foreground/10 pt-2 text-base font-bold">
+          <span>Total today</span>
+          <span className="text-brand">{formatTaka(total || 0)}</span>
+        </div>
+      </div>
+
       {state?.error ? (
         <p className="mt-3 text-sm text-accent">{state.error}</p>
       ) : null}
@@ -113,11 +195,9 @@ export function DonationForm({ campaignId }: { campaignId: string }) {
       <button
         type="submit"
         disabled={pending || !effectiveAmount}
-        className="mt-4 w-full rounded-xl bg-brand px-6 py-3 font-semibold text-white transition hover:bg-brand-dark disabled:opacity-60"
+        className="mt-4 w-full rounded-xl bg-brand px-6 py-3.5 text-lg font-semibold text-white transition hover:bg-brand-dark disabled:opacity-60"
       >
-        {pending
-          ? "Please wait…"
-          : `Donate ${effectiveAmount ? formatTaka(effectiveAmount) : ""} · দান করুন`}
+        {pending ? "Please wait…" : `Donate ${formatTaka(total || 0)}`}
       </button>
       <p className="mt-2 text-center text-xs opacity-50">
         Secure payment via bKash · Nagad · card (connecting soon)

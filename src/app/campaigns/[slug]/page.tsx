@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/anon";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -7,7 +8,6 @@ import { CATEGORY_LABELS, RELATIONSHIP_LABELS } from "@/lib/types";
 import { formatTaka, timeAgo } from "@/lib/format";
 import { RealtimeCampaignStats } from "@/components/RealtimeCampaignStats";
 import { ShareButtons } from "@/components/ShareButtons";
-import { DonationForm } from "@/components/DonationForm";
 import { CampaignUpdateForm } from "@/components/CampaignUpdateForm";
 import { SiteHeader } from "@/components/SiteHeader";
 
@@ -237,9 +237,12 @@ export default async function CampaignPage({
             donationCount={donations.length}
           />
 
-          <div className="mt-6 border-t border-foreground/10 pt-6">
-            <DonationForm campaignId={campaign.id} />
-          </div>
+          <Link
+            href={`/campaigns/${campaign.slug}/donate`}
+            className="mt-5 block w-full rounded-xl bg-brand px-6 py-3.5 text-center text-lg font-semibold text-white transition hover:bg-brand-dark"
+          >
+            Donate now · <span className="font-bengali">দান করুন</span>
+          </Link>
 
           <div className="mt-6 border-t border-foreground/10 pt-4">
             <ShareButtons title={campaign.title} />
