@@ -21,9 +21,23 @@ export type Campaign = {
   cover_image_url: string | null;
   video_url: string | null;
   beneficiary_name: string | null;
+  organizer_name: string | null;
+  organizer_relationship: string | null;
   district: string | null;
   ends_at: string | null;
   created_at: string;
+};
+
+// Public: how the organizer relates to the beneficiary. Shown to donors.
+export const RELATIONSHIP_LABELS: Record<string, string> = {
+  self: "Raising for myself",
+  family: "Family",
+  friend: "Friend",
+  well_wisher: "Well-wisher",
+  neighbour: "Neighbour",
+  colleague: "Colleague",
+  organization: "Organization / community",
+  other: "Other",
 };
 
 export type CampaignUpdate = {

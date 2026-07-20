@@ -6,6 +6,7 @@ import { CATEGORY_LABELS } from "@/lib/types";
 import type { CampaignCategory } from "@/lib/types";
 import { DocumentUploader } from "@/components/DocumentUploader";
 import { VideoUploader } from "@/components/VideoUploader";
+import { RELATIONSHIP_LABELS } from "@/lib/types";
 
 const inputClass =
   "mt-1 w-full rounded-xl border border-foreground/20 bg-card px-4 py-2.5 outline-none focus:border-brand";
@@ -87,6 +88,51 @@ export function CampaignWizard({ userId }: { userId: string }) {
               placeholder="Jashore"
               className={inputClass}
             />
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-xl border border-foreground/10 bg-background p-4">
+          <p className="text-sm font-semibold">
+            Who is raising this? · কে সংগ্রহ করছেন{" "}
+            <span className="opacity-60">(shown publicly)</span>
+          </p>
+          <p className="mt-1 text-xs opacity-60">
+            If you&rsquo;re raising for someone else — a family member, a
+            friend, a well-wisher, or an institution like a school.
+          </p>
+          <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium" htmlFor="organizer_name">
+                Organizer name (you)
+              </label>
+              <input
+                id="organizer_name"
+                name="organizer_name"
+                placeholder="Your name"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label
+                className="block text-sm font-medium"
+                htmlFor="organizer_relationship"
+              >
+                Relationship to beneficiary
+              </label>
+              <select
+                id="organizer_relationship"
+                name="organizer_relationship"
+                defaultValue=""
+                className={inputClass}
+              >
+                <option value="">Choose…</option>
+                {Object.entries(RELATIONSHIP_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -237,17 +283,6 @@ export function CampaignWizard({ userId }: { userId: string }) {
               id="applicant_email"
               name="applicant_email"
               type="email"
-              className={inputClass}
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="block text-sm font-medium" htmlFor="relationship">
-              Your relationship to the beneficiary
-            </label>
-            <input
-              id="relationship"
-              name="relationship"
-              placeholder="e.g. son, neighbour, myself"
               className={inputClass}
             />
           </div>

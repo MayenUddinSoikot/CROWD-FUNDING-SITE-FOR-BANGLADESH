@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/anon";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Campaign, CampaignUpdate, PublicDonation } from "@/lib/types";
-import { CATEGORY_LABELS } from "@/lib/types";
+import { CATEGORY_LABELS, RELATIONSHIP_LABELS } from "@/lib/types";
 import { formatTaka, timeAgo } from "@/lib/format";
 import { RealtimeCampaignStats } from "@/components/RealtimeCampaignStats";
 import { ShareButtons } from "@/components/ShareButtons";
@@ -29,7 +29,7 @@ async function getCampaign(slug: string): Promise<Campaign | null> {
     const { data, error } = await supabase
       .from("campaigns")
       .select(
-        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, district, ends_at, created_at"
+        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, organizer_name, organizer_relationship, district, ends_at, created_at"
       )
       .eq("slug", slug)
       .in("status", ["approved", "completed"])
@@ -171,10 +171,38 @@ export default async function CampaignPage({
           </p>
         ) : null}
 
-        {campaign.beneficiary_name ? (
-          <p className="mt-3 text-sm opacity-60">
-            For: {campaign.beneficiary_name}
-          </p>
+        {campaign.organizer_name ||
+        campaign.beneficiary_name ||
+        campaign.organizer_relationship ? (
+          <div className="mt-4 rounded-xl border border-foreground/10 bg-card p-4 text-sm">
+            {campaign.organizer_name ? (
+              <p>
+                <span className="opacity-60">Raised by </span>
+                <span className="font-semibold">{campaign.organizer_name}</span>
+                {campaign.beneficiary_name ? (
+                  <>
+                    <span className="opacity-60"> for </span>
+                    <span className="font-semibold">
+                      {campaign.beneficiary_name}
+                    </span>
+                  </>
+                ) : null}
+              </p>
+            ) : campaign.beneficiary_name ? (
+              <p>
+                <span className="opacity-60">For: </span>
+                <span className="font-semibold">
+                  {campaign.beneficiary_name}
+                </span>
+              </p>
+            ) : null}
+            {campaign.organizer_relationship &&
+            RELATIONSHIP_LABELS[campaign.organizer_relationship] ? (
+              <p className="mt-1 inline-block rounded-full bg-brand/10 px-3 py-0.5 text-xs font-medium text-brand">
+                {RELATIONSHIP_LABELS[campaign.organizer_relationship]}
+              </p>
+            ) : null}
+          </div>
         ) : null}
 
         {campaign.video_url ? (

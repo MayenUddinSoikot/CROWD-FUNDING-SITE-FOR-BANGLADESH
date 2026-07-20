@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/slug";
 import type { CampaignCategory } from "@/lib/types";
+import { RELATIONSHIP_LABELS } from "@/lib/types";
 
 export type CreateCampaignState = { error?: string } | undefined;
 
@@ -33,6 +34,10 @@ export async function createCampaign(
   const coverImageUrl = String(formData.get("cover_image_url") ?? "").trim();
   const videoUrl = String(formData.get("video_url") ?? "").trim();
   const durationDays = Number(formData.get("duration_days"));
+  const organizerName = String(formData.get("organizer_name") ?? "").trim();
+  const organizerRelationship = String(
+    formData.get("organizer_relationship") ?? ""
+  ).trim();
 
   if (!title || !category || !goalAmount || goalAmount <= 0) {
     return {
@@ -50,6 +55,11 @@ export async function createCampaign(
     Date.now() + days * 24 * 60 * 60 * 1000
   ).toISOString();
 
+  const allowedRelationships = new Set(Object.keys(RELATIONSHIP_LABELS));
+  const relationship = allowedRelationships.has(organizerRelationship)
+    ? organizerRelationship
+    : null;
+
   const { data, error } = await supabase
     .from("campaigns")
     .insert({
@@ -66,6 +76,8 @@ export async function createCampaign(
       story_bn: storyBn || null,
       cover_image_url: coverImageUrl || null,
       video_url: videoUrl || null,
+      organizer_name: organizerName || null,
+      organizer_relationship: relationship,
       ends_at: endsAt,
       creator_id: user.id,
       status: "pending",
@@ -87,7 +99,7 @@ export async function createCampaign(
     applicant_nid: str(formData, "applicant_nid"),
     applicant_phone: str(formData, "applicant_phone"),
     applicant_email: str(formData, "applicant_email"),
-    relationship: str(formData, "relationship"),
+    relationship: relationship ? RELATIONSHIP_LABELS[relationship] : null,
     bank_name: str(formData, "bank_name"),
     bank_branch: str(formData, "bank_branch"),
     bank_account_name: str(formData, "bank_account_name"),
