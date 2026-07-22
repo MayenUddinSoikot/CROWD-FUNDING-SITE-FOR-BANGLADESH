@@ -146,7 +146,44 @@ export default async function Home({
           )}
         </section>
 
-        <section className="mt-20 w-full max-w-5xl px-6">
+        {/* Trust band */}
+        <section className="mt-20 w-full bg-brand-dark px-6 py-16 text-white">
+          <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
+            <span className="rounded-full bg-white/15 px-4 py-1 text-sm font-semibold">
+              We&rsquo;ve got you covered · <span className="font-bengali">আপনার পাশে</span>
+            </span>
+            <h2 className="mt-5 text-3xl font-bold leading-tight sm:text-4xl">
+              Bangladesh&rsquo;s trusted place to give
+            </h2>
+            <p className="mt-4 max-w-xl leading-relaxed text-white/85">
+              Every campaign is personally verified with NID and documents
+              before it goes live. With a 0% platform fee and secure bKash,
+              Nagad &amp; card payments, you can give with peace of mind.
+            </p>
+            <div className="mt-8 grid w-full grid-cols-3 gap-4 text-center">
+              <div>
+                <p className="text-2xl font-bold">0%</p>
+                <p className="text-sm text-white/75">platform fee</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold">100%</p>
+                <p className="text-sm text-white/75">verified campaigns</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold">🔒</p>
+                <p className="text-sm text-white/75">secure payments</p>
+              </div>
+            </div>
+            <Link
+              href="/start"
+              className="mt-8 rounded-full bg-white px-6 py-3 font-semibold text-brand-dark transition hover:bg-white/90"
+            >
+              Start a campaign
+            </Link>
+          </div>
+        </section>
+
+        <section id="how" className="mt-20 w-full max-w-5xl px-6">
           <h2 className="text-2xl font-bold">
             How Shohay works ·{" "}
             <span className="font-bengali">কীভাবে কাজ করে</span>
