@@ -12,7 +12,7 @@ type Uploaded = {
 
 const BUCKET = "campaign-docs";
 const FIELDS: { docType: DocType; label: string; hint: string }[] = [
-  { docType: "nid", label: "NID (national ID)", hint: "Front & back — photo or PDF" },
+  { docType: "nid", label: "NID (national ID) — required", hint: "Front & back — photo or PDF" },
   { docType: "medical", label: "Medical reports", hint: "Prescriptions, reports — photo or PDF" },
   { docType: "cheque", label: "Bank cheque / statement", hint: "For payout verification" },
   { docType: "other", label: "Other supporting documents", hint: "Optional" },

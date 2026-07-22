@@ -38,10 +38,42 @@ export async function createCampaign(
   const organizerRelationship = String(
     formData.get("organizer_relationship") ?? ""
   ).trim();
+  const applicantName = String(formData.get("applicant_name") ?? "").trim();
+  const applicantNid = String(formData.get("applicant_nid") ?? "").trim();
+  const applicantPhone = String(formData.get("applicant_phone") ?? "").trim();
+  const documents = parseDocuments(formData.get("documents"));
 
-  if (!title || !category || !goalAmount || goalAmount <= 0) {
+  // Every required field must be filled — mirrors the form's required marks
+  // and blocks incomplete submissions even if the browser check is bypassed.
+  const missing =
+    !title ||
+    !category ||
+    !goalAmount ||
+    goalAmount <= 0 ||
+    !beneficiaryName ||
+    !district ||
+    !organizerName ||
+    !organizerRelationship ||
+    !summary ||
+    !story ||
+    !applicantName ||
+    !applicantNid ||
+    !applicantPhone;
+
+  if (missing) {
     return {
-      error: "Please fill in the title, category, and a goal amount above 0.",
+      error:
+        "Please complete all required fields (marked *) before submitting.",
+    };
+  }
+
+  if (!firstPhoto) {
+    return { error: "Please add at least one photo of the campaign." };
+  }
+
+  if (!documents.some((d) => d.docType === "nid")) {
+    return {
+      error: "Please upload an NID photo or PDF in the Documents section.",
     };
   }
 
@@ -133,7 +165,6 @@ export async function createCampaign(
 
   // Documents were already uploaded to the private vault from the browser;
   // here we just record which files belong to this campaign.
-  const documents = parseDocuments(formData.get("documents"));
   if (documents.length > 0) {
     const { error: dError } = await supabase.from("campaign_documents").insert(
       documents.map((doc) => ({

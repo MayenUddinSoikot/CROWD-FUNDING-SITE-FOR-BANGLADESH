@@ -18,10 +18,11 @@ export function CampaignCard({ campaign }: { campaign: Campaign }) {
         <img
           src={campaign.cover_image_url}
           alt=""
-          className="h-40 w-full object-cover"
+          loading="lazy"
+          className="aspect-[3/2] w-full object-cover"
         />
       ) : (
-        <div className="flex h-40 w-full items-center justify-center bg-gradient-to-br from-brand/20 to-brand/5 text-5xl">
+        <div className="flex aspect-[3/2] w-full items-center justify-center bg-gradient-to-br from-brand/20 to-brand/5 text-5xl">
           {category.emoji}
         </div>
       )}

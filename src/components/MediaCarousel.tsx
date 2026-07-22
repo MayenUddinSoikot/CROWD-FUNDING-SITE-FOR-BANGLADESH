@@ -68,7 +68,7 @@ export function MediaCarousel({
               type="button"
               aria-label="Previous"
               onClick={() => go(index - 1)}
-              className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur hover:bg-black/60"
+              className="absolute left-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-2xl text-white backdrop-blur transition hover:bg-black/65 active:scale-95"
             >
               ‹
             </button>
@@ -76,7 +76,7 @@ export function MediaCarousel({
               type="button"
               aria-label="Next"
               onClick={() => go(index + 1)}
-              className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur hover:bg-black/60"
+              className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-2xl text-white backdrop-blur transition hover:bg-black/65 active:scale-95"
             >
               ›
             </button>
@@ -85,17 +85,21 @@ export function MediaCarousel({
       </div>
 
       {count > 1 ? (
-        <div className="mt-3 flex justify-center gap-2">
+        <div className="mt-2 flex justify-center gap-1">
           {media.map((m, i) => (
             <button
               key={m.id}
               type="button"
               aria-label={`Go to item ${i + 1}`}
               onClick={() => setIndex(i)}
-              className={`h-2 rounded-full transition-all ${
-                i === index ? "w-6 bg-brand" : "w-2 bg-foreground/25"
-              }`}
-            />
+              className="flex h-8 items-center px-1"
+            >
+              <span
+                className={`h-2 rounded-full transition-all ${
+                  i === index ? "w-6 bg-brand" : "w-2 bg-foreground/25"
+                }`}
+              />
+            </button>
           ))}
         </div>
       ) : null}

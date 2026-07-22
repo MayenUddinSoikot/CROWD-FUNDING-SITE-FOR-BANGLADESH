@@ -11,6 +11,10 @@ import { RELATIONSHIP_LABELS } from "@/lib/types";
 const inputClass =
   "mt-1 w-full rounded-xl border border-foreground/20 bg-card px-4 py-2.5 outline-none focus:border-brand";
 
+function Req() {
+  return <span className="text-accent" title="Required">*</span>;
+}
+
 function Section({
   title,
   subtitle,
@@ -69,22 +73,24 @@ export function CampaignWizard({ userId }: { userId: string }) {
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-medium" htmlFor="beneficiary_name">
-              Beneficiary name
+              Beneficiary name <Req />
             </label>
             <input
               id="beneficiary_name"
               name="beneficiary_name"
+              required
               placeholder="Md. Rahim Uddin"
               className={inputClass}
             />
           </div>
           <div>
             <label className="block text-sm font-medium" htmlFor="district">
-              District · জেলা
+              District · জেলা <Req />
             </label>
             <input
               id="district"
               name="district"
+              required
               placeholder="Jashore"
               className={inputClass}
             />
@@ -103,11 +109,12 @@ export function CampaignWizard({ userId }: { userId: string }) {
           <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-sm font-medium" htmlFor="organizer_name">
-                Organizer name (you)
+                Organizer name (you) <Req />
               </label>
               <input
                 id="organizer_name"
                 name="organizer_name"
+                required
                 placeholder="Your name"
                 className={inputClass}
               />
@@ -117,11 +124,12 @@ export function CampaignWizard({ userId }: { userId: string }) {
                 className="block text-sm font-medium"
                 htmlFor="organizer_relationship"
               >
-                Relationship to beneficiary
+                Relationship to beneficiary <Req />
               </label>
               <select
                 id="organizer_relationship"
                 name="organizer_relationship"
+                required
                 defaultValue=""
                 className={inputClass}
               >
@@ -152,11 +160,12 @@ export function CampaignWizard({ userId }: { userId: string }) {
 
       <Section title="3. Story · বিবরণ">
         <label className="block text-sm font-medium" htmlFor="summary">
-          Short summary (1-2 sentences, English)
+          Short summary (1-2 sentences, English) <Req />
         </label>
         <textarea
           id="summary"
           name="summary"
+          required
           rows={2}
           maxLength={280}
           className={inputClass}
@@ -174,9 +183,9 @@ export function CampaignWizard({ userId }: { userId: string }) {
         />
 
         <label className="mt-4 block text-sm font-medium" htmlFor="story">
-          Full story (English)
+          Full story (English) <Req />
         </label>
-        <textarea id="story" name="story" rows={5} className={inputClass} />
+        <textarea id="story" name="story" required rows={5} className={inputClass} />
 
         <label className="font-bengali mt-4 block text-sm font-medium" htmlFor="story_bn">
           সম্পূর্ণ বিবরণ (বাংলা)
@@ -228,7 +237,7 @@ export function CampaignWizard({ userId }: { userId: string }) {
 
       <Section
         title="4b. Photos & video · ছবি ও ভিডিও"
-        subtitle="Add up to 4 photos and one video (upload or a YouTube link). Shown publicly as a swipeable gallery."
+        subtitle="At least one photo is required. Add up to 4 photos and one video (upload or a YouTube link). Shown publicly as a swipeable gallery."
       >
         <MediaUploader userId={userId} />
       </Section>
@@ -240,24 +249,35 @@ export function CampaignWizard({ userId }: { userId: string }) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-medium" htmlFor="applicant_name">
-              Your full name (applicant)
+              Your full name (applicant) <Req />
             </label>
-            <input id="applicant_name" name="applicant_name" className={inputClass} />
+            <input
+              id="applicant_name"
+              name="applicant_name"
+              required
+              className={inputClass}
+            />
           </div>
           <div>
             <label className="block text-sm font-medium" htmlFor="applicant_nid">
-              Your NID number · জাতীয় পরিচয়পত্র
+              Your NID number · জাতীয় পরিচয়পত্র <Req />
             </label>
-            <input id="applicant_nid" name="applicant_nid" className={inputClass} />
+            <input
+              id="applicant_nid"
+              name="applicant_nid"
+              required
+              className={inputClass}
+            />
           </div>
           <div>
             <label className="block text-sm font-medium" htmlFor="applicant_phone">
-              Phone · মোবাইল
+              Phone · মোবাইল <Req />
             </label>
             <input
               id="applicant_phone"
               name="applicant_phone"
               type="tel"
+              required
               placeholder="01XXXXXXXXX"
               className={inputClass}
             />
@@ -327,18 +347,21 @@ export function CampaignWizard({ userId }: { userId: string }) {
 
       <Section
         title="7. Documents · কাগজপত্র (private — admin only)"
-        subtitle="Upload photos or PDFs of the NID, medical reports, and bank cheque so Shohay can verify. Stored privately — only admins can open them."
+        subtitle="An NID photo/PDF is required. Also upload medical reports and a bank cheque where relevant. Stored privately — only admins can open them."
       >
         <DocumentUploader userId={userId} />
       </Section>
 
       {state?.error ? (
-        <p className="mt-4 text-sm text-accent">{state.error}</p>
+        <p className="mt-4 rounded-xl border border-accent/40 bg-accent/10 p-3 text-sm text-accent">
+          {state.error}
+        </p>
       ) : null}
 
       <p className="mt-4 text-sm opacity-60">
-        Your campaign is reviewed before it goes live — you&rsquo;ll see it
-        under &ldquo;My campaigns&rdquo; once submitted.
+        Fields marked <Req /> are required. Your campaign is reviewed before it
+        goes live — you&rsquo;ll see it under &ldquo;My campaigns&rdquo; once
+        submitted.
       </p>
 
       <button
