@@ -35,43 +35,66 @@ function Section({
   );
 }
 
+const TYPE_OPTIONS: {
+  key: "standard" | "occasion" | "creator";
+  emoji: string;
+  title: string;
+  desc: string;
+}[] = [
+  {
+    key: "standard",
+    emoji: "🤝",
+    title: "A fundraiser",
+    desc: "Medical, education, disaster, or a cause you care about.",
+  },
+  {
+    key: "occasion",
+    emoji: "🎂",
+    title: "Occasion fundraiser",
+    desc: "Raise for a charity on your birthday, wedding, or anniversary.",
+  },
+  {
+    key: "creator",
+    emoji: "☕",
+    title: "Creator support",
+    desc: "An ongoing page — fans can “buy you a cha.”",
+  },
+];
+
 export function CampaignWizard({ userId }: { userId: string }) {
   const [state, action, pending] = useActionState(createCampaign, undefined);
-  const [type, setType] = useState<"standard" | "creator">("standard");
+  const [type, setType] = useState<"standard" | "occasion" | "creator">(
+    "standard"
+  );
   const isCreator = type === "creator";
+  const isOccasion = type === "occasion";
 
   return (
     <form action={action} className="mt-8 w-full max-w-2xl text-left">
-      <input type="hidden" name="campaign_type" value={type} />
+      <input
+        type="hidden"
+        name="campaign_type"
+        value={isCreator ? "creator" : "standard"}
+      />
 
-      <Section title="What are you raising for? · কীসের জন্য">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={() => setType("standard")}
-            className={`rounded-xl border p-4 text-left transition ${
-              !isCreator ? "border-brand bg-brand/5" : "border-foreground/20"
-            }`}
-          >
-            <p className="font-semibold">🤝 A fundraiser</p>
-            <p className="mt-1 text-sm opacity-70">
-              Medical, education, disaster, a cause — or a birthday / wedding
-              fundraiser for someone.
-            </p>
-          </button>
-          <button
-            type="button"
-            onClick={() => setType("creator")}
-            className={`rounded-xl border p-4 text-left transition ${
-              isCreator ? "border-brand bg-brand/5" : "border-foreground/20"
-            }`}
-          >
-            <p className="font-semibold">☕ Creator support</p>
-            <p className="mt-1 text-sm opacity-70">
-              An ongoing page for a journalist, artist, or creator — fans can
-              &ldquo;buy you a cha.&rdquo;
-            </p>
-          </button>
+      <Section title="Step 1 · What kind of page? · কী ধরনের">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {TYPE_OPTIONS.map((opt) => (
+            <button
+              type="button"
+              key={opt.key}
+              onClick={() => setType(opt.key)}
+              className={`rounded-xl border p-4 text-left transition ${
+                type === opt.key
+                  ? "border-brand bg-brand/5 ring-1 ring-brand"
+                  : "border-foreground/20 hover:border-brand/50"
+              }`}
+            >
+              <p className="text-2xl">{opt.emoji}</p>
+              <p className="mt-1 font-semibold">{opt.title}</p>
+              <p className="mt-1 text-sm opacity-70">{opt.desc}</p>
+            </button>
+          ))}
         </div>
       </Section>
 
@@ -108,13 +131,24 @@ export function CampaignWizard({ userId }: { userId: string }) {
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-medium" htmlFor="beneficiary_name">
-              Beneficiary name <Req />
+              {isCreator
+                ? "Your creator / page name"
+                : isOccasion
+                  ? "Who / which charity you're raising for"
+                  : "Beneficiary name"}{" "}
+              <Req />
             </label>
             <input
               id="beneficiary_name"
               name="beneficiary_name"
               required
-              placeholder="Md. Rahim Uddin"
+              placeholder={
+                isCreator
+                  ? "e.g. Dhaka Street Stories"
+                  : isOccasion
+                    ? "e.g. JAAGO Foundation"
+                    : "Md. Rahim Uddin"
+              }
               className={inputClass}
             />
           </div>
@@ -179,18 +213,19 @@ export function CampaignWizard({ userId }: { userId: string }) {
           </div>
         </div>
 
-        {!isCreator ? (
+        {isOccasion ? (
           <div className="mt-4">
             <label className="block text-sm font-medium" htmlFor="occasion">
-              Special occasion? · বিশেষ উপলক্ষ (optional)
+              Which occasion? · কোন উপলক্ষ <Req />
             </label>
             <select
               id="occasion"
               name="occasion"
+              required
               defaultValue=""
               className={inputClass}
             >
-              <option value="">Not for a special occasion</option>
+              <option value="">Choose an occasion</option>
               {Object.entries(OCCASION_LABELS).map(([key, o]) => (
                 <option key={key} value={key}>
                   {o.emoji} {o.label}
@@ -198,7 +233,7 @@ export function CampaignWizard({ userId }: { userId: string }) {
               ))}
             </select>
             <p className="mt-1 text-xs opacity-60">
-              e.g. raising for a charity on your birthday or wedding.
+              Your friends can chip in for the charity to mark your day. 🎉
             </p>
           </div>
         ) : null}
@@ -218,7 +253,10 @@ export function CampaignWizard({ userId }: { userId: string }) {
 
       <Section title="3. Story · বিবরণ">
         <label className="block text-sm font-medium" htmlFor="summary">
-          Short summary (1-2 sentences, English) <Req />
+          {isCreator
+            ? "What content do you make? (1-2 sentences)"
+            : "Short summary (1-2 sentences, English)"}{" "}
+          <Req />
         </label>
         <textarea
           id="summary"
@@ -241,7 +279,8 @@ export function CampaignWizard({ userId }: { userId: string }) {
         />
 
         <label className="mt-4 block text-sm font-medium" htmlFor="story">
-          Full story (English) <Req />
+          {isCreator ? "About you & your work (English)" : "Full story (English)"}{" "}
+          <Req />
         </label>
         <textarea id="story" name="story" required rows={5} className={inputClass} />
 
