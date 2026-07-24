@@ -4,6 +4,86 @@ import { useState } from "react";
 import Link from "next/link";
 import { logout } from "@/app/login/actions";
 
+type MenuItem = { title: string; subtitle: string; href: string };
+
+const MENUS: Record<string, { heading: string; items: MenuItem[] }> = {
+  donate: {
+    heading: "Discover campaigns to support",
+    items: [
+      { title: "Browse all campaigns", subtitle: "Every live campaign", href: "/search" },
+      { title: "🎂 Occasion fundraisers", subtitle: "Birthdays, weddings & more", href: "/search?filter=birthday" },
+      { title: "☕ Support a creator", subtitle: "Buy creators a cha", href: "/search?filter=creators" },
+      { title: "Disaster relief", subtitle: "Give to verified relief", href: "/search?category=disaster_relief" },
+      { title: "Medical", subtitle: "Help with medical costs", href: "/search?category=medical" },
+      { title: "Education", subtitle: "Support students", href: "/search?category=education" },
+    ],
+  },
+  fundraise: {
+    heading: "Start a campaign — 0% platform fee",
+    items: [
+      { title: "Start a fundraiser", subtitle: "Medical, education, a cause", href: "/start" },
+      { title: "🎂 Occasion fundraiser", subtitle: "Raise on your birthday", href: "/start" },
+      { title: "☕ Creator page", subtitle: "Ongoing supporter page", href: "/start" },
+      { title: "How it works", subtitle: "Step by step", href: "/#how" },
+    ],
+  },
+  about: {
+    heading: "How Shohay works, and more",
+    items: [
+      { title: "How Shohay works", subtitle: "Verify, fund, payout", href: "/#how" },
+      { title: "0% platform fee", subtitle: "Every taka reaches the campaign", href: "/#how" },
+      { title: "Verified campaigns", subtitle: "NID & document checked", href: "/#how" },
+      { title: "Help & FAQ", subtitle: "Support in Bangla & English", href: "/#how" },
+    ],
+  },
+};
+
+function Dropdown({
+  id,
+  label,
+  menu,
+  setMenu,
+}: {
+  id: string;
+  label: string;
+  menu: string | null;
+  setMenu: (v: string | null) => void;
+}) {
+  const active = menu === id;
+  const data = MENUS[id];
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setMenu(active ? null : id)}
+        className={`flex items-center gap-1 hover:text-brand ${active ? "text-brand" : ""}`}
+      >
+        {label} <span className="text-xs">{active ? "▲" : "▼"}</span>
+      </button>
+      {active ? (
+        <div className="absolute left-0 top-full z-50 mt-3 w-[440px] rounded-2xl border border-foreground/10 bg-background p-5 shadow-xl">
+          <p className="mb-3 text-sm font-semibold opacity-60">{data.heading}</p>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+            {data.items.map((item) => (
+              <Link
+                key={item.title + item.href}
+                href={item.href}
+                onClick={() => setMenu(null)}
+                className="group block"
+              >
+                <span className="block font-semibold group-hover:text-brand">
+                  {item.title}
+                </span>
+                <span className="block text-sm opacity-60">{item.subtitle}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function SiteNav({
   isLoggedIn,
   isAdmin,
@@ -12,21 +92,24 @@ export function SiteNav({
   isAdmin: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [menu, setMenu] = useState<string | null>(null);
   const close = () => setOpen(false);
 
   return (
     <>
+      {/* Backdrop to close dropdowns */}
+      {menu ? (
+        <div
+          className="fixed inset-0 z-40 hidden lg:block"
+          onClick={() => setMenu(null)}
+        />
+      ) : null}
+
       {/* Desktop nav */}
-      <nav className="hidden items-center gap-4 text-sm lg:flex">
-        <Link href="/search" className="hover:text-brand">
-          Donate
-        </Link>
-        <Link href="/start" className="hover:text-brand">
-          Fundraise
-        </Link>
-        <Link href="/#how" className="hover:text-brand">
-          About
-        </Link>
+      <nav className="hidden items-center gap-5 text-sm lg:flex">
+        <Dropdown id="donate" label="Donate" menu={menu} setMenu={setMenu} />
+        <Dropdown id="fundraise" label="Fundraise" menu={menu} setMenu={setMenu} />
+        <Dropdown id="about" label="About" menu={menu} setMenu={setMenu} />
         {isLoggedIn ? (
           <Link href="/account" className="hover:text-brand">
             My campaigns
