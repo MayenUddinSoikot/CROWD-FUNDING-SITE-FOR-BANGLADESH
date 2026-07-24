@@ -5,7 +5,8 @@ import Link from "next/link";
 import { startDonation } from "@/app/campaigns/[slug]/donate-actions";
 import { formatTaka } from "@/lib/format";
 
-const PRESETS = [50, 100, 500, 1000, 5000, 100000];
+const DONATE_PRESETS = [50, 100, 500, 1000, 5000, 100000];
+const CHA_PRESETS = [20, 50, 100, 200, 500, 1000];
 const TIP_PERCENTS = [0, 5, 10, 15];
 
 const inputClass =
@@ -14,12 +15,16 @@ const inputClass =
 export function DonationForm({
   campaignId,
   slug,
+  variant = "donate",
 }: {
   campaignId: string;
   slug: string;
+  variant?: "donate" | "creator";
 }) {
+  const isCreator = variant === "creator";
+  const PRESETS = isCreator ? CHA_PRESETS : DONATE_PRESETS;
   const [state, action, pending] = useActionState(startDonation, undefined);
-  const [amount, setAmount] = useState<number>(500);
+  const [amount, setAmount] = useState<number>(isCreator ? 100 : 500);
   const [custom, setCustom] = useState<string>("");
   const [tipPercent, setTipPercent] = useState<number>(5);
   const [customTip, setCustomTip] = useState<string>("");
@@ -58,7 +63,9 @@ export function DonationForm({
       <input type="hidden" name="tip_amount" value={tip} />
 
       <p className="text-sm font-semibold">
-        Enter your donation · দানের পরিমাণ
+        {isCreator
+          ? "Buy them a cha · চা খাওয়ান ☕"
+          : "Enter your donation · দানের পরিমাণ"}
       </p>
 
       {/* Big amount display */}
@@ -197,7 +204,11 @@ export function DonationForm({
         disabled={pending || !effectiveAmount}
         className="mt-4 w-full rounded-xl bg-brand px-6 py-3.5 text-lg font-semibold text-white transition hover:bg-brand-dark disabled:opacity-60"
       >
-        {pending ? "Please wait…" : `Donate ${formatTaka(total || 0)}`}
+        {pending
+          ? "Please wait…"
+          : isCreator
+            ? `Buy a cha · ${formatTaka(total || 0)} ☕`
+            : `Donate ${formatTaka(total || 0)}`}
       </button>
       <p className="mt-2 text-center text-xs opacity-50">
         Secure payment via bKash · Nagad · card (connecting soon)

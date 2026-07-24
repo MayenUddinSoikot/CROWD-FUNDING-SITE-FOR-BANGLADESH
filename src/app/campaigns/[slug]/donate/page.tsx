@@ -17,7 +17,7 @@ async function getCampaign(slug: string): Promise<Campaign | null> {
     const { data } = await supabase
       .from("campaigns")
       .select(
-        "id, slug, title, title_bn, category, goal_amount, raised_amount, status, cover_image_url, beneficiary_name, created_at"
+        "id, slug, title, title_bn, category, goal_amount, raised_amount, status, cover_image_url, beneficiary_name, campaign_type, created_at"
       )
       .eq("slug", slug)
       .in("status", ["approved", "completed"])
@@ -63,7 +63,9 @@ export default async function DonatePage({
           {/* Donation form */}
           <div className="order-2 lg:order-1">
             <h1 className="font-serif text-2xl font-bold">
-              You&rsquo;re donating to
+              {campaign.campaign_type === "creator"
+                ? "You're supporting"
+                : "You're donating to"}
             </h1>
             <p className="mt-1 text-lg">{campaign.title}</p>
             {campaign.beneficiary_name ? (
@@ -73,7 +75,13 @@ export default async function DonatePage({
             ) : null}
 
             <div className="mt-6">
-              <DonationForm campaignId={campaign.id} slug={campaign.slug} />
+              <DonationForm
+                campaignId={campaign.id}
+                slug={campaign.slug}
+                variant={
+                  campaign.campaign_type === "creator" ? "creator" : "donate"
+                }
+              />
             </div>
           </div>
 

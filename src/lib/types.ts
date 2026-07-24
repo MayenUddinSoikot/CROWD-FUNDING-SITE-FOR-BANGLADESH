@@ -24,8 +24,23 @@ export type Campaign = {
   organizer_name: string | null;
   organizer_relationship: string | null;
   district: string | null;
+  campaign_type: string; // 'standard' | 'creator'
+  occasion: string | null;
   ends_at: string | null;
   created_at: string;
+};
+
+// Optional special-occasion tag shown publicly on a campaign.
+export const OCCASION_LABELS: Record<
+  string,
+  { label: string; emoji: string }
+> = {
+  birthday: { label: "Birthday", emoji: "🎂" },
+  wedding: { label: "Wedding", emoji: "💍" },
+  anniversary: { label: "Anniversary", emoji: "💐" },
+  memorial: { label: "In memory", emoji: "🕊️" },
+  eid: { label: "Eid / religious", emoji: "🌙" },
+  other: { label: "Special occasion", emoji: "🎉" },
 };
 
 // Public: how the organizer relates to the beneficiary. Shown to donors.

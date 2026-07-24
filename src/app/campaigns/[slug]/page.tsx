@@ -9,7 +9,7 @@ import type {
   CampaignUpdate,
   PublicDonation,
 } from "@/lib/types";
-import { CATEGORY_LABELS, RELATIONSHIP_LABELS } from "@/lib/types";
+import { CATEGORY_LABELS, RELATIONSHIP_LABELS, OCCASION_LABELS } from "@/lib/types";
 import { formatTaka, timeAgo } from "@/lib/format";
 import { RealtimeCampaignStats } from "@/components/RealtimeCampaignStats";
 import { ShareButtons } from "@/components/ShareButtons";
@@ -35,7 +35,7 @@ async function getCampaign(slug: string): Promise<Campaign | null> {
     const { data, error } = await supabase
       .from("campaigns")
       .select(
-        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, organizer_name, organizer_relationship, district, ends_at, created_at"
+        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, organizer_name, organizer_relationship, campaign_type, occasion, district, ends_at, created_at"
       )
       .eq("slug", slug)
       .in("status", ["approved", "completed"])
@@ -172,12 +172,25 @@ export default async function CampaignPage({
           <MediaCarousel media={media} fallbackEmoji={category.emoji} />
         </div>
 
-        <p className="mt-6 text-xs font-medium uppercase tracking-wide text-brand">
-          {category.en} · <span className="font-bengali">{category.bn}</span>
-          {campaign.district ? (
-            <span className="opacity-70"> · {campaign.district}</span>
+        <div className="mt-6 flex flex-wrap items-center gap-2">
+          {campaign.campaign_type === "creator" ? (
+            <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">
+              ☕ Creator support
+            </span>
           ) : null}
-        </p>
+          {campaign.occasion && OCCASION_LABELS[campaign.occasion] ? (
+            <span className="rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
+              {OCCASION_LABELS[campaign.occasion].emoji}{" "}
+              {OCCASION_LABELS[campaign.occasion].label} fundraiser
+            </span>
+          ) : null}
+          <span className="text-xs font-medium uppercase tracking-wide text-brand">
+            {category.en} · <span className="font-bengali">{category.bn}</span>
+            {campaign.district ? (
+              <span className="opacity-70"> · {campaign.district}</span>
+            ) : null}
+          </span>
+        </div>
 
         <h1 className="mt-2 font-serif text-3xl font-bold leading-tight sm:text-4xl">
           {campaign.title}
@@ -248,7 +261,11 @@ export default async function CampaignPage({
             href={`/campaigns/${campaign.slug}/donate`}
             className="mt-5 block w-full rounded-xl bg-brand px-6 py-3.5 text-center text-lg font-semibold text-white transition hover:bg-brand-dark"
           >
-            Donate now · <span className="font-bengali">দান করুন</span>
+            {campaign.campaign_type === "creator" ? (
+              <>Buy a cha ☕ · <span className="font-bengali">চা খাওয়ান</span></>
+            ) : (
+              <>Donate now · <span className="font-bengali">দান করুন</span></>
+            )}
           </Link>
 
           <div className="mt-6 border-t border-foreground/10 pt-4">

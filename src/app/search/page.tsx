@@ -10,6 +10,8 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Search campaigns — Shohay সহায়" };
 
 const FILTERS: { key: string; label: string; bn: string }[] = [
+  { key: "creators", label: "Creators ☕", bn: "ক্রিয়েটর" },
+  { key: "birthday", label: "Birthdays 🎂", bn: "জন্মদিন" },
   { key: "just_launched", label: "Just launched", bn: "নতুন" },
   { key: "almost", label: "Almost there", bn: "প্রায় পূর্ণ" },
   { key: "needs_boost", label: "Needs a boost", bn: "সাহায্য দরকার" },
@@ -23,6 +25,12 @@ function daysLeft(endsAt: string | null): number | null {
 }
 
 function applySpecialFilter(list: Campaign[], filter: string | undefined): Campaign[] {
+  if (filter === "creators") {
+    return list.filter((c) => c.campaign_type === "creator");
+  }
+  if (filter === "birthday") {
+    return list.filter((c) => c.occasion === "birthday");
+  }
   if (filter === "just_launched") {
     const cutoff = Date.now() - 2 * 24 * 60 * 60 * 1000;
     return list.filter((c) => new Date(c.created_at).getTime() >= cutoff);
@@ -53,7 +61,7 @@ async function getAllCampaigns(): Promise<Campaign[]> {
     const { data } = await supabase
       .from("campaigns")
       .select(
-        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, organizer_name, organizer_relationship, district, ends_at, created_at"
+        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, organizer_name, organizer_relationship, campaign_type, occasion, district, ends_at, created_at"
       )
       .in("status", ["approved", "completed"])
       .order("created_at", { ascending: false })

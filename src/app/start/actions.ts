@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/slug";
 import type { CampaignCategory } from "@/lib/types";
-import { RELATIONSHIP_LABELS } from "@/lib/types";
+import { RELATIONSHIP_LABELS, OCCASION_LABELS } from "@/lib/types";
 
 export type CreateCampaignState = { error?: string } | undefined;
 
@@ -42,6 +42,15 @@ export async function createCampaign(
   const applicantNid = String(formData.get("applicant_nid") ?? "").trim();
   const applicantPhone = String(formData.get("applicant_phone") ?? "").trim();
   const documents = parseDocuments(formData.get("documents"));
+  const campaignType =
+    String(formData.get("campaign_type") ?? "") === "creator"
+      ? "creator"
+      : "standard";
+  const occasionRaw = String(formData.get("occasion") ?? "").trim();
+  const occasion =
+    campaignType === "standard" && occasionRaw in OCCASION_LABELS
+      ? occasionRaw
+      : null;
 
   // Every required field must be filled — mirrors the form's required marks
   // and blocks incomplete submissions even if the browser check is bypassed.
@@ -77,11 +86,13 @@ export async function createCampaign(
     };
   }
 
+  // Creator support pages are ongoing (no end date); fundraisers get one.
   const allowedDurations = new Set([7, 14, 30, 60, 90]);
   const days = allowedDurations.has(durationDays) ? durationDays : 30;
-  const endsAt = new Date(
-    Date.now() + days * 24 * 60 * 60 * 1000
-  ).toISOString();
+  const endsAt =
+    campaignType === "creator"
+      ? null
+      : new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
 
   const allowedRelationships = new Set(Object.keys(RELATIONSHIP_LABELS));
   const relationship = allowedRelationships.has(organizerRelationship)
@@ -105,6 +116,8 @@ export async function createCampaign(
       cover_image_url: firstPhoto,
       organizer_name: organizerName || null,
       organizer_relationship: relationship,
+      campaign_type: campaignType,
+      occasion,
       ends_at: endsAt,
       creator_id: user.id,
       status: "pending",

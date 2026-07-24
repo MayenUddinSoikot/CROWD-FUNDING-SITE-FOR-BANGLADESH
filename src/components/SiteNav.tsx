@@ -17,12 +17,15 @@ export function SiteNav({
   return (
     <>
       {/* Desktop nav */}
-      <nav className="hidden items-center gap-4 text-sm sm:flex">
-        <Link href="/search" aria-label="Search" className="hover:text-brand">
-          🔍
-        </Link>
+      <nav className="hidden items-center gap-4 text-sm lg:flex">
         <Link href="/search" className="hover:text-brand">
-          Donate · <span className="font-bengali">দান</span>
+          Donate
+        </Link>
+        <Link href="/start" className="hover:text-brand">
+          Fundraise
+        </Link>
+        <Link href="/#how" className="hover:text-brand">
+          About
         </Link>
         {isLoggedIn ? (
           <Link href="/account" className="hover:text-brand">
@@ -42,7 +45,7 @@ export function SiteNav({
           </form>
         ) : (
           <Link href="/login" className="hover:text-brand">
-            Log in
+            Sign in
           </Link>
         )}
         <Link
@@ -53,8 +56,8 @@ export function SiteNav({
         </Link>
       </nav>
 
-      {/* Mobile: search + hamburger */}
-      <div className="flex items-center gap-3 sm:hidden">
+      {/* Mobile / tablet: search + hamburger */}
+      <div className="flex items-center gap-3 lg:hidden">
         <Link href="/search" aria-label="Search" className="text-lg">
           🔍
         </Link>
@@ -71,7 +74,7 @@ export function SiteNav({
 
       {/* Right-side drawer */}
       {open ? (
-        <div className="fixed inset-0 z-50 sm:hidden" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-black/40" onClick={close} />
           <div className="absolute right-0 top-0 flex h-full w-4/5 max-w-xs flex-col bg-background p-6 shadow-xl">
             <button

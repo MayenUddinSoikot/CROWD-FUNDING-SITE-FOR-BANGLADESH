@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { createCampaign } from "./actions";
-import { CATEGORY_LABELS } from "@/lib/types";
+import { CATEGORY_LABELS, OCCASION_LABELS } from "@/lib/types";
 import type { CampaignCategory } from "@/lib/types";
 import { DocumentUploader } from "@/components/DocumentUploader";
 import { MediaUploader } from "@/components/MediaUploader";
@@ -37,9 +37,44 @@ function Section({
 
 export function CampaignWizard({ userId }: { userId: string }) {
   const [state, action, pending] = useActionState(createCampaign, undefined);
+  const [type, setType] = useState<"standard" | "creator">("standard");
+  const isCreator = type === "creator";
 
   return (
     <form action={action} className="mt-8 w-full max-w-2xl text-left">
+      <input type="hidden" name="campaign_type" value={type} />
+
+      <Section title="What are you raising for? · কীসের জন্য">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => setType("standard")}
+            className={`rounded-xl border p-4 text-left transition ${
+              !isCreator ? "border-brand bg-brand/5" : "border-foreground/20"
+            }`}
+          >
+            <p className="font-semibold">🤝 A fundraiser</p>
+            <p className="mt-1 text-sm opacity-70">
+              Medical, education, disaster, a cause — or a birthday / wedding
+              fundraiser for someone.
+            </p>
+          </button>
+          <button
+            type="button"
+            onClick={() => setType("creator")}
+            className={`rounded-xl border p-4 text-left transition ${
+              isCreator ? "border-brand bg-brand/5" : "border-foreground/20"
+            }`}
+          >
+            <p className="font-semibold">☕ Creator support</p>
+            <p className="mt-1 text-sm opacity-70">
+              An ongoing page for a journalist, artist, or creator — fans can
+              &ldquo;buy you a cha.&rdquo;
+            </p>
+          </button>
+        </div>
+      </Section>
+
       <Section title="1. Basics · মূল তথ্য">
         <label className="block text-sm font-medium" htmlFor="title">
           Campaign title (English)
@@ -144,6 +179,29 @@ export function CampaignWizard({ userId }: { userId: string }) {
           </div>
         </div>
 
+        {!isCreator ? (
+          <div className="mt-4">
+            <label className="block text-sm font-medium" htmlFor="occasion">
+              Special occasion? · বিশেষ উপলক্ষ (optional)
+            </label>
+            <select
+              id="occasion"
+              name="occasion"
+              defaultValue=""
+              className={inputClass}
+            >
+              <option value="">Not for a special occasion</option>
+              {Object.entries(OCCASION_LABELS).map(([key, o]) => (
+                <option key={key} value={key}>
+                  {o.emoji} {o.label}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs opacity-60">
+              e.g. raising for a charity on your birthday or wedding.
+            </p>
+          </div>
+        ) : null}
       </Section>
 
       <Section title="2. Bangla title · বাংলা শিরোনাম">
@@ -198,11 +256,17 @@ export function CampaignWizard({ userId }: { userId: string }) {
         />
       </Section>
 
-      <Section title="4. Funding goal & duration · লক্ষ্য ও সময়">
+      <Section
+        title={
+          isCreator
+            ? "4. Support target · লক্ষ্য"
+            : "4. Funding goal & duration · লক্ষ্য ও সময়"
+        }
+      >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-medium" htmlFor="goal_amount">
-              Goal amount (৳ Taka)
+              {isCreator ? "Support target (৳ Taka)" : "Goal amount (৳ Taka)"} <Req />
             </label>
             <input
               id="goal_amount"
@@ -211,27 +275,33 @@ export function CampaignWizard({ userId }: { userId: string }) {
               min={1}
               step={1}
               required
-              placeholder="350000"
+              placeholder={isCreator ? "50000" : "350000"}
               className={inputClass}
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium" htmlFor="duration_days">
-              Runs for · কত দিন
-            </label>
-            <select
-              id="duration_days"
-              name="duration_days"
-              defaultValue="30"
-              className={inputClass}
-            >
-              <option value="7">7 days</option>
-              <option value="14">14 days</option>
-              <option value="30">30 days</option>
-              <option value="60">60 days</option>
-              <option value="90">90 days</option>
-            </select>
-          </div>
+          {!isCreator ? (
+            <div>
+              <label className="block text-sm font-medium" htmlFor="duration_days">
+                Runs for · কত দিন
+              </label>
+              <select
+                id="duration_days"
+                name="duration_days"
+                defaultValue="30"
+                className={inputClass}
+              >
+                <option value="7">7 days</option>
+                <option value="14">14 days</option>
+                <option value="30">30 days</option>
+                <option value="60">60 days</option>
+                <option value="90">90 days</option>
+              </select>
+            </div>
+          ) : (
+            <p className="self-end text-sm opacity-60">
+              Creator pages are ongoing — no end date.
+            </p>
+          )}
         </div>
       </Section>
 
