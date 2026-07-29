@@ -3,7 +3,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { SiteHeader } from "@/components/SiteHeader";
 import { formatTaka } from "@/lib/format";
 import type { Campaign } from "@/lib/types";
 
@@ -46,7 +45,6 @@ export default async function AccountPage({
 
   return (
     <>
-      <SiteHeader />
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 pb-16">
         <h1 className="mt-10 text-2xl font-bold">
           My campaigns · <span className="font-bengali">আমার ক্যাম্পেইন</span>

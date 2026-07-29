@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { SiteHeader } from "@/components/SiteHeader";
 import { LoginForm } from "./LoginForm";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +18,6 @@ export default async function LoginPage() {
 
   return (
     <>
-      <SiteHeader />
       <main className="flex flex-1 flex-col items-center px-6 py-16 text-center">
         <h1 className="font-bengali text-3xl font-bold">লগ ইন করুন</h1>
         <p className="mt-1 text-lg font-semibold">Log in</p>

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAdminClient } from "@/lib/admin";
-import { SiteHeader } from "@/components/SiteHeader";
 import { formatTaka } from "@/lib/format";
 import { CATEGORY_LABELS } from "@/lib/types";
 import type { Campaign } from "@/lib/types";
@@ -37,7 +36,6 @@ export default async function AdminDashboard() {
 
   return (
     <>
-      <SiteHeader />
       <main className="mx-auto w-full max-w-4xl flex-1 px-6 pb-16">
         <div className="mt-10 flex items-center justify-between gap-4">
           <h1 className="text-2xl font-bold">

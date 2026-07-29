@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getAdminClient } from "@/lib/admin";
-import { SiteHeader } from "@/components/SiteHeader";
 import { formatTaka } from "@/lib/format";
 import { CATEGORY_LABELS } from "@/lib/types";
 import type {
@@ -76,7 +75,6 @@ export default async function AdminCampaignDetail({
 
   return (
     <>
-      <SiteHeader />
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 pb-16">
         <p className="mt-8 text-sm">
           <Link href="/admin" className="opacity-60 hover:text-brand">

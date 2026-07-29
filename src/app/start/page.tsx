@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { SiteHeader } from "@/components/SiteHeader";
 import type { PublicCharity } from "@/lib/types";
 import { CampaignWizard } from "./CampaignWizard";
 
@@ -32,7 +31,6 @@ export default async function StartCampaignPage() {
   if (!userId) {
     return (
       <>
-        <SiteHeader />
         <main className="flex flex-1 flex-col items-center justify-center px-6 py-24 text-center">
           <h1 className="font-bengali text-3xl font-bold sm:text-4xl">
             ক্যাম্পেইন শুরু করুন
@@ -55,7 +53,6 @@ export default async function StartCampaignPage() {
 
   return (
     <>
-      <SiteHeader />
       <main className="flex flex-1 flex-col items-center px-6 py-16 text-center">
         <h1 className="font-bengali text-3xl font-bold sm:text-4xl">
           ক্যাম্পেইন শুরু করুন

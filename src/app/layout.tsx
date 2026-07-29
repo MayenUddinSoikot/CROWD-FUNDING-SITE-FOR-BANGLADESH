@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Lora, Noto_Sans_Bengali } from "next/font/google";
 import "./globals.css";
+import { SiteHeader } from "@/components/SiteHeader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,7 +36,10 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${lora.variable} ${notoBengali.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <SiteHeader />
+        {children}
+      </body>
     </html>
   );
 }

@@ -3,7 +3,6 @@ import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/anon";
 import type { Campaign, CampaignCategory } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
 import { RealtimeCampaignGrid } from "@/components/RealtimeCampaignGrid";
-import { SiteHeader } from "@/components/SiteHeader";
 
 // Always show fresh donation totals — never a stale build-time snapshot.
 export const dynamic = "force-dynamic";
@@ -54,7 +53,6 @@ export default async function Home({
 
   return (
     <>
-      <SiteHeader />
       <main className="flex flex-1 flex-col items-center pb-16 text-center">
         {/* Hero */}
         <section className="w-full bg-gradient-to-b from-brand/10 to-transparent px-6 py-16 sm:py-20">

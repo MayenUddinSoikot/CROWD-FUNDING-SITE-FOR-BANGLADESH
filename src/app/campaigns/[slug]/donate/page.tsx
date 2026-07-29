@@ -6,7 +6,6 @@ import type { Campaign } from "@/lib/types";
 import { formatTaka, percentRaised } from "@/lib/format";
 import { ProgressBar } from "@/components/ProgressBar";
 import { DonationForm } from "@/components/DonationForm";
-import { SiteHeader } from "@/components/SiteHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +50,6 @@ export default async function DonatePage({
 
   return (
     <>
-      <SiteHeader />
       <main className="mx-auto w-full max-w-4xl flex-1 px-6 pb-16">
         <p className="mt-6 text-sm">
           <Link href={`/campaigns/${slug}`} className="opacity-60 hover:text-brand">

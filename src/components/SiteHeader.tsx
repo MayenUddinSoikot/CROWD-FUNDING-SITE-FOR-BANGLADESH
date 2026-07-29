@@ -25,7 +25,7 @@ export async function SiteHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-foreground/10 bg-background/95 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-foreground/10 bg-background">
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6">
         <Link href="/" className="flex shrink-0 items-baseline gap-2">
           <span className="font-bengali text-2xl font-bold text-brand">

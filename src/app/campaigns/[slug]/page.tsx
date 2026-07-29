@@ -15,7 +15,6 @@ import { RealtimeCampaignStats } from "@/components/RealtimeCampaignStats";
 import { ShareButtons } from "@/components/ShareButtons";
 import { MediaCarousel } from "@/components/MediaCarousel";
 import { CampaignUpdateForm } from "@/components/CampaignUpdateForm";
-import { SiteHeader } from "@/components/SiteHeader";
 
 function daysLeft(endsAt: string | null): number | null {
   if (!endsAt) return null;
@@ -195,7 +194,6 @@ export default async function CampaignPage({
 
   return (
     <>
-      <SiteHeader />
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 pb-16">
         <div className="mt-8">
           <MediaCarousel media={media} fallbackEmoji={category.emoji} />

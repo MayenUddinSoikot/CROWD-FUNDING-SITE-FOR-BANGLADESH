@@ -4,7 +4,6 @@ import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/anon";
 import type { Campaign, CampaignCategory } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
 import { CampaignCard } from "@/components/CampaignCard";
-import { SiteHeader } from "@/components/SiteHeader";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Search campaigns — Shohay সহায়" };
@@ -105,7 +104,6 @@ export default async function SearchPage({
 
   return (
     <>
-      <SiteHeader />
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 pb-16">
         <h1 className="mt-8 text-2xl font-bold">
           Find a campaign · <span className="font-bengali">ক্যাম্পেইন খুঁজুন</span>
