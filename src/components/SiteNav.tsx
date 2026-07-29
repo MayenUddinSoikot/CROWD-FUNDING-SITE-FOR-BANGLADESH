@@ -93,6 +93,7 @@ export function SiteNav({
 }) {
   const [open, setOpen] = useState(false);
   const [menu, setMenu] = useState<string | null>(null);
+  const [section, setSection] = useState<string | null>(null);
   const close = () => setOpen(false);
 
   return (
@@ -159,7 +160,7 @@ export function SiteNav({
       {open ? (
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-black/40" onClick={close} />
-          <div className="absolute right-0 top-0 flex h-full w-4/5 max-w-xs flex-col bg-background p-6 shadow-xl">
+          <div className="absolute right-0 top-0 flex h-full w-[78%] max-w-[300px] flex-col bg-background px-5 py-5 shadow-xl">
             <button
               type="button"
               onClick={close}
@@ -169,30 +170,42 @@ export function SiteNav({
               ✕
             </button>
 
-            <div className="mt-2 flex-1 space-y-1 overflow-y-auto">
+            <div className="mt-1 flex-1 divide-y divide-foreground/5 overflow-y-auto">
               <DrawerItem
                 href={isLoggedIn ? "/account" : "/login"}
                 title="Manage your activity"
                 subtitle="Your donations and campaigns"
                 onClick={close}
               />
-              <DrawerItem
-                href="/search"
-                title="Donate"
+              <AccordionSection
+                sectionKey="donate"
+                label="Donate"
                 subtitle="Discover campaigns to support"
-                onClick={close}
+                open={section === "donate"}
+                onToggle={() =>
+                  setSection(section === "donate" ? null : "donate")
+                }
+                onNavigate={close}
               />
-              <DrawerItem
-                href="/start"
-                title="Fundraise"
-                subtitle="Start a campaign, 0% platform fee"
-                onClick={close}
+              <AccordionSection
+                sectionKey="fundraise"
+                label="Fundraise"
+                subtitle="Start a campaign, 0% fee"
+                open={section === "fundraise"}
+                onToggle={() =>
+                  setSection(section === "fundraise" ? null : "fundraise")
+                }
+                onNavigate={close}
               />
-              <DrawerItem
-                href="/#how"
-                title="About"
+              <AccordionSection
+                sectionKey="about"
+                label="About"
                 subtitle="How Shohay works"
-                onClick={close}
+                open={section === "about"}
+                onToggle={() =>
+                  setSection(section === "about" ? null : "about")
+                }
+                onNavigate={close}
               />
               {isAdmin ? (
                 <DrawerItem
@@ -204,7 +217,7 @@ export function SiteNav({
               ) : null}
             </div>
 
-            <div className="space-y-3 pt-4">
+            <div className="space-y-2 pt-4">
               <Link
                 href="/start"
                 onClick={close}
@@ -261,5 +274,58 @@ function DrawerItem({
       </span>
       <span className="opacity-40">›</span>
     </Link>
+  );
+}
+
+function AccordionSection({
+  sectionKey,
+  label,
+  subtitle,
+  open,
+  onToggle,
+  onNavigate,
+}: {
+  sectionKey: string;
+  label: string;
+  subtitle: string;
+  open: boolean;
+  onToggle: () => void;
+  onNavigate: () => void;
+}) {
+  const items = MENUS[sectionKey].items;
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-3 px-2 py-3 text-left"
+      >
+        <span>
+          <span className="block font-semibold">{label}</span>
+          <span className="block text-sm opacity-60">{subtitle}</span>
+        </span>
+        <span
+          className={`opacity-40 transition-transform ${open ? "rotate-180" : ""}`}
+        >
+          ▾
+        </span>
+      </button>
+      {open ? (
+        <div className="space-y-1 pb-2 pl-3">
+          {items.map((item) => (
+            <Link
+              key={item.href + item.title}
+              href={item.href}
+              onClick={onNavigate}
+              className="block rounded-lg px-2 py-2 hover:bg-foreground/5"
+            >
+              <span className="block text-sm font-medium">{item.title}</span>
+              <span className="block text-xs opacity-60">{item.subtitle}</span>
+            </Link>
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }
