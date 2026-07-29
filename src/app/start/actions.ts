@@ -86,6 +86,18 @@ export async function createCampaign(
     };
   }
 
+  // Occasion fundraisers must pick verified charities that sum to 100%.
+  const charityAllocations = parseCharities(formData.get("charities"));
+  if (occasion) {
+    const total = charityAllocations.reduce((s, c) => s + c.percentage, 0);
+    if (charityAllocations.length === 0 || Math.round(total) !== 100) {
+      return {
+        error:
+          "Choose one or more charities whose shares add up to 100%.",
+      };
+    }
+  }
+
   // Creator support pages are ongoing (no end date); fundraisers get one.
   const allowedDurations = new Set([7, 14, 30, 60, 90]);
   const days = allowedDurations.has(durationDays) ? durationDays : 30;
@@ -162,6 +174,18 @@ export async function createCampaign(
     }
   }
 
+  // Charity split for occasion fundraisers.
+  if (occasion && charityAllocations.length > 0) {
+    const { error: cError } = await supabase.from("campaign_charities").insert(
+      charityAllocations.map((c) => ({
+        campaign_id: data.id,
+        charity_id: c.charity_id,
+        percentage: c.percentage,
+      }))
+    );
+    if (cError) console.error("Failed to save charities:", cError.message);
+  }
+
   // Public gallery media (photos + video / YouTube), already uploaded to
   // the public bucket from the browser.
   if (media.length > 0) {
@@ -220,6 +244,28 @@ function parseDocuments(raw: FormDataEntryValue | null): UploadedDoc[] {
 function str(formData: FormData, key: string): string | null {
   const value = String(formData.get(key) ?? "").trim();
   return value || null;
+}
+
+type CharityAlloc = { charity_id: string; percentage: number };
+
+function parseCharities(raw: FormDataEntryValue | null): CharityAlloc[] {
+  if (typeof raw !== "string" || !raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(
+        (c): c is CharityAlloc =>
+          c &&
+          typeof c.charity_id === "string" &&
+          c.charity_id.length > 0 &&
+          Number.isFinite(Number(c.percentage))
+      )
+      .map((c) => ({ charity_id: c.charity_id, percentage: Number(c.percentage) }))
+      .slice(0, 10);
+  } catch {
+    return [];
+  }
 }
 
 type MediaItem = { type: "image" | "video" | "youtube"; url: string; position: number };

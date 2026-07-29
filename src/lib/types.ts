@@ -62,6 +62,20 @@ export type CampaignUpdate = {
   created_at: string;
 };
 
+export type PublicCharity = {
+  id: string;
+  name: string;
+  description: string | null;
+  logo_url: string | null;
+};
+
+export type CampaignCharity = {
+  id: string;
+  campaign_id: string;
+  charity_id: string;
+  percentage: number;
+};
+
 export type MediaType = "image" | "video" | "youtube";
 
 export type CampaignMedia = {

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { SiteHeader } from "@/components/SiteHeader";
+import type { PublicCharity } from "@/lib/types";
 import { CampaignWizard } from "./CampaignWizard";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
 
 export default async function StartCampaignPage() {
   let userId: string | null = null;
+  let charities: PublicCharity[] = [];
 
   if (isSupabaseConfigured()) {
     const supabase = await createServerSupabaseClient();
@@ -19,6 +21,12 @@ export default async function StartCampaignPage() {
       data: { user },
     } = await supabase.auth.getUser();
     userId = user?.id ?? null;
+
+    const { data } = await supabase
+      .from("public_charities")
+      .select("id, name, description, logo_url")
+      .order("name");
+    charities = (data as PublicCharity[]) ?? [];
   }
 
   if (!userId) {
@@ -53,7 +61,7 @@ export default async function StartCampaignPage() {
           ক্যাম্পেইন শুরু করুন
         </h1>
         <p className="mt-2 text-xl font-semibold">Start a campaign</p>
-        <CampaignWizard userId={userId} />
+        <CampaignWizard userId={userId} charities={charities} />
       </main>
     </>
   );

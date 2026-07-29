@@ -39,10 +39,18 @@ export default async function AdminDashboard() {
     <>
       <SiteHeader />
       <main className="mx-auto w-full max-w-4xl flex-1 px-6 pb-16">
-        <h1 className="mt-10 text-2xl font-bold">
-          Admin dashboard ·{" "}
-          <span className="font-bengali">অ্যাডমিন ড্যাশবোর্ড</span>
-        </h1>
+        <div className="mt-10 flex items-center justify-between gap-4">
+          <h1 className="text-2xl font-bold">
+            Admin dashboard ·{" "}
+            <span className="font-bengali">অ্যাডমিন</span>
+          </h1>
+          <Link
+            href="/admin/charities"
+            className="rounded-full border border-foreground/20 px-4 py-2 text-sm font-semibold hover:border-brand hover:text-brand"
+          >
+            Manage charities
+          </Link>
+        </div>
 
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <StatTile label="Pending review" value={String(pending.length)} />

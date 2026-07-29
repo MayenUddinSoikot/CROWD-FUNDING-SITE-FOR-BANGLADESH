@@ -92,6 +92,34 @@ async function getMedia(campaignId: string): Promise<CampaignMedia[]> {
   }
 }
 
+async function getCharityAllocations(
+  campaignId: string
+): Promise<{ name: string; percentage: number }[]> {
+  try {
+    const supabase = getSupabaseClient();
+    const { data: allocs } = await supabase
+      .from("campaign_charities")
+      .select("charity_id, percentage")
+      .eq("campaign_id", campaignId);
+    if (!allocs || allocs.length === 0) return [];
+
+    const ids = allocs.map((a) => a.charity_id);
+    const { data: charities } = await supabase
+      .from("public_charities")
+      .select("id, name")
+      .in("id", ids);
+    const nameById = new Map(
+      (charities ?? []).map((c) => [c.id as string, c.name as string])
+    );
+    return allocs.map((a) => ({
+      name: nameById.get(a.charity_id) ?? "Charity",
+      percentage: Number(a.percentage),
+    }));
+  } catch {
+    return [];
+  }
+}
+
 async function getUpdates(campaignId: string): Promise<CampaignUpdate[]> {
   try {
     const supabase = getSupabaseClient();
@@ -138,6 +166,7 @@ export default async function CampaignPage({
   const donations = await getDonations(campaign.id);
   const updates = await getUpdates(campaign.id);
   const media = await getMedia(campaign.id);
+  const charityAllocations = await getCharityAllocations(campaign.id);
   const category = CATEGORY_LABELS[campaign.category] ?? CATEGORY_LABELS.other;
   const remaining = daysLeft(campaign.ends_at);
 
@@ -232,6 +261,22 @@ export default async function CampaignPage({
                 {RELATIONSHIP_LABELS[campaign.organizer_relationship]}
               </p>
             ) : null}
+          </div>
+        ) : null}
+
+        {charityAllocations.length > 0 ? (
+          <div className="mt-4 rounded-xl border border-brand/30 bg-brand/5 p-4 text-sm">
+            <p className="font-semibold text-brand">
+              💚 Funds go directly to verified charities
+            </p>
+            <ul className="mt-2 space-y-1">
+              {charityAllocations.map((a) => (
+                <li key={a.name} className="flex justify-between">
+                  <span>{a.name}</span>
+                  <span className="font-semibold">{a.percentage}%</span>
+                </li>
+              ))}
+            </ul>
           </div>
         ) : null}
 

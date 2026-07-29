@@ -6,7 +6,9 @@ import { CATEGORY_LABELS, OCCASION_LABELS } from "@/lib/types";
 import type { CampaignCategory } from "@/lib/types";
 import { DocumentUploader } from "@/components/DocumentUploader";
 import { MediaUploader } from "@/components/MediaUploader";
+import { CharityAllocator } from "@/components/CharityAllocator";
 import { RELATIONSHIP_LABELS } from "@/lib/types";
+import type { PublicCharity } from "@/lib/types";
 
 const inputClass =
   "mt-1 w-full rounded-xl border border-foreground/20 bg-card px-4 py-2.5 outline-none focus:border-brand";
@@ -61,7 +63,13 @@ const TYPE_OPTIONS: {
   },
 ];
 
-export function CampaignWizard({ userId }: { userId: string }) {
+export function CampaignWizard({
+  userId,
+  charities,
+}: {
+  userId: string;
+  charities: PublicCharity[];
+}) {
   const [state, action, pending] = useActionState(createCampaign, undefined);
   const [type, setType] = useState<"standard" | "occasion" | "creator">(
     "standard"
@@ -405,54 +413,88 @@ export function CampaignWizard({ userId }: { userId: string }) {
         </div>
       </Section>
 
-      <Section
-        title="6. Payout details · পেআউট (private — admin only)"
-        subtitle="Where approved funds should be sent. Also never shown publicly."
-      >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label className="block text-sm font-medium" htmlFor="bkash_number">
-              bKash / Nagad number
-            </label>
-            <input
-              id="bkash_number"
-              name="bkash_number"
-              type="tel"
-              placeholder="01XXXXXXXXX"
-              className={inputClass}
-            />
+      {isOccasion ? (
+        <Section
+          title="6. Where the money goes · চ্যারিটি"
+          subtitle="For an occasion fundraiser, funds go to verified charities — not to you."
+        >
+          <CharityAllocator charities={charities} />
+          <label className="mt-4 block text-sm font-medium" htmlFor="notes">
+            Anything else for the reviewer
+          </label>
+          <textarea id="notes" name="notes" rows={3} className={inputClass} />
+        </Section>
+      ) : (
+        <Section
+          title="6. Payout details · পেআউট (private — admin only)"
+          subtitle={
+            isCreator
+              ? "Where your support should be sent — this goes to you, for you and your projects. Never shown publicly."
+              : "Where approved funds should be sent. Never shown publicly."
+          }
+        >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium" htmlFor="bkash_number">
+                bKash / Nagad number
+              </label>
+              <input
+                id="bkash_number"
+                name="bkash_number"
+                type="tel"
+                placeholder="01XXXXXXXXX"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium" htmlFor="bank_name">
+                Bank name
+              </label>
+              <input id="bank_name" name="bank_name" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium" htmlFor="bank_account_name">
+                Account holder name
+              </label>
+              <input id="bank_account_name" name="bank_account_name" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium" htmlFor="bank_account_number">
+                Account number
+              </label>
+              <input id="bank_account_number" name="bank_account_number" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium" htmlFor="bank_branch">
+                Branch
+              </label>
+              <input id="bank_branch" name="bank_branch" className={inputClass} />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium" htmlFor="bank_name">
-              Bank name
-            </label>
-            <input id="bank_name" name="bank_name" className={inputClass} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium" htmlFor="bank_account_name">
-              Account holder name
-            </label>
-            <input id="bank_account_name" name="bank_account_name" className={inputClass} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium" htmlFor="bank_account_number">
-              Account number
-            </label>
-            <input id="bank_account_number" name="bank_account_number" className={inputClass} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium" htmlFor="bank_branch">
-              Branch
-            </label>
-            <input id="bank_branch" name="bank_branch" className={inputClass} />
-          </div>
-        </div>
 
-        <label className="mt-4 block text-sm font-medium" htmlFor="notes">
-          Anything else for the reviewer
-        </label>
-        <textarea id="notes" name="notes" rows={3} className={inputClass} />
-      </Section>
+          {isCreator ? (
+            <>
+              <label className="mt-4 block text-sm font-medium" htmlFor="notes">
+                What will support fund? (your projects)
+              </label>
+              <textarea
+                id="notes"
+                name="notes"
+                rows={3}
+                placeholder="e.g. equipment, travel for stories, a documentary series…"
+                className={inputClass}
+              />
+            </>
+          ) : (
+            <>
+              <label className="mt-4 block text-sm font-medium" htmlFor="notes">
+                Anything else for the reviewer
+              </label>
+              <textarea id="notes" name="notes" rows={3} className={inputClass} />
+            </>
+          )}
+        </Section>
+      )}
 
       <Section
         title="7. Documents · কাগজপত্র (private — admin only)"
