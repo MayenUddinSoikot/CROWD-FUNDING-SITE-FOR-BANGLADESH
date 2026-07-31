@@ -30,10 +30,10 @@ const MENUS: Record<string, { heading: string; items: MenuItem[] }> = {
   about: {
     heading: "How Shohay works, and more",
     items: [
-      { title: "How Shohay works", subtitle: "Verify, fund, payout", href: "/#how" },
-      { title: "0% platform fee", subtitle: "Every taka reaches the campaign", href: "/#how" },
-      { title: "Verified campaigns", subtitle: "NID & document checked", href: "/#how" },
-      { title: "Help & FAQ", subtitle: "Support in Bangla & English", href: "/#how" },
+      { title: "How Shohay works", subtitle: "Verify, fund, payout", href: "/about#how" },
+      { title: "0% platform fee", subtitle: "Every taka reaches the campaign", href: "/about#fee" },
+      { title: "Verified & safe", subtitle: "NID & documents checked", href: "/about#safety" },
+      { title: "Help & FAQ", subtitle: "Support in Bangla & English", href: "/faq" },
     ],
   },
 };
@@ -110,7 +110,7 @@ export function SiteNav({
       <nav className="hidden items-center gap-5 text-sm lg:flex">
         <Dropdown id="donate" label="Donate" menu={menu} setMenu={setMenu} />
         <Dropdown id="fundraise" label="Fundraise" menu={menu} setMenu={setMenu} />
-        <Dropdown id="about" label="About" menu={menu} setMenu={setMenu} />
+        <Dropdown id="about" label="About Shohay" menu={menu} setMenu={setMenu} />
         {isLoggedIn ? (
           <Link href="/account" className="hover:text-brand">
             My campaigns
@@ -199,7 +199,7 @@ export function SiteNav({
               />
               <AccordionSection
                 sectionKey="about"
-                label="About"
+                label="About Shohay"
                 subtitle="How Shohay works"
                 open={section === "about"}
                 onToggle={() =>

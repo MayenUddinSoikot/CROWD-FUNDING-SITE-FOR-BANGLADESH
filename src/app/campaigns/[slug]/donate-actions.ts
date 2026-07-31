@@ -44,15 +44,17 @@ export async function startDonation(
     donor_phone: isEmail ? null : contact,
     message: message || null,
     is_anonymous: isAnonymous,
-    status: "initiated",
+    // DEMO: mark paid immediately so the donation + message + live counter
+    // show while testing. When SSLCommerz is added, insert 'initiated' here
+    // and let the verified payment callback set 'paid'.
+    status: "paid",
+    paid_at: new Date().toISOString(),
   });
 
   if (error) {
-    console.error("Failed to start donation:", error.message);
-    return { error: "Could not start the donation. Please try again." };
+    console.error("Failed to record donation:", error.message);
+    return { error: "Could not record the donation. Please try again." };
   }
 
-  // Days 8-9: this is where we'll redirect to SSLCommerz to actually
-  // collect the money. For now we record the pledge and confirm.
   return { pledged: true, amount };
 }

@@ -42,9 +42,9 @@ export function DonationForm({
           Thank you! · ধন্যবাদ 💚
         </p>
         <p className="mt-2 text-sm opacity-80">
-          Your {formatTaka(state.amount)} pledge is recorded. Online payment
-          (bKash / Nagad / card) is being connected — you&rsquo;ll be able to
-          complete it here very soon.
+          Your {formatTaka(state.amount)} donation is recorded and now shows on
+          the campaign. (Live card/bKash/Nagad payment is being connected — no
+          money is charged yet during testing.)
         </p>
         <Link
           href={`/campaigns/${slug}`}
