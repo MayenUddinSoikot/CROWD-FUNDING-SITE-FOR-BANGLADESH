@@ -23,6 +23,17 @@ function daysLeft(endsAt: string | null): number | null {
   return Math.max(0, Math.ceil(ms / (24 * 60 * 60 * 1000)));
 }
 
+// Days left in the current 30-day cycle for a recurring creator page.
+function cycleDaysLeft(anchor: string | null, cycleDays: number): number | null {
+  if (!anchor) return null;
+  const a = new Date(anchor).getTime();
+  if (Number.isNaN(a)) return null;
+  const cyc = cycleDays * 24 * 60 * 60 * 1000;
+  const passed = Math.floor((Date.now() - a) / cyc);
+  const end = a + (passed + 1) * cyc;
+  return Math.max(0, Math.ceil((end - Date.now()) / (24 * 60 * 60 * 1000)));
+}
+
 // Always show fresh donation totals — never a stale build-time snapshot.
 export const dynamic = "force-dynamic";
 
@@ -34,7 +45,7 @@ async function getCampaign(slug: string): Promise<Campaign | null> {
     const { data, error } = await supabase
       .from("campaigns")
       .select(
-        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, organizer_name, organizer_relationship, campaign_type, occasion, district, ends_at, created_at"
+        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, organizer_name, organizer_relationship, campaign_type, occasion, is_recurring, cycle_days, cycle_anchor, district, ends_at, created_at"
       )
       .eq("slug", slug)
       .in("status", ["approved", "completed"])
@@ -168,6 +179,9 @@ export default async function CampaignPage({
   const charityAllocations = await getCharityAllocations(campaign.id);
   const category = CATEGORY_LABELS[campaign.category] ?? CATEGORY_LABELS.other;
   const remaining = daysLeft(campaign.ends_at);
+  const cycleLeft = campaign.is_recurring
+    ? cycleDaysLeft(campaign.cycle_anchor, campaign.cycle_days)
+    : null;
 
   // Can the current viewer post updates? (the creator, or an admin)
   let canPostUpdate = false;
@@ -279,7 +293,17 @@ export default async function CampaignPage({
         ) : null}
 
         <div className="mt-6 rounded-2xl border border-foreground/10 bg-card p-6 shadow-sm">
-          {remaining !== null ? (
+          {campaign.is_recurring ? (
+            <p className="mb-3 text-sm font-medium text-brand">
+              ☕ Monthly support · resets every 30 days
+              {cycleLeft !== null ? (
+                <span className="opacity-70">
+                  {" "}
+                  · {cycleLeft} day{cycleLeft === 1 ? "" : "s"} left this cycle
+                </span>
+              ) : null}
+            </p>
+          ) : remaining !== null ? (
             <p className="mb-3 text-sm font-medium">
               {remaining > 0 ? (
                 <>
@@ -298,6 +322,7 @@ export default async function CampaignPage({
             initialRaised={campaign.raised_amount}
             goalAmount={campaign.goal_amount}
             donationCount={donations.length}
+            monthly={campaign.is_recurring}
           />
 
           <Link

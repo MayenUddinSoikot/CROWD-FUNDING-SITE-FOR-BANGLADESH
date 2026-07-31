@@ -74,6 +74,9 @@ export function CampaignWizard({
   const [type, setType] = useState<"standard" | "occasion" | "creator">(
     "standard"
   );
+  const [creatorMode, setCreatorMode] = useState<"monthly" | "project">(
+    "monthly"
+  );
   const isCreator = type === "creator";
   const isOccasion = type === "occasion";
 
@@ -306,14 +309,50 @@ export function CampaignWizard({
       <Section
         title={
           isCreator
-            ? "4. Support target · লক্ষ্য"
+            ? "4. Support · সাপোর্ট"
             : "4. Funding goal & duration · লক্ষ্য ও সময়"
         }
       >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label className="block text-sm font-medium" htmlFor="goal_amount">
-              {isCreator ? "Support target (৳ Taka)" : "Goal amount (৳ Taka)"} <Req />
+        {isCreator ? (
+          <>
+            <input type="hidden" name="creator_mode" value={creatorMode} />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setCreatorMode("monthly")}
+                className={`rounded-xl border p-4 text-left transition ${
+                  creatorMode === "monthly"
+                    ? "border-brand bg-brand/5 ring-1 ring-brand"
+                    : "border-foreground/20"
+                }`}
+              >
+                <p className="font-semibold">☕ Monthly ongoing support</p>
+                <p className="mt-1 text-sm opacity-70">
+                  For your regular work. Runs in 30-day cycles and resets to ৳0
+                  each month, then keeps going.
+                </p>
+              </button>
+              <button
+                type="button"
+                onClick={() => setCreatorMode("project")}
+                className={`rounded-xl border p-4 text-left transition ${
+                  creatorMode === "project"
+                    ? "border-brand bg-brand/5 ring-1 ring-brand"
+                    : "border-foreground/20"
+                }`}
+              >
+                <p className="font-semibold">🎬 Special project</p>
+                <p className="mt-1 text-sm opacity-70">
+                  A one-time goal for a specific project (up to 30 days).
+                </p>
+              </button>
+            </div>
+
+            <label className="mt-4 block text-sm font-medium" htmlFor="goal_amount">
+              {creatorMode === "monthly"
+                ? "Monthly support target (৳ Taka)"
+                : "Project goal (৳ Taka)"}{" "}
+              <Req />
             </label>
             <input
               id="goal_amount"
@@ -322,11 +361,50 @@ export function CampaignWizard({
               min={1}
               step={1}
               required
-              placeholder={isCreator ? "50000" : "350000"}
+              placeholder="50000"
               className={inputClass}
             />
-          </div>
-          {!isCreator ? (
+
+            {creatorMode === "project" ? (
+              <div className="mt-4">
+                <label className="block text-sm font-medium" htmlFor="duration_days">
+                  Runs for · কত দিন (max 30)
+                </label>
+                <select
+                  id="duration_days"
+                  name="duration_days"
+                  defaultValue="30"
+                  className={inputClass}
+                >
+                  <option value="7">7 days</option>
+                  <option value="14">14 days</option>
+                  <option value="30">30 days</option>
+                </select>
+              </div>
+            ) : (
+              <p className="mt-2 text-sm opacity-60">
+                Runs in 30-day cycles — the amount resets to ৳0 each month and
+                the page keeps going. ৩০ দিন পর পর শূন্য থেকে শুরু হয়।
+              </p>
+            )}
+          </>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium" htmlFor="goal_amount">
+                Goal amount (৳ Taka) <Req />
+              </label>
+              <input
+                id="goal_amount"
+                name="goal_amount"
+                type="number"
+                min={1}
+                step={1}
+                required
+                placeholder="350000"
+                className={inputClass}
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium" htmlFor="duration_days">
                 Runs for · কত দিন
@@ -344,12 +422,8 @@ export function CampaignWizard({
                 <option value="90">90 days</option>
               </select>
             </div>
-          ) : (
-            <p className="self-end text-sm opacity-60">
-              Creator pages are ongoing — no end date.
-            </p>
-          )}
-        </div>
+          </div>
+        )}
       </Section>
 
       <Section

@@ -26,6 +26,9 @@ export type Campaign = {
   district: string | null;
   campaign_type: string; // 'standard' | 'creator'
   occasion: string | null;
+  is_recurring: boolean;
+  cycle_days: number;
+  cycle_anchor: string | null;
   ends_at: string | null;
   created_at: string;
 };

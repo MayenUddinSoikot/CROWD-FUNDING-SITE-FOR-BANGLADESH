@@ -51,6 +51,10 @@ export async function createCampaign(
     campaignType === "standard" && occasionRaw in OCCASION_LABELS
       ? occasionRaw
       : null;
+  const creatorMode =
+    String(formData.get("creator_mode") ?? "") === "project"
+      ? "project"
+      : "monthly";
 
   // Every required field must be filled — mirrors the form's required marks
   // and blocks incomplete submissions even if the browser check is bypassed.
@@ -98,13 +102,29 @@ export async function createCampaign(
     }
   }
 
-  // Creator support pages are ongoing (no end date); fundraisers get one.
+  // Duration & recurring logic.
   const allowedDurations = new Set([7, 14, 30, 60, 90]);
   const days = allowedDurations.has(durationDays) ? durationDays : 30;
-  const endsAt =
-    campaignType === "creator"
-      ? null
-      : new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+  const dayMs = 24 * 60 * 60 * 1000;
+
+  let endsAt: string | null;
+  let isRecurring = false;
+  let cycleAnchor: string | null = null;
+
+  if (campaignType === "creator") {
+    if (creatorMode === "monthly") {
+      // Ongoing, resets every 30 days.
+      isRecurring = true;
+      cycleAnchor = new Date().toISOString();
+      endsAt = null;
+    } else {
+      // Special project — capped at 30 days.
+      const projectDays = Math.min(days, 30);
+      endsAt = new Date(Date.now() + projectDays * dayMs).toISOString();
+    }
+  } else {
+    endsAt = new Date(Date.now() + days * dayMs).toISOString();
+  }
 
   const allowedRelationships = new Set(Object.keys(RELATIONSHIP_LABELS));
   const relationship = allowedRelationships.has(organizerRelationship)
@@ -130,6 +150,8 @@ export async function createCampaign(
       organizer_relationship: relationship,
       campaign_type: campaignType,
       occasion,
+      is_recurring: isRecurring,
+      cycle_anchor: cycleAnchor,
       ends_at: endsAt,
       creator_id: user.id,
       status: "pending",

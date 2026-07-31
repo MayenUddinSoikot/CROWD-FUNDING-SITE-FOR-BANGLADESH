@@ -29,6 +29,7 @@ export function CampaignCard({ campaign }: { campaign: Campaign }) {
 
       <div className="flex flex-1 flex-col gap-2 p-5 text-left">
         <p className="text-xs font-medium uppercase tracking-wide text-brand">
+          {campaign.is_recurring ? <span>☕ Monthly · </span> : null}
           {category.en} · <span className="font-bengali">{category.bn}</span>
           {campaign.district ? (
             <span className="opacity-70"> · {campaign.district}</span>

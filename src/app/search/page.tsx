@@ -60,7 +60,7 @@ async function getAllCampaigns(): Promise<Campaign[]> {
     const { data } = await supabase
       .from("campaigns")
       .select(
-        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, organizer_name, organizer_relationship, campaign_type, occasion, district, ends_at, created_at"
+        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, organizer_name, organizer_relationship, campaign_type, occasion, is_recurring, cycle_days, cycle_anchor, district, ends_at, created_at"
       )
       .in("status", ["approved", "completed"])
       .order("created_at", { ascending: false })

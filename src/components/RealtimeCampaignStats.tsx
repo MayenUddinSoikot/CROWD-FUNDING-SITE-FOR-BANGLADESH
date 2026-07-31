@@ -12,11 +12,13 @@ export function RealtimeCampaignStats({
   initialRaised,
   goalAmount,
   donationCount,
+  monthly = false,
 }: {
   campaignId: string;
   initialRaised: number;
   goalAmount: number;
   donationCount: number;
+  monthly?: boolean;
 }) {
   const [raised, setRaised] = useState(initialRaised);
   const [justUpdated, setJustUpdated] = useState(false);
@@ -61,7 +63,11 @@ export function RealtimeCampaignStats({
         >
           {formatTaka(raised)}
         </p>
-        <p className="text-sm opacity-60">raised of {formatTaka(goalAmount)} goal</p>
+        <p className="text-sm opacity-60">
+          {monthly
+            ? `this month of ${formatTaka(goalAmount)} monthly target`
+            : `raised of ${formatTaka(goalAmount)} goal`}
+        </p>
       </div>
       <div className="mt-3">
         <ProgressBar percent={percent} />

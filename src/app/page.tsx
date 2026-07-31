@@ -19,7 +19,7 @@ async function getCampaigns(
     let query = supabase
       .from("campaigns")
       .select(
-        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, beneficiary_name, district, ends_at, created_at"
+        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, beneficiary_name, district, is_recurring, cycle_days, cycle_anchor, ends_at, created_at"
       )
       .in("status", ["approved", "completed"])
       .order("created_at", { ascending: false });
