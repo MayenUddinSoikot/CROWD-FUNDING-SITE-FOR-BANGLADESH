@@ -111,14 +111,20 @@ export function CampaignWizard({
 
       <Section title="1. Basics · মূল তথ্য">
         <label className="block text-sm font-medium" htmlFor="title">
-          Campaign title (English)
+          {isCreator ? "Page title (English)" : "Campaign title (English)"} <Req />
         </label>
         <input
           id="title"
           name="title"
           required
           maxLength={120}
-          placeholder="Help Rahim get heart surgery"
+          placeholder={
+            isCreator
+              ? "e.g. Dhaka Street Stories — monthly support"
+              : isOccasion
+                ? "e.g. My birthday fundraiser for clean water"
+                : "e.g. Support urgent treatment for a family"
+          }
           className={inputClass}
         />
 
@@ -572,9 +578,13 @@ export function CampaignWizard({
 
       <Section
         title="7. Documents · কাগজপত্র (private — admin only)"
-        subtitle="An NID photo/PDF is required. Also upload medical reports and a bank cheque where relevant. Stored privately — only admins can open them."
+        subtitle={
+          isCreator || isOccasion
+            ? "An NID photo/PDF is required, plus any supporting documents. Stored privately — only admins can open them."
+            : "An NID photo/PDF is required. Also upload medical reports and a bank cheque where relevant. Stored privately — only admins can open them."
+        }
       >
-        <DocumentUploader userId={userId} />
+        <DocumentUploader userId={userId} simple={isCreator || isOccasion} />
       </Section>
 
       {state?.error ? (

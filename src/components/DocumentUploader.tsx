@@ -11,11 +11,19 @@ type Uploaded = {
 };
 
 const BUCKET = "campaign-docs";
-const FIELDS: { docType: DocType; label: string; hint: string }[] = [
+
+type Field = { docType: DocType; label: string; hint: string };
+
+const FULL_FIELDS: Field[] = [
   { docType: "nid", label: "NID (national ID) — required", hint: "Front & back — photo or PDF" },
   { docType: "medical", label: "Medical reports", hint: "Prescriptions, reports — photo or PDF" },
   { docType: "cheque", label: "Bank cheque / statement", hint: "For payout verification" },
   { docType: "other", label: "Other supporting documents", hint: "Optional" },
+];
+
+const SIMPLE_FIELDS: Field[] = [
+  { docType: "nid", label: "NID (national ID) — required", hint: "Front & back — photo or PDF" },
+  { docType: "other", label: "Supporting documents", hint: "Anything that helps verify — photo or PDF" },
 ];
 
 function extensionOf(name: string): string {
@@ -23,7 +31,14 @@ function extensionOf(name: string): string {
   return match ? match[1].toLowerCase() : "dat";
 }
 
-export function DocumentUploader({ userId }: { userId: string }) {
+export function DocumentUploader({
+  userId,
+  simple = false,
+}: {
+  userId: string;
+  simple?: boolean;
+}) {
+  const FIELDS = simple ? SIMPLE_FIELDS : FULL_FIELDS;
   const [items, setItems] = useState<Uploaded[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);

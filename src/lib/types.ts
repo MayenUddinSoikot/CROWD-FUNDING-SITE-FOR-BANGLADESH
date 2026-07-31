@@ -1,8 +1,16 @@
 export type CampaignCategory =
   | "medical"
+  | "emergency"
   | "education"
   | "disaster_relief"
   | "community"
+  | "creator"
+  | "arts"
+  | "religious"
+  | "animal"
+  | "environment"
+  | "sports"
+  | "memorial"
   | "other";
 
 export type Campaign = {
@@ -159,8 +167,16 @@ export const CATEGORY_LABELS: Record<
   { en: string; bn: string; emoji: string }
 > = {
   medical: { en: "Medical", bn: "চিকিৎসা", emoji: "🏥" },
+  emergency: { en: "Emergency", bn: "জরুরি", emoji: "🚨" },
   education: { en: "Education", bn: "শিক্ষা", emoji: "📚" },
   disaster_relief: { en: "Disaster Relief", bn: "দুর্যোগ ত্রাণ", emoji: "🌊" },
   community: { en: "Community", bn: "কমিউনিটি", emoji: "🤝" },
+  creator: { en: "Creator / content", bn: "ক্রিয়েটর", emoji: "🎥" },
+  arts: { en: "Arts & music", bn: "শিল্প ও সংগীত", emoji: "🎨" },
+  religious: { en: "Religious", bn: "ধর্মীয়", emoji: "🕌" },
+  animal: { en: "Animals", bn: "প্রাণী", emoji: "🐾" },
+  environment: { en: "Environment", bn: "পরিবেশ", emoji: "🌱" },
+  sports: { en: "Sports", bn: "খেলাধুলা", emoji: "🏆" },
+  memorial: { en: "Memorial", bn: "স্মরণে", emoji: "🕊️" },
   other: { en: "Other", bn: "অন্যান্য", emoji: "💚" },
 };
