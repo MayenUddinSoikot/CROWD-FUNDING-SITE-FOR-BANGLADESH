@@ -223,11 +223,6 @@ export default async function Home({
             ))}
           </div>
         </section>
-
-        <footer className="mt-16 px-6 text-sm opacity-50">
-          © {new Date().getFullYear()} Shohay · 0% platform fee · Made in
-          Bangladesh 🇧🇩
-        </footer>
       </main>
     </>
   );
