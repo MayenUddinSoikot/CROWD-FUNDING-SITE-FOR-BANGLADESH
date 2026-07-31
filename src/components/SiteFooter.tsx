@@ -28,6 +28,7 @@ const COLUMNS: { heading: string; links: { label: string; href: string }[] }[] =
         { label: "How Shohay works", href: "/about#how" },
         { label: "0% platform fee", href: "/about#fee" },
         { label: "Verified & safe", href: "/about#safety" },
+        { label: "News & stories", href: "/news" },
         { label: "Help & FAQ", href: "/faq" },
       ],
     },

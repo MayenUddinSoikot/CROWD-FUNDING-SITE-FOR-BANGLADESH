@@ -52,15 +52,23 @@ export default async function AdminCharitiesPage() {
           {charities.map((c) => (
             <li
               key={c.id}
-              className="rounded-xl border border-foreground/10 bg-card p-4"
+              className="flex items-center justify-between gap-4 rounded-xl border border-foreground/10 bg-card p-4"
             >
-              <p className="font-semibold">{c.name}</p>
-              {c.description ? (
-                <p className="text-sm opacity-70">{c.description}</p>
-              ) : null}
-              <p className="mt-1 text-xs opacity-50">
-                Payout: {c.bkash_number ?? c.bank_name ?? "not set — add it"}
-              </p>
+              <div>
+                <p className="font-semibold">{c.name}</p>
+                {c.description ? (
+                  <p className="text-sm opacity-70">{c.description}</p>
+                ) : null}
+                <p className="mt-1 text-xs opacity-50">
+                  Payout: {c.bkash_number ?? c.bank_name ?? "not set — add it"}
+                </p>
+              </div>
+              <Link
+                href={`/admin/charities/${c.id}`}
+                className="shrink-0 rounded-full border border-foreground/20 px-4 py-1.5 text-sm font-semibold hover:border-brand hover:text-brand"
+              >
+                Edit
+              </Link>
             </li>
           ))}
         </ul>

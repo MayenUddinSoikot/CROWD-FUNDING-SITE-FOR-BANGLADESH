@@ -62,6 +62,19 @@ export type CampaignUpdate = {
   created_at: string;
 };
 
+export type Post = {
+  id: string;
+  slug: string;
+  title: string;
+  title_bn: string | null;
+  excerpt: string | null;
+  body: string | null;
+  body_bn: string | null;
+  cover_image_url: string | null;
+  published: boolean;
+  created_at: string;
+};
+
 export type PublicCharity = {
   id: string;
   name: string;

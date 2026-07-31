@@ -42,12 +42,20 @@ export default async function AdminDashboard() {
             Admin dashboard ·{" "}
             <span className="font-bengali">অ্যাডমিন</span>
           </h1>
-          <Link
-            href="/admin/charities"
-            className="rounded-full border border-foreground/20 px-4 py-2 text-sm font-semibold hover:border-brand hover:text-brand"
-          >
-            Manage charities
-          </Link>
+          <div className="flex gap-2">
+            <Link
+              href="/admin/charities"
+              className="rounded-full border border-foreground/20 px-4 py-2 text-sm font-semibold hover:border-brand hover:text-brand"
+            >
+              Charities
+            </Link>
+            <Link
+              href="/admin/news"
+              className="rounded-full border border-foreground/20 px-4 py-2 text-sm font-semibold hover:border-brand hover:text-brand"
+            >
+              News
+            </Link>
+          </div>
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">

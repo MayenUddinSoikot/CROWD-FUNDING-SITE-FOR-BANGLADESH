@@ -33,6 +33,7 @@ const MENUS: Record<string, { heading: string; items: MenuItem[] }> = {
       { title: "How Shohay works", subtitle: "Verify, fund, payout", href: "/about#how" },
       { title: "0% platform fee", subtitle: "Every taka reaches the campaign", href: "/about#fee" },
       { title: "Verified & safe", subtitle: "NID & documents checked", href: "/about#safety" },
+      { title: "News & stories", subtitle: "Updates from Shohay", href: "/news" },
       { title: "Help & FAQ", subtitle: "Support in Bangla & English", href: "/faq" },
     ],
   },
