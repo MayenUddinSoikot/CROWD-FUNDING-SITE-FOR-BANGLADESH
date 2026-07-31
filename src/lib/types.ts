@@ -39,6 +39,7 @@ export type Campaign = {
   cycle_anchor: string | null;
   ends_at: string | null;
   created_at: string;
+  creator_id?: string | null;
 };
 
 // Optional special-occasion tag shown publicly on a campaign.
@@ -84,6 +85,14 @@ export type Post = {
   cover_image_url: string | null;
   published: boolean;
   created_at: string;
+};
+
+export type PublicCreator = {
+  id: string;
+  username: string;
+  display_name: string | null;
+  bio: string | null;
+  avatar_url: string | null;
 };
 
 export type PublicCharity = {

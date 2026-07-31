@@ -5,6 +5,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { formatTaka } from "@/lib/format";
 import type { Campaign } from "@/lib/types";
+import { CreatorProfileForm } from "./CreatorProfileForm";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "My campaigns — Shohay সহায়" };
@@ -32,6 +33,18 @@ export default async function AccountPage({
 
   const { created } = await searchParams;
 
+  const { data: profileRow } = await supabase
+    .from("profiles")
+    .select("username, display_name, bio, avatar_url")
+    .eq("id", user.id)
+    .maybeSingle();
+  const profile = profileRow ?? {
+    username: null,
+    display_name: null,
+    bio: null,
+    avatar_url: null,
+  };
+
   const { data, error } = await supabase
     .from("campaigns")
     .select(
@@ -49,6 +62,10 @@ export default async function AccountPage({
         <h1 className="mt-10 text-2xl font-bold">
           My campaigns · <span className="font-bengali">আমার ক্যাম্পেইন</span>
         </h1>
+
+        <div className="mt-6">
+          <CreatorProfileForm profile={profile} />
+        </div>
 
         {created ? (
           <div className="mt-4 rounded-xl border border-brand/30 bg-brand/10 p-4 text-sm text-brand">

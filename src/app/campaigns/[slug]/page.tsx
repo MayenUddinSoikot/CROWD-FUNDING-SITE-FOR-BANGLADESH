@@ -7,6 +7,7 @@ import type {
   Campaign,
   CampaignMedia,
   CampaignUpdate,
+  PublicCreator,
   PublicDonation,
 } from "@/lib/types";
 import { CATEGORY_LABELS, RELATIONSHIP_LABELS, OCCASION_LABELS } from "@/lib/types";
@@ -45,7 +46,7 @@ async function getCampaign(slug: string): Promise<Campaign | null> {
     const { data, error } = await supabase
       .from("campaigns")
       .select(
-        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, organizer_name, organizer_relationship, campaign_type, occasion, is_recurring, cycle_days, cycle_anchor, district, ends_at, created_at"
+        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, organizer_name, organizer_relationship, campaign_type, occasion, is_recurring, cycle_days, cycle_anchor, district, ends_at, created_at, creator_id"
       )
       .eq("slug", slug)
       .in("status", ["approved", "completed"])
@@ -130,6 +131,24 @@ async function getCharityAllocations(
   }
 }
 
+async function getCreator(creatorId: string): Promise<PublicCreator | null> {
+  try {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from("public_creators")
+      .select("id, username, display_name, bio, avatar_url")
+      .eq("id", creatorId)
+      .maybeSingle();
+    if (error) {
+      console.error("Failed to load creator:", error.message);
+      return null;
+    }
+    return data as PublicCreator | null;
+  } catch {
+    return null;
+  }
+}
+
 async function getUpdates(campaignId: string): Promise<CampaignUpdate[]> {
   try {
     const supabase = getSupabaseClient();
@@ -177,6 +196,9 @@ export default async function CampaignPage({
   const updates = await getUpdates(campaign.id);
   const media = await getMedia(campaign.id);
   const charityAllocations = await getCharityAllocations(campaign.id);
+  const creator = campaign.creator_id
+    ? await getCreator(campaign.creator_id)
+    : null;
   const category = CATEGORY_LABELS[campaign.category] ?? CATEGORY_LABELS.other;
   const remaining = daysLeft(campaign.ends_at);
   const cycleLeft = campaign.is_recurring
@@ -273,6 +295,25 @@ export default async function CampaignPage({
                 {RELATIONSHIP_LABELS[campaign.organizer_relationship]}
               </p>
             ) : null}
+            {creator ? (
+              <p className="mt-2">
+                <Link
+                  href={`/creator/${creator.username}`}
+                  className="text-sm font-medium text-brand hover:underline"
+                >
+                  View creator profile →
+                </Link>
+              </p>
+            ) : null}
+          </div>
+        ) : creator ? (
+          <div className="mt-4 rounded-xl border border-foreground/10 bg-card p-4 text-sm">
+            <Link
+              href={`/creator/${creator.username}`}
+              className="font-medium text-brand hover:underline"
+            >
+              View creator profile →
+            </Link>
           </div>
         ) : null}
 
