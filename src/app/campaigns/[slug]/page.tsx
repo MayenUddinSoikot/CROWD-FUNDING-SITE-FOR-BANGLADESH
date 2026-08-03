@@ -35,6 +35,11 @@ function cycleDaysLeft(anchor: string | null, cycleDays: number): number | null 
   return Math.max(0, Math.ceil((end - Date.now()) / (24 * 60 * 60 * 1000)));
 }
 
+function initialOf(name: string | null | undefined): string {
+  const c = (name ?? "").trim().charAt(0);
+  return c ? c.toUpperCase() : "S";
+}
+
 // Always show fresh donation totals — never a stale build-time snapshot.
 export const dynamic = "force-dynamic";
 
@@ -204,6 +209,7 @@ export default async function CampaignPage({
   const cycleLeft = campaign.is_recurring
     ? cycleDaysLeft(campaign.cycle_anchor, campaign.cycle_days)
     : null;
+  const supportMessages = donations.filter((d) => d.message);
 
   // Can the current viewer post updates? (the creator, or an admin)
   let canPostUpdate = false;
@@ -228,257 +234,336 @@ export default async function CampaignPage({
     }
   }
 
+  const donateButton = (
+    <Link
+      href={`/campaigns/${campaign.slug}/donate`}
+      className="block w-full rounded-full bg-brand px-6 py-3.5 text-center text-lg font-semibold text-white transition hover:bg-brand-dark"
+    >
+      {campaign.campaign_type === "creator" ? (
+        <>Buy a cha ☕ · <span className="font-bengali">চা খাওয়ান</span></>
+      ) : (
+        <>Donate now · <span className="font-bengali">দান করুন</span></>
+      )}
+    </Link>
+  );
+
   return (
-    <>
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 pb-16">
-        <div className="mt-8">
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 sm:px-6">
+      <h1 className="mt-8 font-serif text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl">
+        {campaign.title}
+      </h1>
+      {campaign.title_bn ? (
+        <p className="font-bengali mt-2 text-lg opacity-80 sm:text-xl">
+          {campaign.title_bn}
+        </p>
+      ) : null}
+
+      <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-10">
+        {/* ===== Left column, part 1: media + organizer line ===== */}
+        <div className="lg:col-start-1">
           <MediaCarousel media={media} fallbackEmoji={category.emoji} />
-        </div>
 
-        <div className="mt-6 flex flex-wrap items-center gap-2">
-          {campaign.campaign_type === "creator" ? (
-            <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">
-              ☕ Creator support
-            </span>
-          ) : null}
-          {campaign.occasion && OCCASION_LABELS[campaign.occasion] ? (
-            <span className="rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
-              {OCCASION_LABELS[campaign.occasion].emoji}{" "}
-              {OCCASION_LABELS[campaign.occasion].label} fundraiser
-            </span>
-          ) : null}
-          <span className="text-xs font-medium uppercase tracking-wide text-brand">
-            {category.en} · <span className="font-bengali">{category.bn}</span>
-            {campaign.district ? (
-              <span className="opacity-70"> · {campaign.district}</span>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            {campaign.campaign_type === "creator" ? (
+              <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">
+                ☕ Creator support
+              </span>
             ) : null}
-          </span>
+            {campaign.occasion && OCCASION_LABELS[campaign.occasion] ? (
+              <span className="rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
+                {OCCASION_LABELS[campaign.occasion].emoji}{" "}
+                {OCCASION_LABELS[campaign.occasion].label} fundraiser
+              </span>
+            ) : null}
+            <span className="text-xs font-medium uppercase tracking-wide text-brand">
+              {category.en} · <span className="font-bengali">{category.bn}</span>
+              {campaign.district ? (
+                <span className="opacity-70"> · {campaign.district}</span>
+              ) : null}
+            </span>
+          </div>
+
+          {campaign.organizer_name || campaign.beneficiary_name ? (
+            <div className="mt-4 flex items-center gap-3 border-b border-foreground/10 pb-4 text-sm">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/15 font-bold text-brand">
+                {initialOf(campaign.organizer_name ?? campaign.beneficiary_name)}
+              </span>
+              <p>
+                {campaign.organizer_name ? (
+                  <>
+                    <span className="font-semibold">{campaign.organizer_name}</span>
+                    {campaign.beneficiary_name ? (
+                      <>
+                        <span className="opacity-60"> is organizing this fundraiser for </span>
+                        <span className="font-semibold">{campaign.beneficiary_name}</span>
+                      </>
+                    ) : (
+                      <span className="opacity-60"> is organizing this fundraiser</span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <span className="opacity-60">Fundraiser for </span>
+                    <span className="font-semibold">{campaign.beneficiary_name}</span>
+                  </>
+                )}
+              </p>
+            </div>
+          ) : null}
         </div>
 
-        <h1 className="mt-2 font-serif text-3xl font-bold leading-tight sm:text-4xl">
-          {campaign.title}
-        </h1>
-        {campaign.title_bn ? (
-          <p className="font-bengali mt-2 text-xl opacity-80">
-            {campaign.title_bn}
-          </p>
-        ) : null}
-
-        {campaign.organizer_name ||
-        campaign.beneficiary_name ||
-        campaign.organizer_relationship ? (
-          <div className="mt-4 rounded-xl border border-foreground/10 bg-card p-4 text-sm">
-            {campaign.organizer_name ? (
-              <p>
-                <span className="opacity-60">Raised by </span>
-                <span className="font-semibold">{campaign.organizer_name}</span>
-                {campaign.beneficiary_name ? (
-                  <>
-                    <span className="opacity-60"> for </span>
-                    <span className="font-semibold">
-                      {campaign.beneficiary_name}
-                    </span>
-                  </>
+        {/* ===== Right column: sticky money card (GoFundMe style) ===== */}
+        <aside className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          <div className="rounded-2xl border border-foreground/10 bg-card p-6 shadow-sm lg:sticky lg:top-24">
+            {campaign.is_recurring ? (
+              <p className="mb-3 text-sm font-medium text-brand">
+                ☕ Monthly support · resets every 30 days
+                {cycleLeft !== null ? (
+                  <span className="opacity-70">
+                    {" "}
+                    · {cycleLeft} day{cycleLeft === 1 ? "" : "s"} left this cycle
+                  </span>
                 ) : null}
               </p>
-            ) : campaign.beneficiary_name ? (
-              <p>
-                <span className="opacity-60">For: </span>
-                <span className="font-semibold">
-                  {campaign.beneficiary_name}
-                </span>
+            ) : remaining !== null ? (
+              <p className="mb-3 text-sm font-medium">
+                {remaining > 0 ? (
+                  <>
+                    ⏳ {remaining} day{remaining === 1 ? "" : "s"} left ·{" "}
+                    <span className="font-bengali">{remaining} দিন বাকি</span>
+                  </>
+                ) : (
+                  <span className="opacity-60">This campaign has ended.</span>
+                )}
               </p>
             ) : null}
-            {campaign.organizer_relationship &&
-            RELATIONSHIP_LABELS[campaign.organizer_relationship] ? (
-              <p className="mt-1 inline-block rounded-full bg-brand/10 px-3 py-0.5 text-xs font-medium text-brand">
-                {RELATIONSHIP_LABELS[campaign.organizer_relationship]}
-              </p>
-            ) : null}
-            {creator ? (
-              <p className="mt-2">
-                <Link
-                  href={`/creator/${creator.username}`}
-                  className="text-sm font-medium text-brand hover:underline"
-                >
-                  View creator profile →
-                </Link>
-              </p>
-            ) : null}
-          </div>
-        ) : creator ? (
-          <div className="mt-4 rounded-xl border border-foreground/10 bg-card p-4 text-sm">
-            <Link
-              href={`/creator/${creator.username}`}
-              className="font-medium text-brand hover:underline"
-            >
-              View creator profile →
-            </Link>
-          </div>
-        ) : null}
 
-        {charityAllocations.length > 0 ? (
-          <div className="mt-4 rounded-xl border border-brand/30 bg-brand/5 p-4 text-sm">
-            <p className="font-semibold text-brand">
-              💚 Funds go directly to verified charities
-            </p>
-            <ul className="mt-2 space-y-1">
-              {charityAllocations.map((a) => (
-                <li key={a.name} className="flex justify-between">
-                  <span>{a.name}</span>
-                  <span className="font-semibold">{a.percentage}%</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
+            <RealtimeCampaignStats
+              key={campaign.id}
+              campaignId={campaign.id}
+              initialRaised={campaign.raised_amount}
+              goalAmount={campaign.goal_amount}
+              donationCount={donations.length}
+              monthly={campaign.is_recurring}
+            />
 
-        <div className="mt-6 rounded-2xl border border-foreground/10 bg-card p-6 shadow-sm">
-          {campaign.is_recurring ? (
-            <p className="mb-3 text-sm font-medium text-brand">
-              ☕ Monthly support · resets every 30 days
-              {cycleLeft !== null ? (
-                <span className="opacity-70">
-                  {" "}
-                  · {cycleLeft} day{cycleLeft === 1 ? "" : "s"} left this cycle
-                </span>
-              ) : null}
-            </p>
-          ) : remaining !== null ? (
-            <p className="mb-3 text-sm font-medium">
-              {remaining > 0 ? (
-                <>
-                  ⏳ {remaining} day{remaining === 1 ? "" : "s"} left ·{" "}
-                  <span className="font-bengali">{remaining} দিন বাকি</span>
-                </>
-              ) : (
-                <span className="opacity-60">This campaign has ended.</span>
-              )}
-            </p>
-          ) : null}
+            <div className="mt-5">{donateButton}</div>
 
-          <RealtimeCampaignStats
-            key={campaign.id}
-            campaignId={campaign.id}
-            initialRaised={campaign.raised_amount}
-            goalAmount={campaign.goal_amount}
-            donationCount={donations.length}
-            monthly={campaign.is_recurring}
-          />
+            <div className="mt-4 border-t border-foreground/10 pt-4">
+              <ShareButtons title={campaign.title} />
+            </div>
 
-          <Link
-            href={`/campaigns/${campaign.slug}/donate`}
-            className="mt-5 block w-full rounded-xl bg-brand px-6 py-3.5 text-center text-lg font-semibold text-white transition hover:bg-brand-dark"
-          >
-            {campaign.campaign_type === "creator" ? (
-              <>Buy a cha ☕ · <span className="font-bengali">চা খাওয়ান</span></>
+            {donations.length > 0 ? (
+              <ul className="mt-5 space-y-4 border-t border-foreground/10 pt-5">
+                {donations.slice(0, 6).map((donation) => (
+                  <li key={donation.id} className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-foreground/10 text-sm font-bold">
+                      {donation.donor_name ? initialOf(donation.donor_name) : "🤲"}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">
+                        {donation.donor_name ?? (
+                          <span className="font-bengali">নাম প্রকাশে অনিচ্ছুক</span>
+                        )}
+                      </p>
+                      <p className="text-sm opacity-60">
+                        <span className="font-semibold text-foreground">
+                          {formatTaka(donation.amount)}
+                        </span>{" "}
+                        · {timeAgo(donation.paid_at)}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             ) : (
-              <>Donate now · <span className="font-bengali">দান করুন</span></>
+              <p className="mt-5 border-t border-foreground/10 pt-5 text-sm opacity-60">
+                Be the first to donate.{" "}
+                <span className="font-bengali">প্রথম দাতা হোন।</span>
+              </p>
             )}
-          </Link>
-
-          <div className="mt-6 border-t border-foreground/10 pt-4">
-            <ShareButtons title={campaign.title} />
           </div>
-        </div>
+        </aside>
 
-        {campaign.summary ? (
-          <p className="mt-8 text-lg leading-relaxed opacity-90">
-            {campaign.summary}
-          </p>
-        ) : null}
-        {campaign.summary_bn ? (
-          <p className="font-bengali mt-3 leading-relaxed opacity-80">
-            {campaign.summary_bn}
-          </p>
-        ) : null}
-
-        {campaign.story ? (
-          <div className="mt-6 whitespace-pre-line leading-relaxed opacity-80">
-            {campaign.story}
-          </div>
-        ) : null}
-        {campaign.story_bn ? (
-          <div className="font-bengali mt-4 whitespace-pre-line leading-relaxed opacity-80">
-            {campaign.story_bn}
-          </div>
-        ) : null}
-
-        <section className="mt-10">
-          <h2 className="text-xl font-bold">
-            Updates · <span className="font-bengali">আপডেট</span>
-          </h2>
-
-          {canPostUpdate ? (
-            <div className="mt-4">
-              <CampaignUpdateForm campaignId={campaign.id} slug={campaign.slug} />
+        {/* ===== Left column, part 2: story + everything else ===== */}
+        <div className="lg:col-start-1">
+          {charityAllocations.length > 0 ? (
+            <div className="rounded-xl border border-brand/30 bg-brand/5 p-4 text-sm">
+              <p className="font-semibold text-brand">
+                💚 Funds go directly to verified charities
+              </p>
+              <ul className="mt-2 space-y-1">
+                {charityAllocations.map((a) => (
+                  <li key={a.name} className="flex justify-between">
+                    <span>{a.name}</span>
+                    <span className="font-semibold">{a.percentage}%</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           ) : null}
 
-          {updates.length === 0 ? (
-            <p className="mt-4 text-sm opacity-60">
-              No updates yet.{" "}
-              <span className="font-bengali">এখনো কোনো আপডেট নেই।</span>
+          {campaign.summary ? (
+            <p className="mt-6 text-lg leading-relaxed opacity-90">
+              {campaign.summary}
             </p>
-          ) : (
-            <ul className="mt-4 space-y-3">
-              {updates.map((update) => (
-                <li
-                  key={update.id}
-                  className="rounded-xl border border-foreground/10 bg-card p-4"
-                >
-                  <p className="whitespace-pre-line text-sm leading-relaxed">
-                    {update.body}
-                  </p>
-                  <p className="mt-2 text-xs opacity-50">
-                    {timeAgo(update.created_at)}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <section className="mt-10">
-          <h2 className="text-xl font-bold">
-            Recent donations ·{" "}
-            <span className="font-bengali">সাম্প্রতিক দান</span>
-          </h2>
-
-          {donations.length === 0 ? (
-            <p className="mt-4 text-sm opacity-60">
-              Be the first to donate.{" "}
-              <span className="font-bengali">প্রথম দাতা হোন।</span>
+          ) : null}
+          {campaign.summary_bn ? (
+            <p className="font-bengali mt-3 leading-relaxed opacity-80">
+              {campaign.summary_bn}
             </p>
-          ) : (
-            <ul className="mt-4 space-y-3">
-              {donations.map((donation) => (
-                <li
-                  key={donation.id}
-                  className="flex items-start justify-between gap-4 rounded-xl border border-foreground/10 bg-card p-4"
-                >
+          ) : null}
+
+          {campaign.story ? (
+            <div className="mt-5 whitespace-pre-line leading-relaxed opacity-80">
+              {campaign.story}
+            </div>
+          ) : null}
+          {campaign.story_bn ? (
+            <div className="font-bengali mt-4 whitespace-pre-line leading-relaxed opacity-80">
+              {campaign.story_bn}
+            </div>
+          ) : null}
+
+          {/* Organizer and beneficiary — like GoFundMe */}
+          {campaign.organizer_name || campaign.beneficiary_name || creator ? (
+            <section className="mt-10 border-t border-foreground/10 pt-8">
+              <h2 className="text-xl font-bold">
+                Organizer{campaign.beneficiary_name ? " and beneficiary" : ""} ·{" "}
+                <span className="font-bengali">আয়োজক</span>
+              </h2>
+              <div className="mt-4 flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-10">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand/15 font-bold text-brand">
+                    {initialOf(
+                      campaign.organizer_name ??
+                        creator?.display_name ??
+                        creator?.username
+                    )}
+                  </span>
                   <div>
-                    <p className="font-medium">
-                      {donation.donor_name ?? "Anonymous · নাম প্রকাশে অনিচ্ছুক"}
+                    <p className="font-semibold">
+                      {campaign.organizer_name ??
+                        creator?.display_name ??
+                        creator?.username ??
+                        "Organizer"}
                     </p>
-                    {donation.message ? (
-                      <p className="mt-1 text-sm opacity-70">
-                        {donation.message}
+                    <p className="text-sm opacity-60">Organizer</p>
+                    {campaign.district ? (
+                      <p className="text-sm opacity-60">{campaign.district}</p>
+                    ) : null}
+                    {campaign.organizer_relationship &&
+                    RELATIONSHIP_LABELS[campaign.organizer_relationship] ? (
+                      <p className="mt-1.5 inline-block rounded-full bg-brand/10 px-3 py-0.5 text-xs font-medium text-brand">
+                        {RELATIONSHIP_LABELS[campaign.organizer_relationship]}
                       </p>
                     ) : null}
-                    <p className="mt-1 text-xs opacity-50">
-                      {timeAgo(donation.paid_at)}
-                    </p>
+                    {creator ? (
+                      <p className="mt-2">
+                        <Link
+                          href={`/creator/${creator.username}`}
+                          className="text-sm font-medium text-brand hover:underline"
+                        >
+                          View creator profile →
+                        </Link>
+                      </p>
+                    ) : null}
                   </div>
-                  <p className="whitespace-nowrap font-semibold text-brand">
-                    {formatTaka(donation.amount)}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </main>
-    </>
+                </div>
+
+                {campaign.beneficiary_name ? (
+                  <div className="flex items-start gap-3">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-foreground/10 font-bold">
+                      {initialOf(campaign.beneficiary_name)}
+                    </span>
+                    <div>
+                      <p className="font-semibold">{campaign.beneficiary_name}</p>
+                      <p className="text-sm opacity-60">Beneficiary</p>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </section>
+          ) : null}
+
+          <section className="mt-10 border-t border-foreground/10 pt-8">
+            <h2 className="text-xl font-bold">
+              Updates · <span className="font-bengali">আপডেট</span>
+            </h2>
+
+            {canPostUpdate ? (
+              <div className="mt-4">
+                <CampaignUpdateForm campaignId={campaign.id} slug={campaign.slug} />
+              </div>
+            ) : null}
+
+            {updates.length === 0 ? (
+              <p className="mt-4 text-sm opacity-60">
+                No updates yet.{" "}
+                <span className="font-bengali">এখনো কোনো আপডেট নেই।</span>
+              </p>
+            ) : (
+              <ul className="mt-4 space-y-3">
+                {updates.map((update) => (
+                  <li
+                    key={update.id}
+                    className="rounded-xl border border-foreground/10 bg-card p-4"
+                  >
+                    <p className="whitespace-pre-line text-sm leading-relaxed">
+                      {update.body}
+                    </p>
+                    <p className="mt-2 text-xs opacity-50">
+                      {timeAgo(update.created_at)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          {/* Words of support — donor messages at the bottom, like GoFundMe */}
+          <section className="mt-10 border-t border-foreground/10 pt-8">
+            <h2 className="text-xl font-bold">
+              Words of support ·{" "}
+              <span className="font-bengali">সমর্থনের বার্তা</span>
+            </h2>
+
+            {supportMessages.length === 0 ? (
+              <p className="mt-4 text-sm opacity-60">
+                Please donate to share words of support.{" "}
+                <span className="font-bengali">
+                  দান করে সমর্থনের বার্তা লিখুন।
+                </span>
+              </p>
+            ) : (
+              <ul className="mt-4 space-y-5">
+                {supportMessages.map((donation) => (
+                  <li key={donation.id} className="flex items-start gap-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-foreground/10 text-sm font-bold">
+                      {donation.donor_name ? initialOf(donation.donor_name) : "🤲"}
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold">
+                        {donation.donor_name ?? (
+                          <span className="font-bengali">নাম প্রকাশে অনিচ্ছুক</span>
+                        )}
+                      </p>
+                      <p className="text-xs opacity-60">
+                        {formatTaka(donation.amount)} · {timeAgo(donation.paid_at)}
+                      </p>
+                      <p className="mt-1 text-sm leading-relaxed opacity-85">
+                        {donation.message}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <div className="mt-8 sm:max-w-xs">{donateButton}</div>
+          </section>
+        </div>
+      </div>
+    </main>
   );
 }

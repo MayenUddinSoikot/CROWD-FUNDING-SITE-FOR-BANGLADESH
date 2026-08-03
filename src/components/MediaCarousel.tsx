@@ -39,7 +39,7 @@ export function MediaCarousel({
   return (
     <div>
       <div
-        className="relative aspect-video w-full overflow-hidden rounded-2xl border border-foreground/10 bg-black"
+        className="relative aspect-video w-full overflow-hidden rounded-2xl border border-foreground/10 bg-foreground/5"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
@@ -48,7 +48,7 @@ export function MediaCarousel({
           <img
             src={current.url}
             alt=""
-            className="h-full w-full object-contain"
+            className="h-full w-full object-cover"
           />
         ) : current.media_type === "youtube" ? (
           <iframe
@@ -56,10 +56,28 @@ export function MediaCarousel({
             title="Campaign video"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            className="h-full w-full"
+            className="h-full w-full bg-black"
           />
         ) : (
-          <video src={current.url} controls className="h-full w-full" />
+          <>
+            {/* Blurred first frame fills the letterbox area behind vertical videos. */}
+            <video
+              src={current.url}
+              muted
+              playsInline
+              preload="metadata"
+              aria-hidden
+              tabIndex={-1}
+              className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-2xl"
+            />
+            <video
+              src={current.url}
+              controls
+              playsInline
+              preload="metadata"
+              className="relative h-full w-full object-contain"
+            />
+          </>
         )}
 
         {count > 1 ? (
@@ -80,6 +98,9 @@ export function MediaCarousel({
             >
               ›
             </button>
+            <span className="absolute bottom-2 right-2 rounded-full bg-black/50 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">
+              {index + 1} / {count}
+            </span>
           </>
         ) : null}
       </div>
