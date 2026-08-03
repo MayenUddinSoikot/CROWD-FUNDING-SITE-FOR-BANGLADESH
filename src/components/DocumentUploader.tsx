@@ -15,15 +15,39 @@ const BUCKET = "campaign-docs";
 type Field = { docType: DocType; label: string; hint: string };
 
 const FULL_FIELDS: Field[] = [
-  { docType: "nid", label: "NID (national ID) — required", hint: "Front & back — photo or PDF" },
-  { docType: "medical", label: "Medical reports", hint: "Prescriptions, reports — photo or PDF" },
-  { docType: "cheque", label: "Bank cheque / statement", hint: "For payout verification" },
-  { docType: "other", label: "Other supporting documents", hint: "Optional" },
+  {
+    docType: "nid",
+    label: "NID, Passport or Birth certificate — required",
+    hint: "Any one government ID — photo or PDF",
+  },
+  {
+    docType: "medical",
+    label: "Medical reports (optional)",
+    hint: "Prescriptions, reports — photo or PDF",
+  },
+  {
+    docType: "cheque",
+    label: "Bank cheque / statement (optional)",
+    hint: "For payout verification",
+  },
+  {
+    docType: "other",
+    label: "Other supporting documents (optional)",
+    hint: "Anything that helps verify",
+  },
 ];
 
 const SIMPLE_FIELDS: Field[] = [
-  { docType: "nid", label: "NID (national ID) — required", hint: "Front & back — photo or PDF" },
-  { docType: "other", label: "Supporting documents", hint: "Anything that helps verify — photo or PDF" },
+  {
+    docType: "nid",
+    label: "NID, Passport or Birth certificate — required",
+    hint: "Any one government ID — photo or PDF",
+  },
+  {
+    docType: "other",
+    label: "Supporting documents (optional)",
+    hint: "Anything that helps verify — photo or PDF",
+  },
 ];
 
 function extensionOf(name: string): string {

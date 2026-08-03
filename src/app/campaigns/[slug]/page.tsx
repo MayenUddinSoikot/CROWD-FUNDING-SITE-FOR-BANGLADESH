@@ -10,7 +10,12 @@ import type {
   PublicCreator,
   PublicDonation,
 } from "@/lib/types";
-import { CATEGORY_LABELS, RELATIONSHIP_LABELS, OCCASION_LABELS } from "@/lib/types";
+import {
+  CATEGORY_LABELS,
+  RELATIONSHIP_LABELS,
+  OCCASION_LABELS,
+  SOCIAL_PLATFORMS,
+} from "@/lib/types";
 import { formatTaka, timeAgo } from "@/lib/format";
 import { RealtimeCampaignStats } from "@/components/RealtimeCampaignStats";
 import { ShareButtons } from "@/components/ShareButtons";
@@ -51,7 +56,7 @@ async function getCampaign(slug: string): Promise<Campaign | null> {
     const { data, error } = await supabase
       .from("campaigns")
       .select(
-        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, organizer_name, organizer_relationship, campaign_type, occasion, is_recurring, cycle_days, cycle_anchor, district, ends_at, created_at, creator_id"
+        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, organizer_name, organizer_relationship, campaign_type, occasion, is_recurring, cycle_days, cycle_anchor, district, ends_at, created_at, creator_id, social_links"
       )
       .eq("slug", slug)
       .in("status", ["approved", "completed"])
@@ -210,6 +215,9 @@ export default async function CampaignPage({
     ? cycleDaysLeft(campaign.cycle_anchor, campaign.cycle_days)
     : null;
   const supportMessages = donations.filter((d) => d.message);
+  const socialLinks = SOCIAL_PLATFORMS.filter(
+    (p) => campaign.social_links?.[p.key]
+  ).map((p) => ({ ...p, url: campaign.social_links![p.key] }));
 
   // Can the current viewer post updates? (the creator, or an admin)
   let canPostUpdate = false;
@@ -468,6 +476,21 @@ export default async function CampaignPage({
                         </Link>
                       </p>
                     ) : null}
+                    {socialLinks.length > 0 ? (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {socialLinks.map((s) => (
+                          <a
+                            key={s.key}
+                            href={s.url}
+                            target="_blank"
+                            rel="noopener noreferrer nofollow"
+                            className="rounded-full border border-foreground/15 px-3 py-1 text-xs font-medium transition hover:border-brand hover:text-brand"
+                          >
+                            {s.emoji} {s.label}
+                          </a>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
 
@@ -562,6 +585,22 @@ export default async function CampaignPage({
 
             <div className="mt-8 sm:max-w-xs">{donateButton}</div>
           </section>
+
+          <div className="mt-10 rounded-xl border border-foreground/10 bg-card p-4 text-xs leading-relaxed opacity-70">
+            <p className="font-semibold">🛡️ Shohay trust & safety</p>
+            <p className="mt-1.5">
+              Shohay has full authority to remove, refuse, or cancel any
+              campaign — and to freeze its funds — if any wrongdoing or
+              fraudulent activity is found. An independent third-party audit is
+              conducted at the end of every year, and is welcome.
+            </p>
+            <p className="font-bengali mt-1.5">
+              কোনো অনিয়ম বা প্রতারণা পাওয়া গেলে সহায় যেকোনো ক্যাম্পেইন
+              সরিয়ে দেওয়ার, প্রত্যাখ্যান বা বাতিল করার এবং তহবিল ফ্রিজ করার
+              পূর্ণ কর্তৃত্ব রাখে। প্রতি বছর শেষে স্বাধীন তৃতীয় পক্ষের
+              নিরীক্ষা (অডিট) করা হয়।
+            </p>
+          </div>
         </div>
       </div>
     </main>

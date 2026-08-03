@@ -40,7 +40,16 @@ export type Campaign = {
   ends_at: string | null;
   created_at: string;
   creator_id?: string | null;
+  social_links?: Record<string, string> | null;
 };
+
+// Social platforms a creator can link on their fundraiser.
+export const SOCIAL_PLATFORMS: { key: string; label: string; emoji: string }[] = [
+  { key: "facebook", label: "Facebook", emoji: "📘" },
+  { key: "instagram", label: "Instagram", emoji: "📸" },
+  { key: "youtube", label: "YouTube", emoji: "▶️" },
+  { key: "tiktok", label: "TikTok", emoji: "🎵" },
+];
 
 // Optional special-occasion tag shown publicly on a campaign.
 export const OCCASION_LABELS: Record<
@@ -156,7 +165,7 @@ export type CampaignDocument = {
 };
 
 export const DOC_TYPE_LABELS: Record<DocType, string> = {
-  nid: "NID (national ID)",
+  nid: "Government ID (NID / Passport / Birth certificate)",
   medical: "Medical report",
   cheque: "Bank cheque / statement",
   other: "Other document",

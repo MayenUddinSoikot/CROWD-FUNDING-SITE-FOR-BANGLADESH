@@ -152,7 +152,7 @@ export default async function AdminCampaignDetail({
           {v ? (
             <div className="mt-2">
               <Row label="Applicant name" value={v.applicant_name} />
-              <Row label="NID number" value={v.applicant_nid} />
+              <Row label="NID / Passport / Birth certificate no." value={v.applicant_nid} />
               <Row label="Phone" value={v.applicant_phone} />
               <Row label="Email" value={v.applicant_email} />
               <Row label="Relationship to beneficiary" value={v.relationship} />

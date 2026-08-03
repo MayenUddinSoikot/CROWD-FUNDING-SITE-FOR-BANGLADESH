@@ -55,6 +55,8 @@ export async function createCampaign(
     String(formData.get("creator_mode") ?? "") === "project"
       ? "project"
       : "monthly";
+  const socialLinks =
+    campaignType === "creator" ? parseSocialLinks(formData) : null;
 
   // Every required field must be filled — mirrors the form's required marks
   // and blocks incomplete submissions even if the browser check is bypassed.
@@ -86,7 +88,8 @@ export async function createCampaign(
 
   if (!documents.some((d) => d.docType === "nid")) {
     return {
-      error: "Please upload an NID photo or PDF in the Documents section.",
+      error:
+        "Please upload one government ID — NID, Passport or Birth certificate — in the Documents section.",
     };
   }
 
@@ -152,6 +155,7 @@ export async function createCampaign(
       occasion,
       is_recurring: isRecurring,
       cycle_anchor: cycleAnchor,
+      social_links: socialLinks,
       ends_at: endsAt,
       creator_id: user.id,
       status: "pending",
@@ -261,6 +265,20 @@ function parseDocuments(raw: FormDataEntryValue | null): UploadedDoc[] {
   } catch {
     return [];
   }
+}
+
+const SOCIAL_KEYS = ["facebook", "instagram", "youtube", "tiktok"] as const;
+
+// Only well-formed https links are kept; null when none were given.
+function parseSocialLinks(formData: FormData): Record<string, string> | null {
+  const links: Record<string, string> = {};
+  for (const key of SOCIAL_KEYS) {
+    const value = String(formData.get(`social_${key}`) ?? "").trim();
+    if (value && /^https:\/\/\S+$/.test(value) && value.length <= 300) {
+      links[key] = value;
+    }
+  }
+  return Object.keys(links).length > 0 ? links : null;
 }
 
 function str(formData: FormData, key: string): string | null {

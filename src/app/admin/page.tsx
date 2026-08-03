@@ -70,7 +70,7 @@ export default async function AdminDashboard() {
             Waiting for review · <span className="font-bengali">পর্যালোচনা</span>
           </h2>
           <p className="mt-1 text-sm opacity-60">
-            Open each one to see the applicant&rsquo;s NID, contact, and payout
+            Open each one to see the applicant&rsquo;s ID, contact, and payout
             details before approving.
           </p>
 

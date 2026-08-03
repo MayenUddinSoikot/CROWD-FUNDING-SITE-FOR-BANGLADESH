@@ -258,7 +258,7 @@ export function CampaignWizard({
 
       <Section title="2. Bangla title · বাংলা শিরোনাম">
         <label className="font-bengali block text-sm font-medium" htmlFor="title_bn">
-          একই শিরোনাম বাংলায় (ঐচ্ছিক)
+          একই শিরোনাম বাংলায় <span className="font-sans">(optional)</span>
         </label>
         <input
           id="title_bn"
@@ -285,7 +285,7 @@ export function CampaignWizard({
         />
 
         <label className="font-bengali mt-4 block text-sm font-medium" htmlFor="summary_bn">
-          সংক্ষিপ্ত বিবরণ (বাংলা)
+          সংক্ষিপ্ত বিবরণ (বাংলা) <span className="font-sans">(optional)</span>
         </label>
         <textarea
           id="summary_bn"
@@ -302,7 +302,7 @@ export function CampaignWizard({
         <textarea id="story" name="story" required rows={5} className={inputClass} />
 
         <label className="font-bengali mt-4 block text-sm font-medium" htmlFor="story_bn">
-          সম্পূর্ণ বিবরণ (বাংলা)
+          সম্পূর্ণ বিবরণ (বাংলা) <span className="font-sans">(optional)</span>
         </label>
         <textarea
           id="story_bn"
@@ -311,6 +311,64 @@ export function CampaignWizard({
           className={`font-bengali ${inputClass}`}
         />
       </Section>
+
+      {isCreator ? (
+        <Section
+          title="3b. Social media links · সোশ্যাল লিংক (optional)"
+          subtitle="Shown publicly on your page so supporters can find your work and trust who you are."
+        >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium" htmlFor="social_facebook">
+                📘 Facebook (optional)
+              </label>
+              <input
+                id="social_facebook"
+                name="social_facebook"
+                type="url"
+                placeholder="https://facebook.com/yourpage"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium" htmlFor="social_instagram">
+                📸 Instagram (optional)
+              </label>
+              <input
+                id="social_instagram"
+                name="social_instagram"
+                type="url"
+                placeholder="https://instagram.com/yourhandle"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium" htmlFor="social_youtube">
+                ▶️ YouTube (optional)
+              </label>
+              <input
+                id="social_youtube"
+                name="social_youtube"
+                type="url"
+                placeholder="https://youtube.com/@yourchannel"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium" htmlFor="social_tiktok">
+                🎵 TikTok (optional)
+              </label>
+              <input
+                id="social_tiktok"
+                name="social_tiktok"
+                type="url"
+                placeholder="https://tiktok.com/@yourhandle"
+                className={inputClass}
+              />
+            </div>
+          </div>
+        </Section>
+      ) : null}
 
       <Section
         title={
@@ -440,8 +498,8 @@ export function CampaignWizard({
       </Section>
 
       <Section
-        title="5. Verification · যাচাই (private — admin only)"
-        subtitle="This section is never shown publicly. Shohay uses it to verify the campaign before approving. এই তথ্য কখনো প্রকাশ্যে দেখানো হয় না।"
+        title="5. Verification · যাচাই (private & confidential)"
+        subtitle="Never shown publicly. Our internal verification team reviews this confidentially before approving your campaign. এই তথ্য সম্পূর্ণ গোপনীয় — শুধুমাত্র আমাদের অভ্যন্তরীণ যাচাই টিম দেখে।"
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
@@ -457,7 +515,7 @@ export function CampaignWizard({
           </div>
           <div>
             <label className="block text-sm font-medium" htmlFor="applicant_nid">
-              Your NID number · জাতীয় পরিচয়পত্র <Req />
+              NID / Passport / Birth certificate number <Req />
             </label>
             <input
               id="applicant_nid"
@@ -481,7 +539,7 @@ export function CampaignWizard({
           </div>
           <div>
             <label className="block text-sm font-medium" htmlFor="applicant_email">
-              Email
+              Email (optional)
             </label>
             <input
               id="applicant_email"
@@ -500,17 +558,17 @@ export function CampaignWizard({
         >
           <CharityAllocator charities={charities} />
           <label className="mt-4 block text-sm font-medium" htmlFor="notes">
-            Anything else for the reviewer
+            Anything else for the reviewer (optional)
           </label>
           <textarea id="notes" name="notes" rows={3} className={inputClass} />
         </Section>
       ) : (
         <Section
-          title="6. Payout details · পেআউট (private — admin only)"
+          title="6. Payout details · পেআউট (private & confidential)"
           subtitle={
             isCreator
-              ? "Where your support should be sent — this goes to you, for you and your projects. Never shown publicly."
-              : "Where approved funds should be sent. Never shown publicly."
+              ? "Where your support should be sent — this goes to you, for you and your projects. Never shown publicly — verified confidentially by our internal team. Give bKash/Nagad or bank details (at least one)."
+              : "Where approved funds should be sent. Never shown publicly — verified confidentially by our internal team. Give bKash/Nagad or bank details (at least one)."
           }
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -546,7 +604,7 @@ export function CampaignWizard({
             </div>
             <div>
               <label className="block text-sm font-medium" htmlFor="bank_branch">
-                Branch
+                Branch (optional)
               </label>
               <input id="bank_branch" name="bank_branch" className={inputClass} />
             </div>
@@ -555,7 +613,7 @@ export function CampaignWizard({
           {isCreator ? (
             <>
               <label className="mt-4 block text-sm font-medium" htmlFor="notes">
-                What will support fund? (your projects)
+                What will support fund? (your projects) (optional)
               </label>
               <textarea
                 id="notes"
@@ -568,7 +626,7 @@ export function CampaignWizard({
           ) : (
             <>
               <label className="mt-4 block text-sm font-medium" htmlFor="notes">
-                Anything else for the reviewer
+                Anything else for the reviewer (optional)
               </label>
               <textarea id="notes" name="notes" rows={3} className={inputClass} />
             </>
@@ -577,11 +635,11 @@ export function CampaignWizard({
       )}
 
       <Section
-        title="7. Documents · কাগজপত্র (private — admin only)"
+        title="7. Documents · কাগজপত্র (private & confidential)"
         subtitle={
           isCreator || isOccasion
-            ? "An NID photo/PDF is required, plus any supporting documents. Stored privately — only admins can open them."
-            : "An NID photo/PDF is required. Also upload medical reports and a bank cheque where relevant. Stored privately — only admins can open them."
+            ? "One government ID is required — NID, Passport or Birth certificate — plus any supporting documents. Stored privately and reviewed confidentially by our internal verification team only."
+            : "One government ID is required — NID, Passport or Birth certificate. Also upload medical reports and a bank cheque where relevant. Stored privately and reviewed confidentially by our internal verification team only."
         }
       >
         <DocumentUploader userId={userId} simple={isCreator || isOccasion} />
@@ -598,6 +656,22 @@ export function CampaignWizard({
         goes live — you&rsquo;ll see it under &ldquo;My campaigns&rdquo; once
         submitted.
       </p>
+
+      <div className="mt-4 rounded-xl border border-foreground/15 bg-background p-4 text-xs leading-relaxed opacity-80">
+        <p className="font-semibold">⚖️ Please note before you submit</p>
+        <p className="mt-1.5">
+          Shohay has full authority to remove, refuse, or cancel any campaign —
+          and to freeze its funds — if any wrongdoing or fraudulent activity is
+          found. An independent third-party audit is conducted at the end of
+          every year, and is welcome.
+        </p>
+        <p className="font-bengali mt-1.5">
+          কোনো অনিয়ম বা প্রতারণা পাওয়া গেলে সহায় যেকোনো ক্যাম্পেইন সরিয়ে
+          দেওয়ার, প্রত্যাখ্যান বা বাতিল করার এবং তহবিল ফ্রিজ করার পূর্ণ
+          কর্তৃত্ব রাখে। প্রতি বছর শেষে স্বাধীন তৃতীয় পক্ষের নিরীক্ষা (অডিট)
+          করা হয়।
+        </p>
+      </div>
 
       <button
         type="submit"
