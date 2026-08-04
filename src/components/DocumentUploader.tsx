@@ -117,7 +117,7 @@ export function DocumentUploader({
             <input
               id={`file-${f.docType}`}
               type="file"
-              accept="image/jpeg,image/png,image/webp,application/pdf"
+              accept="image/*,application/pdf"
               multiple
               onChange={(e) => handleFiles(f.docType, e.target.files)}
               className="mt-1 block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-brand file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-brand-dark"

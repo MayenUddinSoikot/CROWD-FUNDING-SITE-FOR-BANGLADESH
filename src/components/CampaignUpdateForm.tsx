@@ -91,7 +91,7 @@ export function CampaignUpdateForm({
           <input
             id="update-photo"
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/*"
             onChange={(e) => handlePhoto(e.target.files)}
             className="mt-1 block w-full text-xs file:mr-2 file:rounded-lg file:border-0 file:bg-brand file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-brand-dark"
           />

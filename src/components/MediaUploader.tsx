@@ -81,7 +81,7 @@ export function MediaUploader({ userId }: { userId: string }) {
       <input
         id="photos"
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept="image/*"
         multiple
         onChange={(e) => uploadFiles(e.target.files, "image")}
         className="mt-1 block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-brand file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-brand-dark"
@@ -127,7 +127,7 @@ export function MediaUploader({ userId }: { userId: string }) {
       <input
         id="video"
         type="file"
-        accept="video/mp4,video/webm,video/quicktime"
+        accept="video/*"
         onChange={(e) => uploadFiles(e.target.files, "video")}
         className="mt-1 block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-brand file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-brand-dark"
         disabled={Boolean(ytValid)}
