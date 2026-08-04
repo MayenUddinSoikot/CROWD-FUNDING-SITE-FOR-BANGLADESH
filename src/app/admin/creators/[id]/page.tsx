@@ -3,21 +3,16 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getAdminClient } from "@/lib/admin";
 import { formatTaka, formatCampaignId } from "@/lib/format";
-import type { Campaign } from "@/lib/types";
+import {
+  mergePeople,
+  findPerson,
+  type MergeCampaign,
+  type MergeVerification,
+  type MergeProfile,
+} from "@/lib/creator-merge";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Creator profile — Shohay সহায়" };
-
-type VerificationRow = {
-  campaign_id: string;
-  applicant_name: string | null;
-  applicant_email: string | null;
-  applicant_phone: string | null;
-  applicant_nid: string | null;
-  bkash_number: string | null;
-  bank_name: string | null;
-  bank_account_number: string | null;
-};
+export const metadata: Metadata = { title: "Campaigner profile — Shohay সহায়" };
 
 const STATUS_BADGE: Record<string, string> = {
   pending: "bg-amber-500/15 text-amber-700",
@@ -38,51 +33,49 @@ export default async function AdminCreatorProfile({
 
   const { id } = await params;
 
-  // display_name/username exist only after creator-profiles.sql.
-  let { data: profile } = await supabase
-    .from("profiles")
-    .select("id, full_name, phone, display_name, username, created_at")
-    .eq("id", id)
-    .maybeSingle();
-  if (!profile) {
-    const retry = await supabase
-      .from("profiles")
-      .select("id, full_name, phone, created_at")
-      .eq("id", id)
-      .maybeSingle();
-    profile = (retry.data ?? null) as unknown as typeof profile;
-  }
-
   const campaignFields =
-    "id, slug, title, title_bn, category, goal_amount, raised_amount, status, campaign_type, district, created_at";
+    "id, creator_id, slug, title, raised_amount, status, created_at";
   let { data: campaignRows } = await supabase
     .from("campaigns")
     .select(`${campaignFields}, campaign_no`)
-    .eq("creator_id", id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(10000);
   if (!campaignRows) {
     const retry = await supabase
       .from("campaigns")
       .select(campaignFields)
-      .eq("creator_id", id)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(10000);
     campaignRows = (retry.data ?? []) as unknown as typeof campaignRows;
   }
-  const campaigns = (campaignRows ?? []) as Campaign[];
+  const campaigns = (campaignRows ?? []) as MergeCampaign[];
 
-  if (!profile && campaigns.length === 0) notFound();
+  const { data: verificationRows } = await supabase
+    .from("campaign_verifications")
+    .select(
+      "campaign_id, applicant_name, applicant_email, applicant_phone, applicant_nid, bkash_number, bank_name, bank_account_number"
+    )
+    .limit(10000);
+  const verifications = (verificationRows ?? []) as MergeVerification[];
 
-  const campaignIds = campaigns.map((c) => c.id);
-  const { data: verificationRows } = campaignIds.length
-    ? await supabase
-        .from("campaign_verifications")
-        .select(
-          "campaign_id, applicant_name, applicant_email, applicant_phone, applicant_nid, bkash_number, bank_name, bank_account_number"
-        )
-        .in("campaign_id", campaignIds)
-    : { data: [] };
-  const verifications = (verificationRows ?? []) as VerificationRow[];
+  let { data: profileRows } = await supabase
+    .from("profiles")
+    .select("id, full_name, phone, display_name, username")
+    .limit(10000);
+  if (!profileRows) {
+    const retry = await supabase
+      .from("profiles")
+      .select("id, full_name, phone")
+      .limit(10000);
+    profileRows = (retry.data ?? []) as unknown as typeof profileRows;
+  }
+  const profiles = (profileRows ?? []) as MergeProfile[];
 
+  const people = mergePeople(campaigns, verifications, profiles);
+  const person = findPerson(people, id);
+  if (!person) notFound();
+
+  const campaignIds = person.campaigns.map((c) => c.id);
   const { data: payoutRows } = campaignIds.length
     ? await supabase
         .from("payouts")
@@ -94,40 +87,18 @@ export default async function AdminCreatorProfile({
     0
   );
 
-  const uniq = (values: (string | null)[]) =>
-    [...new Set(values.filter((v): v is string => Boolean(v && v.trim())))];
-
-  const names = uniq([
-    profile?.display_name ?? null,
-    profile?.full_name ?? null,
-    ...verifications.map((v) => v.applicant_name),
-  ]);
-  const emails = uniq(verifications.map((v) => v.applicant_email));
-  const phones = uniq([
-    profile?.phone ?? null,
-    ...verifications.map((v) => v.applicant_phone),
-  ]);
-  const nids = uniq(verifications.map((v) => v.applicant_nid));
-  const payoutMethods = uniq([
-    ...verifications.map((v) =>
-      v.bkash_number ? `bKash/Nagad ${v.bkash_number}` : null
-    ),
-    ...verifications.map((v) =>
-      v.bank_name && v.bank_account_number
-        ? `${v.bank_name} a/c ${v.bank_account_number}`
-        : null
-    ),
-  ]);
-
-  const name = names[0] ?? "Unnamed creator";
-  const totalRaised = campaigns.reduce((s, c) => s + Number(c.raised_amount), 0);
-  const liveCount = campaigns.filter((c) => c.status === "approved").length;
+  const name = person.names[0] ?? "Unnamed campaigner";
+  const liveCount = person.campaigns.filter((c) => c.status === "approved").length;
+  const memberSince = new Date(person.firstSeen).toLocaleDateString("en-GB", {
+    month: "long",
+    year: "numeric",
+  });
 
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-6 pb-16">
       <p className="mt-8 text-sm">
         <Link href="/admin/creators" className="opacity-60 hover:text-brand">
-          ← All creators
+          ← All campaigners
         </Link>
       </p>
 
@@ -137,25 +108,36 @@ export default async function AdminCreatorProfile({
         </span>
         <div>
           <h1 className="text-2xl font-bold">{name}</h1>
-          {names.length > 1 ? (
+          {person.names.length > 1 ? (
             <p className="text-sm opacity-60">
-              Also appears as: {names.slice(1).join(", ")}
+              Also appears as: {person.names.slice(1).join(", ")}
             </p>
           ) : null}
-          {profile?.username ? (
-            <Link
-              href={`/creator/${profile.username}`}
-              className="text-sm font-medium text-brand hover:underline"
-            >
-              Public profile: /creator/{profile.username} →
-            </Link>
+          <p className="text-sm opacity-60">First campaign: {memberSince}</p>
+          {person.accountIds.length > 1 ? (
+            <span className="mt-1 inline-block rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+              ⚠ Uses {person.accountIds.length} login accounts (matched by
+              shared email / phone / ID)
+            </span>
           ) : null}
+          {person.usernames.map((u) => (
+            <p key={u}>
+              <Link
+                href={`/creator/${u}`}
+                className="text-sm font-medium text-brand hover:underline"
+              >
+                Public profile: /creator/{u} →
+              </Link>
+            </p>
+          ))}
         </div>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="rounded-2xl border border-foreground/10 bg-card p-4">
-          <p className="text-xl font-bold text-brand">{campaigns.length}</p>
+          <p className="text-xl font-bold text-brand">
+            {person.campaigns.length}
+          </p>
           <p className="mt-0.5 text-xs opacity-60">Campaigns (lifetime)</p>
         </div>
         <div className="rounded-2xl border border-foreground/10 bg-card p-4">
@@ -163,7 +145,9 @@ export default async function AdminCreatorProfile({
           <p className="mt-0.5 text-xs opacity-60">Live now</p>
         </div>
         <div className="rounded-2xl border border-foreground/10 bg-card p-4">
-          <p className="text-xl font-bold text-brand">{formatTaka(totalRaised)}</p>
+          <p className="text-xl font-bold text-brand">
+            {formatTaka(person.totalRaised)}
+          </p>
           <p className="mt-0.5 text-xs opacity-60">Total raised</p>
         </div>
         <div className="rounded-2xl border border-foreground/10 bg-card p-4">
@@ -174,40 +158,48 @@ export default async function AdminCreatorProfile({
 
       <section className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6">
         <h2 className="text-sm font-bold text-amber-700">
-          🔒 Private — identity & contact
+          🔒 Private — identity & contact (all details ever submitted)
         </h2>
         <dl className="mt-3 space-y-2 text-sm">
           <div className="flex flex-col gap-0.5 sm:flex-row sm:justify-between">
-            <dt className="opacity-60">Email</dt>
+            <dt className="opacity-60">Names used</dt>
             <dd className="font-medium sm:text-right">
-              {emails.join(", ") || "—"}
+              {person.names.join(", ") || "—"}
             </dd>
           </div>
           <div className="flex flex-col gap-0.5 sm:flex-row sm:justify-between">
-            <dt className="opacity-60">Phone</dt>
+            <dt className="opacity-60">Emails</dt>
             <dd className="font-medium sm:text-right">
-              {phones.join(", ") || "—"}
+              {person.emails.join(", ") || "—"}
+            </dd>
+          </div>
+          <div className="flex flex-col gap-0.5 sm:flex-row sm:justify-between">
+            <dt className="opacity-60">Phones</dt>
+            <dd className="font-medium sm:text-right">
+              {person.phones.join(", ") || "—"}
             </dd>
           </div>
           <div className="flex flex-col gap-0.5 sm:flex-row sm:justify-between">
             <dt className="opacity-60">NID / Passport / Birth certificate</dt>
             <dd className="font-medium sm:text-right">
-              {nids.join(", ") || "—"}
+              {person.nids.join(", ") || "—"}
             </dd>
           </div>
           <div className="flex flex-col gap-0.5 sm:flex-row sm:justify-between">
             <dt className="opacity-60">Payout methods used</dt>
             <dd className="font-medium sm:text-right">
-              {payoutMethods.join(" · ") || "—"}
+              {person.payoutMethods.join(" · ") || "—"}
             </dd>
           </div>
         </dl>
       </section>
 
       <section className="mt-8">
-        <h2 className="text-lg font-bold">All their campaigns</h2>
+        <h2 className="text-lg font-bold">
+          All their campaigns ({person.campaigns.length})
+        </h2>
         <ul className="mt-4 divide-y divide-foreground/10 rounded-2xl border border-foreground/10 bg-card">
-          {campaigns.map((c) => (
+          {person.campaigns.map((c) => (
             <li key={c.id}>
               <Link
                 href={`/admin/${c.id}`}
@@ -240,11 +232,6 @@ export default async function AdminCreatorProfile({
               </Link>
             </li>
           ))}
-          {campaigns.length === 0 ? (
-            <li className="px-4 py-8 text-center text-sm opacity-60">
-              No campaigns yet.
-            </li>
-          ) : null}
         </ul>
       </section>
     </main>
