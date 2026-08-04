@@ -52,6 +52,26 @@ export async function freezeCampaign(formData: FormData) {
   revalidatePath("/");
 }
 
+// Record money actually sent to a campaigner (bKash/bank transfer done
+// outside Shohay). Powers the finance dashboard's paid-out totals.
+export async function recordPayout(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  const amount = Number(formData.get("amount"));
+  const note = String(formData.get("note") ?? "").trim();
+  const supabase = await getAdminClient();
+  if (!supabase || !id || !Number.isFinite(amount) || amount <= 0) return;
+
+  const { error } = await supabase.from("payouts").insert({
+    campaign_id: id,
+    amount,
+    ...(note ? { note } : {}),
+  });
+
+  if (error) console.error("Payout record failed:", error.message);
+  revalidatePath(`/admin/${id}`);
+  revalidatePath("/admin/finance");
+}
+
 export async function unfreezeCampaign(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const supabase = await getAdminClient();

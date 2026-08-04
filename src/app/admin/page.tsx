@@ -141,6 +141,18 @@ export default async function AdminDashboard({
             📈 Analytics
           </Link>
           <Link
+            href="/admin/finance"
+            className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
+          >
+            💰 Finance
+          </Link>
+          <Link
+            href="/admin/creators"
+            className="rounded-full border border-foreground/20 px-4 py-2 text-sm font-semibold hover:border-brand hover:text-brand"
+          >
+            👥 Creators
+          </Link>
+          <Link
             href="/admin/charities"
             className="rounded-full border border-foreground/20 px-4 py-2 text-sm font-semibold hover:border-brand hover:text-brand"
           >

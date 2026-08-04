@@ -15,6 +15,7 @@ import {
   rejectCampaign,
   freezeCampaign,
   unfreezeCampaign,
+  recordPayout,
 } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -84,6 +85,22 @@ export default async function AdminCampaignDetail({
       return { doc, url: signed?.signedUrl ?? null };
     })
   );
+
+  // Payout history — table exists only after finance.sql has run.
+  const { data: payoutRows } = await supabase
+    .from("payouts")
+    .select("id, amount, note, paid_at")
+    .eq("campaign_id", id)
+    .order("paid_at", { ascending: false });
+  const payouts = (payoutRows ?? []) as {
+    id: string;
+    amount: number;
+    note: string | null;
+    paid_at: string;
+  }[];
+  const paidOut = payouts.reduce((s, p) => s + Number(p.amount), 0);
+  const netOwed = Math.round(Number(c.raised_amount) * 0.97);
+  const remaining = Math.max(0, netOwed - paidOut);
 
   const category = CATEGORY_LABELS[c.category] ?? CATEGORY_LABELS.other;
 
@@ -226,6 +243,69 @@ export default async function AdminCampaignDetail({
             </div>
           </section>
         ) : null}
+
+        {/* Payouts */}
+        <section className="mt-6 rounded-2xl border border-foreground/10 bg-card p-6">
+          <h2 className="text-sm font-bold text-brand">💸 Payouts</h2>
+          <div className="mt-2">
+            <Row label="Raised" value={formatTaka(c.raised_amount)} />
+            <Row label="Net owed (after ~3% fee)" value={formatTaka(netOwed)} />
+            <Row label="Paid out so far" value={formatTaka(paidOut)} />
+            <Row label="Remaining to pay" value={formatTaka(remaining)} />
+          </div>
+
+          {payouts.length > 0 ? (
+            <ul className="mt-3 space-y-1.5 text-sm">
+              {payouts.map((p) => (
+                <li key={p.id} className="flex justify-between gap-3">
+                  <span className="opacity-60">
+                    {new Date(p.paid_at).toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                    {p.note ? ` — ${p.note}` : ""}
+                  </span>
+                  <span className="font-semibold">{formatTaka(p.amount)}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          <form action={recordPayout} className="mt-4 flex flex-wrap items-end gap-3">
+            <input type="hidden" name="id" value={c.id} />
+            <div>
+              <label className="block text-xs font-medium opacity-60" htmlFor="payout-amount">
+                Amount sent (৳)
+              </label>
+              <input
+                id="payout-amount"
+                name="amount"
+                type="number"
+                min={1}
+                step={1}
+                required
+                className="mt-1 w-36 rounded-xl border border-foreground/20 bg-background px-3 py-2 text-sm outline-none focus:border-brand"
+              />
+            </div>
+            <div className="min-w-[160px] flex-1">
+              <label className="block text-xs font-medium opacity-60" htmlFor="payout-note">
+                Note (optional — e.g. bKash TrxID)
+              </label>
+              <input
+                id="payout-note"
+                name="note"
+                className="mt-1 w-full rounded-xl border border-foreground/20 bg-background px-3 py-2 text-sm outline-none focus:border-brand"
+              />
+            </div>
+            <button
+              type="submit"
+              className="rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
+            >
+              Record payout
+            </button>
+          </form>
+        </section>
 
         {/* Private documents */}
         <section className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6">
