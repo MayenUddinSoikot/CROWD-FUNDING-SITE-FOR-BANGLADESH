@@ -49,9 +49,15 @@ function daysUntil(endsAt: string | null): number | null {
   return Math.ceil(ms / (24 * 60 * 60 * 1000));
 }
 
-export default async function AdminDashboard() {
+export default async function AdminDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; sort?: string; from?: string; to?: string }>;
+}) {
   const supabase = await getAdminClient();
   if (!supabase) redirect("/");
+
+  const { q = "", sort = "latest", from = "", to = "" } = await searchParams;
 
   const { data: all } = await supabase
     .from("campaigns")
@@ -77,13 +83,50 @@ export default async function AdminDashboard() {
   const frozen = campaigns.filter((c) => c.status === "frozen");
   const totalRaised = campaigns.reduce((sum, c) => sum + Number(c.raised_amount), 0);
 
+  // Search + filter + sort for the all-campaigns table.
+  const needle = q.trim().toLowerCase();
+  const fromTs = from ? new Date(from).getTime() : null;
+  const toTs = to ? new Date(to).getTime() + 24 * 60 * 60 * 1000 : null;
+  let filtered = campaigns.filter((c) => {
+    if (
+      needle &&
+      !c.title.toLowerCase().includes(needle) &&
+      !(c.beneficiary_name ?? "").toLowerCase().includes(needle) &&
+      !(c.district ?? "").toLowerCase().includes(needle)
+    ) {
+      return false;
+    }
+    const created = new Date(c.created_at).getTime();
+    if (fromTs !== null && created < fromTs) return false;
+    if (toTs !== null && created >= toTs) return false;
+    return true;
+  });
+  filtered = [...filtered].sort((a, b) => {
+    switch (sort) {
+      case "oldest":
+        return +new Date(a.created_at) - +new Date(b.created_at);
+      case "amount":
+        return Number(b.raised_amount) - Number(a.raised_amount);
+      case "goal":
+        return Number(b.goal_amount) - Number(a.goal_amount);
+      default:
+        return +new Date(b.created_at) - +new Date(a.created_at);
+    }
+  });
+
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-6 pb-16">
       <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-bold">
           Admin dashboard · <span className="font-bengali">অ্যাডমিন</span>
         </h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/admin/analytics"
+            className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
+          >
+            📈 Analytics
+          </Link>
           <Link
             href="/admin/charities"
             className="rounded-full border border-foreground/20 px-4 py-2 text-sm font-semibold hover:border-brand hover:text-brand"
@@ -196,6 +239,85 @@ export default async function AdminDashboard() {
 
       <section className="mt-10">
         <h2 className="text-lg font-bold">All campaigns</h2>
+
+        <form
+          method="get"
+          className="mt-4 flex flex-wrap items-end gap-3 rounded-2xl border border-foreground/10 bg-card p-4"
+        >
+          <div className="min-w-[180px] flex-1">
+            <label className="block text-xs font-medium opacity-60" htmlFor="q">
+              Search
+            </label>
+            <input
+              id="q"
+              name="q"
+              defaultValue={q}
+              placeholder="Title, beneficiary, district…"
+              className="mt-1 w-full rounded-xl border border-foreground/20 bg-background px-3 py-2 text-sm outline-none focus:border-brand"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium opacity-60" htmlFor="sort">
+              Sort by
+            </label>
+            <select
+              id="sort"
+              name="sort"
+              defaultValue={sort}
+              className="mt-1 rounded-xl border border-foreground/20 bg-background px-3 py-2 text-sm outline-none focus:border-brand"
+            >
+              <option value="latest">Latest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="amount">Most raised</option>
+              <option value="goal">Biggest goal</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium opacity-60" htmlFor="from">
+              From date
+            </label>
+            <input
+              id="from"
+              name="from"
+              type="date"
+              defaultValue={from}
+              className="mt-1 rounded-xl border border-foreground/20 bg-background px-3 py-2 text-sm outline-none focus:border-brand"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium opacity-60" htmlFor="to">
+              To date
+            </label>
+            <input
+              id="to"
+              name="to"
+              type="date"
+              defaultValue={to}
+              className="mt-1 rounded-xl border border-foreground/20 bg-background px-3 py-2 text-sm outline-none focus:border-brand"
+            />
+          </div>
+          <button
+            type="submit"
+            className="rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
+          >
+            Apply
+          </button>
+          {q || from || to || sort !== "latest" ? (
+            <Link
+              href="/admin"
+              className="text-sm font-medium opacity-60 hover:text-brand"
+            >
+              Clear
+            </Link>
+          ) : null}
+        </form>
+
+        {q || from || to ? (
+          <p className="mt-3 text-sm opacity-60">
+            {filtered.length} campaign{filtered.length === 1 ? "" : "s"} match.
+          </p>
+        ) : null}
+
         {campaigns.length === 0 ? (
           <p className="mt-4 text-sm opacity-60">No campaigns yet.</p>
         ) : (
@@ -211,7 +333,7 @@ export default async function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-foreground/10">
-                {campaigns.map((c) => {
+                {filtered.map((c) => {
                   const badge = STATUS_BADGE[c.status] ?? STATUS_BADGE.draft;
                   return (
                     <tr key={c.id} className="transition hover:bg-foreground/5">

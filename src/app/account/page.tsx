@@ -91,37 +91,35 @@ export default async function AccountPage({
           <ul className="mt-6 space-y-3">
             {campaigns.map((campaign) => {
               const status = STATUS_LABEL[campaign.status];
-              const isPublic =
-                campaign.status === "approved" || campaign.status === "completed";
-              const content = (
-                <div className="flex items-center justify-between gap-4 rounded-xl border border-foreground/10 bg-card p-4">
-                  <div>
-                    <p className="font-semibold">{campaign.title}</p>
-                    {campaign.title_bn ? (
-                      <p className="font-bengali text-sm opacity-70">
-                        {campaign.title_bn}
-                      </p>
-                    ) : null}
-                    <p className="mt-1 text-sm opacity-60">
-                      {formatTaka(campaign.raised_amount)} of{" "}
-                      {formatTaka(campaign.goal_amount)}
-                    </p>
-                  </div>
-                  <span
-                    className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}
-                  >
-                    {status.en}
-                  </span>
-                </div>
-              );
-
               return (
                 <li key={campaign.id}>
-                  {isPublic ? (
-                    <Link href={`/campaigns/${campaign.slug}`}>{content}</Link>
-                  ) : (
-                    content
-                  )}
+                  <Link
+                    href={`/account/campaigns/${campaign.id}`}
+                    className="flex items-center justify-between gap-4 rounded-xl border border-foreground/10 bg-card p-4 transition hover:border-brand/50"
+                  >
+                    <div>
+                      <p className="font-semibold">{campaign.title}</p>
+                      {campaign.title_bn ? (
+                        <p className="font-bengali text-sm opacity-70">
+                          {campaign.title_bn}
+                        </p>
+                      ) : null}
+                      <p className="mt-1 text-sm opacity-60">
+                        {formatTaka(campaign.raised_amount)} of{" "}
+                        {formatTaka(campaign.goal_amount)}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5">
+                      <span
+                        className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}
+                      >
+                        {status.en}
+                      </span>
+                      <span className="text-xs font-medium text-brand">
+                        Manage →
+                      </span>
+                    </div>
+                  </Link>
                 </li>
               );
             })}

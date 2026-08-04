@@ -20,6 +20,10 @@ export async function postUpdate(
     return { error: "Write something before posting." };
   }
 
+  const imageUrl = String(formData.get("image_url") ?? "").trim();
+  const videoUrl = String(formData.get("video_url") ?? "").trim();
+  const validUrl = (u: string) => /^https:\/\/\S+$/.test(u) && u.length <= 500;
+
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -27,9 +31,14 @@ export async function postUpdate(
   if (!user) return { error: "Please log in again." };
 
   // RLS lets only the campaign's creator (or an admin) insert here.
-  const { error } = await supabase
-    .from("campaign_updates")
-    .insert({ campaign_id: campaignId, body });
+  // Media keys are only sent when present, so posting keeps working
+  // even if campaigner-tools.sql hasn't been run yet.
+  const { error } = await supabase.from("campaign_updates").insert({
+    campaign_id: campaignId,
+    body,
+    ...(validUrl(imageUrl) ? { image_url: imageUrl } : {}),
+    ...(validUrl(videoUrl) ? { video_url: videoUrl } : {}),
+  });
 
   if (error) {
     console.error("Failed to post update:", error.message);
@@ -37,5 +46,6 @@ export async function postUpdate(
   }
 
   if (slug) revalidatePath(`/campaigns/${slug}`);
+  revalidatePath(`/account/campaigns/${campaignId}`);
   return { posted: true };
 }

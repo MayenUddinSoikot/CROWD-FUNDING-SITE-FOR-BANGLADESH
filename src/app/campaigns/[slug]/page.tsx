@@ -15,7 +15,9 @@ import {
   RELATIONSHIP_LABELS,
   OCCASION_LABELS,
   SOCIAL_PLATFORMS,
+  youtubeEmbedUrl,
 } from "@/lib/types";
+import { TrackView } from "@/components/TrackView";
 import { formatTaka, timeAgo } from "@/lib/format";
 import { RealtimeCampaignStats } from "@/components/RealtimeCampaignStats";
 import { ShareButtons } from "@/components/ShareButtons";
@@ -174,12 +176,25 @@ async function getCreator(creatorId: string): Promise<PublicCreator | null> {
 async function getUpdates(campaignId: string): Promise<CampaignUpdate[]> {
   try {
     const supabase = getSupabaseClient();
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from("campaign_updates")
-      .select("id, campaign_id, body, created_at")
+      .select("id, campaign_id, body, image_url, video_url, created_at")
       .eq("campaign_id", campaignId)
       .order("created_at", { ascending: false })
       .limit(50);
+
+    // Media columns exist only after campaigner-tools.sql — fall back.
+    if (error) {
+      const retry = await supabase
+        .from("campaign_updates")
+        .select("id, campaign_id, body, created_at")
+        .eq("campaign_id", campaignId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      data = (retry.data ?? []) as unknown as typeof data;
+      error = retry.error;
+    }
+
     if (error) {
       console.error("Failed to load updates:", error.message);
       return [];
@@ -269,6 +284,7 @@ export default async function CampaignPage({
 
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 sm:px-6">
+      <TrackView campaignId={campaign.id} />
       <h1 className="mt-8 font-serif text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl">
         {campaign.title}
       </h1>
@@ -539,19 +555,52 @@ export default async function CampaignPage({
               </p>
             ) : (
               <ul className="mt-4 space-y-3">
-                {updates.map((update) => (
-                  <li
-                    key={update.id}
-                    className="rounded-xl border border-foreground/10 bg-card p-4"
-                  >
-                    <p className="whitespace-pre-line text-sm leading-relaxed">
-                      {update.body}
-                    </p>
-                    <p className="mt-2 text-xs opacity-50">
-                      {timeAgo(update.created_at)}
-                    </p>
-                  </li>
-                ))}
+                {updates.map((update) => {
+                  const embed = update.video_url
+                    ? youtubeEmbedUrl(update.video_url)
+                    : null;
+                  return (
+                    <li
+                      key={update.id}
+                      className="rounded-xl border border-foreground/10 bg-card p-4"
+                    >
+                      <p className="whitespace-pre-line text-sm leading-relaxed">
+                        {update.body}
+                      </p>
+                      {update.image_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={update.image_url}
+                          alt=""
+                          loading="lazy"
+                          className="mt-3 max-h-96 w-full rounded-xl object-cover"
+                        />
+                      ) : null}
+                      {embed ? (
+                        <div className="mt-3 aspect-video overflow-hidden rounded-xl">
+                          <iframe
+                            src={embed}
+                            title="Update video"
+                            allowFullScreen
+                            className="h-full w-full bg-black"
+                          />
+                        </div>
+                      ) : update.video_url ? (
+                        <a
+                          href={update.video_url}
+                          target="_blank"
+                          rel="noopener noreferrer nofollow"
+                          className="mt-3 inline-block text-sm font-medium text-brand hover:underline"
+                        >
+                          ▶️ Watch video →
+                        </a>
+                      ) : null}
+                      <p className="mt-2 text-xs opacity-50">
+                        {timeAgo(update.created_at)}
+                      </p>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </section>

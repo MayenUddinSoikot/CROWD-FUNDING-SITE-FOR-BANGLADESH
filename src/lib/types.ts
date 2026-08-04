@@ -80,6 +80,8 @@ export type CampaignUpdate = {
   id: string;
   campaign_id: string;
   body: string;
+  image_url?: string | null;
+  video_url?: string | null;
   created_at: string;
 };
 

@@ -2,13 +2,21 @@
 
 import { useState } from "react";
 
-export function ShareButtons({ title }: { title: string }) {
+export function ShareButtons({
+  title,
+  path,
+}: {
+  title: string;
+  path?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState("");
   const [copied, setCopied] = useState(false);
 
   function openModal() {
-    setUrl(typeof window !== "undefined" ? window.location.href : "");
+    if (typeof window !== "undefined") {
+      setUrl(path ? `${window.location.origin}${path}` : window.location.href);
+    }
     setOpen(true);
   }
 
