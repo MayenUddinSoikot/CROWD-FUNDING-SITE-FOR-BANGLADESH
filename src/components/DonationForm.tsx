@@ -28,6 +28,10 @@ export function DonationForm({
   const [custom, setCustom] = useState<string>("");
   const [tipPercent, setTipPercent] = useState<number>(5);
   const [customTip, setCustomTip] = useState<string>("");
+  const [donorName, setDonorName] = useState("");
+  const [contact, setContact] = useState("");
+  const [message, setMessage] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
 
   const effectiveAmount = custom ? Math.max(0, Math.round(Number(custom))) : amount;
   const tip = customTip
@@ -150,7 +154,13 @@ export function DonationForm({
       <label className="mt-6 block text-sm font-medium" htmlFor="donor_name">
         Your name (optional)
       </label>
-      <input id="donor_name" name="donor_name" className={inputClass} />
+      <input
+        id="donor_name"
+        name="donor_name"
+        value={donorName}
+        onChange={(e) => setDonorName(e.target.value)}
+        className={inputClass}
+      />
 
       <label className="mt-3 block text-sm font-medium" htmlFor="contact">
         Phone or email · থ্যাংক-ইউ পাঠাতে
@@ -159,6 +169,8 @@ export function DonationForm({
         id="contact"
         name="contact"
         required
+        value={contact}
+        onChange={(e) => setContact(e.target.value)}
         placeholder="01XXXXXXXXX or you@email.com"
         className={inputClass}
       />
@@ -170,12 +182,20 @@ export function DonationForm({
         id="message"
         name="message"
         maxLength={25}
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
         placeholder="Get well soon!"
         className={inputClass}
       />
 
       <label className="mt-3 flex items-center gap-2 text-sm">
-        <input type="checkbox" name="is_anonymous" className="h-4 w-4" />
+        <input
+          type="checkbox"
+          name="is_anonymous"
+          checked={isAnonymous}
+          onChange={(e) => setIsAnonymous(e.target.checked)}
+          className="h-4 w-4"
+        />
         Donate anonymously · নাম গোপন রাখুন
       </label>
 

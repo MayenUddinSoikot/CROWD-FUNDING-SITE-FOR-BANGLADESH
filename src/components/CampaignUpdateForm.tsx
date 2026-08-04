@@ -15,9 +15,23 @@ export function CampaignUpdateForm({
   slug: string;
 }) {
   const [state, action, pending] = useActionState(postUpdate, undefined);
+  const [body, setBody] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // Clear the form only once, right after a successful post — never on
+  // error, so a failed submit (e.g. session expired) keeps what was typed.
+  const [handledState, setHandledState] = useState(state);
+  if (state !== handledState) {
+    setHandledState(state);
+    if (state?.posted) {
+      setBody("");
+      setVideoUrl("");
+      setImageUrl("");
+    }
+  }
 
   async function handlePhoto(files: FileList | null) {
     if (!files || files.length === 0) return;
@@ -63,6 +77,8 @@ export function CampaignUpdateForm({
         name="body"
         rows={3}
         required
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
         placeholder="e.g. The hospital bed is booked — thank you all!"
         className="mt-1 w-full rounded-xl border border-foreground/20 bg-card px-4 py-2.5 outline-none focus:border-brand"
       />
@@ -96,6 +112,8 @@ export function CampaignUpdateForm({
             id="video_url"
             name="video_url"
             type="url"
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
             placeholder="https://youtube.com/watch?v=…"
             className="mt-1 w-full rounded-xl border border-foreground/20 bg-card px-3 py-1.5 text-sm outline-none focus:border-brand"
           />

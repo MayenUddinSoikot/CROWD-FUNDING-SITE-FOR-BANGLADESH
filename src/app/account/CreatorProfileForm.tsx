@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { saveCreatorProfile } from "./actions";
 
@@ -16,6 +16,12 @@ type Profile = {
 
 export function CreatorProfileForm({ profile }: { profile: Profile }) {
   const [state, action, pending] = useActionState(saveCreatorProfile, undefined);
+  // Controlled so a validation error (e.g. username taken) never wipes
+  // out edits you just typed into the other fields.
+  const [username, setUsername] = useState(profile.username ?? "");
+  const [displayName, setDisplayName] = useState(profile.display_name ?? "");
+  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? "");
+  const [bio, setBio] = useState(profile.bio ?? "");
 
   return (
     <form action={action} className="rounded-2xl border border-foreground/10 bg-card p-5">
@@ -35,7 +41,8 @@ export function CreatorProfileForm({ profile }: { profile: Profile }) {
         <input
           id="username"
           name="username"
-          defaultValue={profile.username ?? ""}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           placeholder="dhaka-street-stories"
           className="flex-1 rounded-xl border border-foreground/20 bg-card px-4 py-2.5 outline-none focus:border-brand"
         />
@@ -47,7 +54,8 @@ export function CreatorProfileForm({ profile }: { profile: Profile }) {
       <input
         id="display_name"
         name="display_name"
-        defaultValue={profile.display_name ?? ""}
+        value={displayName}
+        onChange={(e) => setDisplayName(e.target.value)}
         placeholder="Dhaka Street Stories"
         className={inputClass}
       />
@@ -59,7 +67,8 @@ export function CreatorProfileForm({ profile }: { profile: Profile }) {
         id="avatar_url"
         name="avatar_url"
         type="url"
-        defaultValue={profile.avatar_url ?? ""}
+        value={avatarUrl}
+        onChange={(e) => setAvatarUrl(e.target.value)}
         placeholder="https://…"
         className={inputClass}
       />
@@ -71,7 +80,8 @@ export function CreatorProfileForm({ profile }: { profile: Profile }) {
         id="bio"
         name="bio"
         rows={3}
-        defaultValue={profile.bio ?? ""}
+        value={bio}
+        onChange={(e) => setBio(e.target.value)}
         placeholder="What you create and why people should support you."
         className={inputClass}
       />

@@ -63,6 +63,72 @@ const TYPE_OPTIONS: {
   },
 ];
 
+// Every text/select/textarea field lives here, controlled — React's <form
+// action> resets uncontrolled fields to blank once the action finishes,
+// even when it finishes with a validation error. Controlled fields always
+// reflect this state instead, so nothing typed is ever lost.
+type Values = {
+  title: string;
+  category: string;
+  beneficiary_name: string;
+  district: string;
+  organizer_name: string;
+  organizer_relationship: string;
+  occasion: string;
+  title_bn: string;
+  summary: string;
+  summary_bn: string;
+  story: string;
+  story_bn: string;
+  social_facebook: string;
+  social_instagram: string;
+  social_youtube: string;
+  social_tiktok: string;
+  goal_amount: string;
+  duration_days: string;
+  applicant_name: string;
+  applicant_nid: string;
+  applicant_phone: string;
+  applicant_email: string;
+  notes: string;
+  bkash_number: string;
+  bank_name: string;
+  bank_account_name: string;
+  bank_account_number: string;
+  bank_branch: string;
+};
+
+const INITIAL_VALUES: Values = {
+  title: "",
+  category: "",
+  beneficiary_name: "",
+  district: "",
+  organizer_name: "",
+  organizer_relationship: "",
+  occasion: "",
+  title_bn: "",
+  summary: "",
+  summary_bn: "",
+  story: "",
+  story_bn: "",
+  social_facebook: "",
+  social_instagram: "",
+  social_youtube: "",
+  social_tiktok: "",
+  goal_amount: "",
+  duration_days: "30",
+  applicant_name: "",
+  applicant_nid: "",
+  applicant_phone: "",
+  applicant_email: "",
+  notes: "",
+  bkash_number: "",
+  bank_name: "",
+  bank_account_name: "",
+  bank_account_number: "",
+  bank_branch: "",
+};
+
 export function CampaignWizard({
   userId,
   charities,
@@ -77,8 +143,15 @@ export function CampaignWizard({
   const [creatorMode, setCreatorMode] = useState<"monthly" | "project">(
     "monthly"
   );
+  const [values, setValues] = useState<Values>(INITIAL_VALUES);
   const isCreator = type === "creator";
   const isOccasion = type === "occasion";
+
+  function set<K extends keyof Values>(field: K) {
+    return (
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    ) => setValues((v) => ({ ...v, [field]: e.target.value }));
+  }
 
   return (
     <form action={action} className="mt-8 w-full max-w-2xl text-left">
@@ -118,6 +191,8 @@ export function CampaignWizard({
           name="title"
           required
           maxLength={120}
+          value={values.title}
+          onChange={set("title")}
           placeholder={
             isCreator
               ? "e.g. Dhaka Street Stories — monthly support"
@@ -131,7 +206,14 @@ export function CampaignWizard({
         <label className="mt-4 block text-sm font-medium" htmlFor="category">
           Category · ক্যাটাগরি
         </label>
-        <select id="category" name="category" required className={inputClass}>
+        <select
+          id="category"
+          name="category"
+          required
+          value={values.category}
+          onChange={set("category")}
+          className={inputClass}
+        >
           <option value="">Choose a category</option>
           {(
             Object.entries(CATEGORY_LABELS) as [
@@ -159,6 +241,8 @@ export function CampaignWizard({
               id="beneficiary_name"
               name="beneficiary_name"
               required
+              value={values.beneficiary_name}
+              onChange={set("beneficiary_name")}
               placeholder={
                 isCreator
                   ? "e.g. Dhaka Street Stories"
@@ -177,6 +261,8 @@ export function CampaignWizard({
               id="district"
               name="district"
               required
+              value={values.district}
+              onChange={set("district")}
               placeholder="Jashore"
               className={inputClass}
             />
@@ -201,6 +287,8 @@ export function CampaignWizard({
                 id="organizer_name"
                 name="organizer_name"
                 required
+                value={values.organizer_name}
+                onChange={set("organizer_name")}
                 placeholder="Your name"
                 className={inputClass}
               />
@@ -216,7 +304,8 @@ export function CampaignWizard({
                 id="organizer_relationship"
                 name="organizer_relationship"
                 required
-                defaultValue=""
+                value={values.organizer_relationship}
+                onChange={set("organizer_relationship")}
                 className={inputClass}
               >
                 <option value="">Choose…</option>
@@ -239,7 +328,8 @@ export function CampaignWizard({
               id="occasion"
               name="occasion"
               required
-              defaultValue=""
+              value={values.occasion}
+              onChange={set("occasion")}
               className={inputClass}
             >
               <option value="">Choose an occasion</option>
@@ -263,6 +353,8 @@ export function CampaignWizard({
         <input
           id="title_bn"
           name="title_bn"
+          value={values.title_bn}
+          onChange={set("title_bn")}
           className={`font-bengali ${inputClass}`}
           placeholder="রহিমের হার্ট সার্জারিতে সাহায্য করুন"
         />
@@ -281,6 +373,8 @@ export function CampaignWizard({
           required
           rows={2}
           maxLength={280}
+          value={values.summary}
+          onChange={set("summary")}
           className={inputClass}
         />
 
@@ -292,6 +386,8 @@ export function CampaignWizard({
           name="summary_bn"
           rows={2}
           maxLength={280}
+          value={values.summary_bn}
+          onChange={set("summary_bn")}
           className={`font-bengali ${inputClass}`}
         />
 
@@ -299,7 +395,15 @@ export function CampaignWizard({
           {isCreator ? "About you & your work (English)" : "Full story (English)"}{" "}
           <Req />
         </label>
-        <textarea id="story" name="story" required rows={5} className={inputClass} />
+        <textarea
+          id="story"
+          name="story"
+          required
+          rows={5}
+          value={values.story}
+          onChange={set("story")}
+          className={inputClass}
+        />
 
         <label className="font-bengali mt-4 block text-sm font-medium" htmlFor="story_bn">
           সম্পূর্ণ বিবরণ (বাংলা) <span className="font-sans">(optional)</span>
@@ -308,6 +412,8 @@ export function CampaignWizard({
           id="story_bn"
           name="story_bn"
           rows={5}
+          value={values.story_bn}
+          onChange={set("story_bn")}
           className={`font-bengali ${inputClass}`}
         />
       </Section>
@@ -326,6 +432,8 @@ export function CampaignWizard({
                 id="social_facebook"
                 name="social_facebook"
                 type="url"
+                value={values.social_facebook}
+                onChange={set("social_facebook")}
                 placeholder="https://facebook.com/yourpage"
                 className={inputClass}
               />
@@ -338,6 +446,8 @@ export function CampaignWizard({
                 id="social_instagram"
                 name="social_instagram"
                 type="url"
+                value={values.social_instagram}
+                onChange={set("social_instagram")}
                 placeholder="https://instagram.com/yourhandle"
                 className={inputClass}
               />
@@ -350,6 +460,8 @@ export function CampaignWizard({
                 id="social_youtube"
                 name="social_youtube"
                 type="url"
+                value={values.social_youtube}
+                onChange={set("social_youtube")}
                 placeholder="https://youtube.com/@yourchannel"
                 className={inputClass}
               />
@@ -362,6 +474,8 @@ export function CampaignWizard({
                 id="social_tiktok"
                 name="social_tiktok"
                 type="url"
+                value={values.social_tiktok}
+                onChange={set("social_tiktok")}
                 placeholder="https://tiktok.com/@yourhandle"
                 className={inputClass}
               />
@@ -425,6 +539,8 @@ export function CampaignWizard({
               min={1}
               step={1}
               required
+              value={values.goal_amount}
+              onChange={set("goal_amount")}
               placeholder="50000"
               className={inputClass}
             />
@@ -437,7 +553,8 @@ export function CampaignWizard({
                 <select
                   id="duration_days"
                   name="duration_days"
-                  defaultValue="30"
+                  value={values.duration_days}
+                  onChange={set("duration_days")}
                   className={inputClass}
                 >
                   <option value="7">7 days</option>
@@ -465,6 +582,8 @@ export function CampaignWizard({
                 min={1}
                 step={1}
                 required
+                value={values.goal_amount}
+                onChange={set("goal_amount")}
                 placeholder="350000"
                 className={inputClass}
               />
@@ -476,7 +595,8 @@ export function CampaignWizard({
               <select
                 id="duration_days"
                 name="duration_days"
-                defaultValue="30"
+                value={values.duration_days}
+                onChange={set("duration_days")}
                 className={inputClass}
               >
                 <option value="7">7 days</option>
@@ -510,6 +630,8 @@ export function CampaignWizard({
               id="applicant_name"
               name="applicant_name"
               required
+              value={values.applicant_name}
+              onChange={set("applicant_name")}
               className={inputClass}
             />
           </div>
@@ -521,6 +643,8 @@ export function CampaignWizard({
               id="applicant_nid"
               name="applicant_nid"
               required
+              value={values.applicant_nid}
+              onChange={set("applicant_nid")}
               className={inputClass}
             />
           </div>
@@ -533,6 +657,8 @@ export function CampaignWizard({
               name="applicant_phone"
               type="tel"
               required
+              value={values.applicant_phone}
+              onChange={set("applicant_phone")}
               placeholder="01XXXXXXXXX"
               className={inputClass}
             />
@@ -545,6 +671,8 @@ export function CampaignWizard({
               id="applicant_email"
               name="applicant_email"
               type="email"
+              value={values.applicant_email}
+              onChange={set("applicant_email")}
               className={inputClass}
             />
           </div>
@@ -560,7 +688,14 @@ export function CampaignWizard({
           <label className="mt-4 block text-sm font-medium" htmlFor="notes">
             Anything else for the reviewer (optional)
           </label>
-          <textarea id="notes" name="notes" rows={3} className={inputClass} />
+          <textarea
+            id="notes"
+            name="notes"
+            rows={3}
+            value={values.notes}
+            onChange={set("notes")}
+            className={inputClass}
+          />
         </Section>
       ) : (
         <Section
@@ -580,6 +715,8 @@ export function CampaignWizard({
                 id="bkash_number"
                 name="bkash_number"
                 type="tel"
+                value={values.bkash_number}
+                onChange={set("bkash_number")}
                 placeholder="01XXXXXXXXX"
                 className={inputClass}
               />
@@ -588,25 +725,49 @@ export function CampaignWizard({
               <label className="block text-sm font-medium" htmlFor="bank_name">
                 Bank name
               </label>
-              <input id="bank_name" name="bank_name" className={inputClass} />
+              <input
+                id="bank_name"
+                name="bank_name"
+                value={values.bank_name}
+                onChange={set("bank_name")}
+                className={inputClass}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium" htmlFor="bank_account_name">
                 Account holder name
               </label>
-              <input id="bank_account_name" name="bank_account_name" className={inputClass} />
+              <input
+                id="bank_account_name"
+                name="bank_account_name"
+                value={values.bank_account_name}
+                onChange={set("bank_account_name")}
+                className={inputClass}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium" htmlFor="bank_account_number">
                 Account number
               </label>
-              <input id="bank_account_number" name="bank_account_number" className={inputClass} />
+              <input
+                id="bank_account_number"
+                name="bank_account_number"
+                value={values.bank_account_number}
+                onChange={set("bank_account_number")}
+                className={inputClass}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium" htmlFor="bank_branch">
                 Branch (optional)
               </label>
-              <input id="bank_branch" name="bank_branch" className={inputClass} />
+              <input
+                id="bank_branch"
+                name="bank_branch"
+                value={values.bank_branch}
+                onChange={set("bank_branch")}
+                className={inputClass}
+              />
             </div>
           </div>
 
@@ -619,6 +780,8 @@ export function CampaignWizard({
                 id="notes"
                 name="notes"
                 rows={3}
+                value={values.notes}
+                onChange={set("notes")}
                 placeholder="e.g. equipment, travel for stories, a documentary series…"
                 className={inputClass}
               />
@@ -628,7 +791,14 @@ export function CampaignWizard({
               <label className="mt-4 block text-sm font-medium" htmlFor="notes">
                 Anything else for the reviewer (optional)
               </label>
-              <textarea id="notes" name="notes" rows={3} className={inputClass} />
+              <textarea
+                id="notes"
+                name="notes"
+                rows={3}
+                value={values.notes}
+                onChange={set("notes")}
+                className={inputClass}
+              />
             </>
           )}
         </Section>
