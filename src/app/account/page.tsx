@@ -16,6 +16,7 @@ const STATUS_LABEL: Record<Campaign["status"], { en: string; className: string }
   approved: { en: "Live", className: "bg-brand/15 text-brand" },
   rejected: { en: "Needs changes", className: "bg-accent/15 text-accent" },
   completed: { en: "Completed", className: "bg-foreground/10 text-foreground" },
+  frozen: { en: "Frozen", className: "bg-sky-500/15 text-sky-700" },
 };
 
 export default async function AccountPage({

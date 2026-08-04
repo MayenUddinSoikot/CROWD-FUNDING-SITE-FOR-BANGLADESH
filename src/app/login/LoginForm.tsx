@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { login } from "./actions";
 
 export function LoginForm() {
@@ -31,6 +32,12 @@ export function LoginForm() {
         autoComplete="current-password"
         className="mt-1 w-full rounded-xl border border-foreground/20 bg-card px-4 py-2.5 outline-none focus:border-brand"
       />
+
+      <p className="mt-2 text-right text-sm">
+        <Link href="/forgot-password" className="text-brand hover:underline">
+          Forgot password? · পাসওয়ার্ড ভুলে গেছেন?
+        </Link>
+      </p>
 
       {state?.error ? (
         <p className="mt-3 text-sm text-accent">{state.error}</p>

@@ -10,7 +10,12 @@ import type {
   CampaignDocument,
 } from "@/lib/types";
 import { DOC_TYPE_LABELS } from "@/lib/types";
-import { approveCampaign, rejectCampaign } from "../actions";
+import {
+  approveCampaign,
+  rejectCampaign,
+  freezeCampaign,
+  unfreezeCampaign,
+} from "../actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Review campaign — Shohay সহায়" };
@@ -116,6 +121,33 @@ export default async function AdminCampaignDetail({
               Reject · বাতিল
             </button>
           </form>
+          {c.status === "frozen" ? (
+            <form action={unfreezeCampaign}>
+              <input type="hidden" name="id" value={c.id} />
+              <button
+                type="submit"
+                className="rounded-full border border-sky-500 px-5 py-2 text-sm font-semibold text-sky-600 hover:bg-sky-500/10"
+              >
+                🧊 Unfreeze · আনফ্রিজ
+              </button>
+            </form>
+          ) : (
+            <form action={freezeCampaign}>
+              <input type="hidden" name="id" value={c.id} />
+              <button
+                type="submit"
+                className="rounded-full border border-sky-500 px-5 py-2 text-sm font-semibold text-sky-600 hover:bg-sky-500/10"
+              >
+                🧊 Freeze funds
+              </button>
+            </form>
+          )}
+          <Link
+            href={`/admin/${c.id}/report`}
+            className="rounded-full border border-foreground/20 px-5 py-2 text-sm font-semibold hover:border-brand hover:text-brand"
+          >
+            📄 Donation report (PDF)
+          </Link>
           {c.status === "approved" ? (
             <Link
               href={`/campaigns/${c.slug}`}

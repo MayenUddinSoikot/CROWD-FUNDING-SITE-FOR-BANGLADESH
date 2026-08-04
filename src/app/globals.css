@@ -28,3 +28,19 @@ body {
   font-family: var(--font-geist-sans), var(--font-bengali), Arial, Helvetica,
     sans-serif;
 }
+
+/* Print: the donation report becomes a clean PDF — hide site chrome. */
+@media print {
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+  .print-area {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+}

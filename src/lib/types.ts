@@ -25,7 +25,7 @@ export type Campaign = {
   category: CampaignCategory;
   goal_amount: number;
   raised_amount: number;
-  status: "draft" | "pending" | "approved" | "rejected" | "completed";
+  status: "draft" | "pending" | "approved" | "rejected" | "completed" | "frozen";
   cover_image_url: string | null;
   video_url: string | null;
   beneficiary_name: string | null;
