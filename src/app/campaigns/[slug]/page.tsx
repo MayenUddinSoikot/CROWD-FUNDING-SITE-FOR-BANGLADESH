@@ -18,7 +18,7 @@ import {
   youtubeEmbedUrl,
 } from "@/lib/types";
 import { TrackView } from "@/components/TrackView";
-import { formatTaka, timeAgo } from "@/lib/format";
+import { formatTaka, timeAgo, formatCampaignId } from "@/lib/format";
 import { RealtimeCampaignStats } from "@/components/RealtimeCampaignStats";
 import { ShareButtons } from "@/components/ShareButtons";
 import { MediaCarousel } from "@/components/MediaCarousel";
@@ -60,13 +60,13 @@ async function getCampaign(slug: string): Promise<Campaign | null> {
     const supabase = getSupabaseClient();
     let { data, error } = await supabase
       .from("campaigns")
-      .select(`${CAMPAIGN_FIELDS}, social_links`)
+      .select(`${CAMPAIGN_FIELDS}, social_links, campaign_no`)
       .eq("slug", slug)
       .in("status", ["approved", "completed"])
       .maybeSingle();
 
-    // social_links only exists after creator-socials.sql has been run —
-    // fall back to the base fields so campaigns never 404 because of it.
+    // social_links / campaign_no exist only after their SQL scripts have
+    // run — fall back to the base fields so campaigns never 404.
     if (error) {
       ({ data, error } = await supabase
         .from("campaigns")
@@ -317,6 +317,11 @@ export default async function CampaignPage({
                 <span className="opacity-70"> · {campaign.district}</span>
               ) : null}
             </span>
+            {formatCampaignId(campaign.campaign_no) ? (
+              <span className="rounded-full border border-foreground/15 px-2.5 py-0.5 text-xs font-medium opacity-60">
+                ID {formatCampaignId(campaign.campaign_no)}
+              </span>
+            ) : null}
           </div>
 
           {campaign.organizer_name || campaign.beneficiary_name ? (

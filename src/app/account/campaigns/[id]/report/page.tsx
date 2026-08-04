@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { formatTaka } from "@/lib/format";
+import { formatTaka, formatCampaignId } from "@/lib/format";
 import type { Campaign, PublicDonation } from "@/lib/types";
 import { PrintButton } from "@/components/PrintButton";
 
@@ -44,14 +44,23 @@ export default async function CampaignerReportPage({
 
   const { id } = await params;
 
-  const { data } = await supabase
+  const reportFields =
+    "id, slug, title, title_bn, goal_amount, raised_amount, status, beneficiary_name, district, is_recurring, ends_at, created_at, creator_id";
+  let { data } = await supabase
     .from("campaigns")
-    .select(
-      "id, slug, title, title_bn, goal_amount, raised_amount, status, beneficiary_name, district, is_recurring, ends_at, created_at, creator_id"
-    )
+    .select(`${reportFields}, campaign_no`)
     .eq("id", id)
     .eq("creator_id", user.id)
     .maybeSingle();
+  if (!data) {
+    const retry = await supabase
+      .from("campaigns")
+      .select(reportFields)
+      .eq("id", id)
+      .eq("creator_id", user.id)
+      .maybeSingle();
+    data = (retry.data ?? null) as unknown as typeof data;
+  }
   if (!data) notFound();
   const c = data as Campaign;
 
@@ -95,6 +104,9 @@ export default async function CampaignerReportPage({
             <p className="font-bengali opacity-80">{c.title_bn}</p>
           ) : null}
           <p className="mt-1 text-sm opacity-60">
+            {formatCampaignId(c.campaign_no)
+              ? `Campaign ID ${formatCampaignId(c.campaign_no)} · `
+              : ""}
             {c.beneficiary_name ? `For ${c.beneficiary_name} · ` : ""}
             {c.district ? `${c.district} · ` : ""}
             Report generated {generatedAt}

@@ -41,6 +41,7 @@ export type Campaign = {
   created_at: string;
   creator_id?: string | null;
   social_links?: Record<string, string> | null;
+  campaign_no?: number | null;
 };
 
 // Social platforms a creator can link on their fundraiser.

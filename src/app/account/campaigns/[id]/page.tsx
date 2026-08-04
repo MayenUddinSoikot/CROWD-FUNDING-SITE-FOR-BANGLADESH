@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { formatTaka, percentRaised } from "@/lib/format";
+import { formatTaka, percentRaised, formatCampaignId } from "@/lib/format";
 import type { Campaign } from "@/lib/types";
 import { ProgressBar } from "@/components/ProgressBar";
 import { ShareButtons } from "@/components/ShareButtons";
@@ -60,14 +60,24 @@ export default async function ManageCampaignPage({
 
   const { id } = await params;
 
-  const { data } = await supabase
+  const manageFields =
+    "id, slug, title, title_bn, category, goal_amount, raised_amount, status, campaign_type, is_recurring, cycle_days, cycle_anchor, district, ends_at, created_at, creator_id";
+  let { data } = await supabase
     .from("campaigns")
-    .select(
-      "id, slug, title, title_bn, category, goal_amount, raised_amount, status, campaign_type, is_recurring, cycle_days, cycle_anchor, district, ends_at, created_at, creator_id"
-    )
+    .select(`${manageFields}, campaign_no`)
     .eq("id", id)
     .eq("creator_id", user.id)
     .maybeSingle();
+  if (!data) {
+    // campaign_no exists only after campaign-ids.sql — fall back safely.
+    const retry = await supabase
+      .from("campaigns")
+      .select(manageFields)
+      .eq("id", id)
+      .eq("creator_id", user.id)
+      .maybeSingle();
+    data = (retry.data ?? null) as unknown as typeof data;
+  }
   if (!data) notFound();
   const c = data as Campaign;
 
@@ -95,6 +105,11 @@ export default async function ManageCampaignPage({
         >
           {status.en} · <span className="font-bengali">{status.bn}</span>
         </span>
+        {formatCampaignId(c.campaign_no) ? (
+          <span className="rounded-full border border-foreground/15 px-2.5 py-0.5 text-xs font-semibold">
+            ID {formatCampaignId(c.campaign_no)}
+          </span>
+        ) : null}
         <span className="text-xs opacity-60">
           Created {created === 0 ? "today" : `${created} day${created === 1 ? "" : "s"} ago`}
         </span>

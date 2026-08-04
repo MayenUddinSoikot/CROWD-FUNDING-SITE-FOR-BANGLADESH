@@ -53,22 +53,34 @@ function applySpecialFilter(list: Campaign[], filter: string | undefined): Campa
   return list;
 }
 
+const SEARCH_FIELDS =
+  "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, organizer_name, organizer_relationship, campaign_type, occasion, is_recurring, cycle_days, cycle_anchor, district, ends_at, created_at";
+
 async function getAllCampaigns(): Promise<Campaign[]> {
   if (!isSupabaseConfigured()) return [];
   try {
     const supabase = getSupabaseClient();
-    const { data } = await supabase
-      .from("campaigns")
-      .select(
-        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, organizer_name, organizer_relationship, campaign_type, occasion, is_recurring, cycle_days, cycle_anchor, district, ends_at, created_at"
-      )
-      .in("status", ["approved", "completed"])
-      .order("created_at", { ascending: false })
-      .limit(200);
-    return (data as Campaign[]) ?? [];
+    const run = (fields: string) =>
+      supabase
+        .from("campaigns")
+        .select(fields)
+        .in("status", ["approved", "completed"])
+        .order("created_at", { ascending: false })
+        .limit(200);
+
+    // campaign_no exists only after campaign-ids.sql — fall back safely.
+    let { data, error } = await run(`${SEARCH_FIELDS}, campaign_no`);
+    if (error) ({ data, error } = await run(SEARCH_FIELDS));
+    return (data as unknown as Campaign[]) ?? [];
   } catch {
     return [];
   }
+}
+
+// "SH-1042", "sh1042" or "1042" → 1042; null if not an ID-style query.
+function parseIdQuery(query: string): number | null {
+  const m = /^(?:sh[-\s]?)?(\d{1,12})$/i.exec(query.trim());
+  return m ? Number(m[1]) : null;
 }
 
 export default async function SearchPage({
@@ -86,10 +98,13 @@ export default async function SearchPage({
   let results = await getAllCampaigns();
 
   if (query) {
-    results = results.filter((c) =>
-      [c.title, c.title_bn, c.summary, c.beneficiary_name, c.organizer_name]
-        .filter(Boolean)
-        .some((field) => field!.toLowerCase().includes(query))
+    const idQuery = parseIdQuery(query);
+    results = results.filter(
+      (c) =>
+        (idQuery !== null && c.campaign_no === idQuery) ||
+        [c.title, c.title_bn, c.summary, c.beneficiary_name, c.organizer_name]
+          .filter(Boolean)
+          .some((field) => field!.toLowerCase().includes(query))
     );
   }
   if (activeCategory) {
@@ -116,7 +131,7 @@ export default async function SearchPage({
             <input
               name="q"
               defaultValue={q ?? ""}
-              placeholder="Search campaigns, people, causes…"
+              placeholder="Search campaigns, people, causes, or ID (SH-1042)…"
               className="w-full bg-transparent py-2 outline-none"
             />
             <button

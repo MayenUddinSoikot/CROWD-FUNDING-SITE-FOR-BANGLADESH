@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAdminClient } from "@/lib/admin";
-import { formatTaka } from "@/lib/format";
+import { formatTaka, formatCampaignId } from "@/lib/format";
 import { CATEGORY_LABELS } from "@/lib/types";
 import type { Campaign } from "@/lib/types";
 
@@ -59,12 +59,21 @@ export default async function AdminDashboard({
 
   const { q = "", sort = "latest", from = "", to = "" } = await searchParams;
 
-  const { data: all } = await supabase
+  const adminFields =
+    "id, slug, title, title_bn, category, goal_amount, raised_amount, status, beneficiary_name, district, ends_at, is_recurring, created_at";
+  const first = await supabase
     .from("campaigns")
-    .select(
-      "id, slug, title, title_bn, category, goal_amount, raised_amount, status, beneficiary_name, district, ends_at, is_recurring, created_at"
-    )
+    .select(`${adminFields}, campaign_no`)
     .order("created_at", { ascending: false });
+  let all = first.data;
+  if (first.error) {
+    // campaign_no exists only after campaign-ids.sql — fall back safely.
+    const retry = await supabase
+      .from("campaigns")
+      .select(adminFields)
+      .order("created_at", { ascending: false });
+    all = (retry.data ?? []) as unknown as typeof all;
+  }
 
   const campaigns = (all ?? []) as Campaign[];
   const pending = campaigns.filter((c) => c.status === "pending");
@@ -85,11 +94,15 @@ export default async function AdminDashboard({
 
   // Search + filter + sort for the all-campaigns table.
   const needle = q.trim().toLowerCase();
+  // "SH-1042", "sh1042" or "1042" matches the campaign's ID number.
+  const idMatch = /^(?:sh[-\s]?)?(\d{1,12})$/i.exec(needle);
+  const idNeedle = idMatch ? Number(idMatch[1]) : null;
   const fromTs = from ? new Date(from).getTime() : null;
   const toTs = to ? new Date(to).getTime() + 24 * 60 * 60 * 1000 : null;
   let filtered = campaigns.filter((c) => {
     if (
       needle &&
+      !(idNeedle !== null && c.campaign_no === idNeedle) &&
       !c.title.toLowerCase().includes(needle) &&
       !(c.beneficiary_name ?? "").toLowerCase().includes(needle) &&
       !(c.district ?? "").toLowerCase().includes(needle)
@@ -252,7 +265,7 @@ export default async function AdminDashboard({
               id="q"
               name="q"
               defaultValue={q}
-              placeholder="Title, beneficiary, district…"
+              placeholder="Title, beneficiary, district, or ID (SH-1042)…"
               className="mt-1 w-full rounded-xl border border-foreground/20 bg-background px-3 py-2 text-sm outline-none focus:border-brand"
             />
           </div>
@@ -325,6 +338,7 @@ export default async function AdminDashboard({
             <table className="w-full min-w-[640px] text-left text-sm">
               <thead>
                 <tr className="border-b border-foreground/10 text-xs uppercase tracking-wide opacity-60">
+                  <th className="px-4 py-3 font-semibold">ID</th>
                   <th className="px-4 py-3 font-semibold">Campaign</th>
                   <th className="px-4 py-3 font-semibold">Category</th>
                   <th className="px-4 py-3 font-semibold">Raised / goal</th>
@@ -337,6 +351,9 @@ export default async function AdminDashboard({
                   const badge = STATUS_BADGE[c.status] ?? STATUS_BADGE.draft;
                   return (
                     <tr key={c.id} className="transition hover:bg-foreground/5">
+                      <td className="whitespace-nowrap px-4 py-3 text-xs font-semibold opacity-60">
+                        {formatCampaignId(c.campaign_no) ?? "—"}
+                      </td>
                       <td className="px-4 py-3">
                         <Link
                           href={`/admin/${c.id}`}

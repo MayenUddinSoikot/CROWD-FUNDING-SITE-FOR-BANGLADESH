@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { formatTaka } from "@/lib/format";
+import { formatTaka, formatCampaignId } from "@/lib/format";
 import type { Campaign } from "@/lib/types";
 import { CreatorProfileForm } from "./CreatorProfileForm";
 
@@ -46,13 +46,23 @@ export default async function AccountPage({
     avatar_url: null,
   };
 
-  const { data, error } = await supabase
+  const listFields =
+    "id, slug, title, title_bn, category, goal_amount, raised_amount, status, district, created_at";
+  let { data, error } = await supabase
     .from("campaigns")
-    .select(
-      "id, slug, title, title_bn, category, goal_amount, raised_amount, status, district, created_at"
-    )
+    .select(`${listFields}, campaign_no`)
     .eq("creator_id", user.id)
     .order("created_at", { ascending: false });
+  if (error) {
+    // campaign_no exists only after campaign-ids.sql — fall back safely.
+    const retry = await supabase
+      .from("campaigns")
+      .select(listFields)
+      .eq("creator_id", user.id)
+      .order("created_at", { ascending: false });
+    data = (retry.data ?? []) as unknown as typeof data;
+    error = retry.error;
+  }
 
   if (error) console.error("Failed to load your campaigns:", error.message);
   const campaigns = (data ?? []) as Campaign[];
@@ -107,6 +117,12 @@ export default async function AccountPage({
                       <p className="mt-1 text-sm opacity-60">
                         {formatTaka(campaign.raised_amount)} of{" "}
                         {formatTaka(campaign.goal_amount)}
+                        {formatCampaignId(campaign.campaign_no) ? (
+                          <span>
+                            {" "}
+                            · ID {formatCampaignId(campaign.campaign_no)}
+                          </span>
+                        ) : null}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-1.5">

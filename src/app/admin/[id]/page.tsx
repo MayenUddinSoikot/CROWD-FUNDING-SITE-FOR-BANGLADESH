@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getAdminClient } from "@/lib/admin";
-import { formatTaka } from "@/lib/format";
+import { formatTaka, formatCampaignId } from "@/lib/format";
 import { CATEGORY_LABELS } from "@/lib/types";
 import type {
   Campaign,
@@ -41,13 +41,22 @@ export default async function AdminCampaignDetail({
 
   const { id } = await params;
 
-  const { data: campaign } = await supabase
+  const detailFields =
+    "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, beneficiary_name, district, created_at";
+  let { data: campaign } = await supabase
     .from("campaigns")
-    .select(
-      "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, beneficiary_name, district, created_at"
-    )
+    .select(`${detailFields}, campaign_no`)
     .eq("id", id)
     .maybeSingle();
+  if (!campaign) {
+    // campaign_no exists only after campaign-ids.sql — fall back safely.
+    const retry = await supabase
+      .from("campaigns")
+      .select(detailFields)
+      .eq("id", id)
+      .maybeSingle();
+    campaign = (retry.data ?? null) as unknown as typeof campaign;
+  }
 
   if (!campaign) notFound();
   const c = campaign as Campaign;
@@ -91,6 +100,11 @@ export default async function AdminCampaignDetail({
           <span className="rounded-full bg-foreground/10 px-3 py-1 text-xs font-semibold capitalize">
             {c.status}
           </span>
+          {formatCampaignId(c.campaign_no) ? (
+            <span className="rounded-full border border-foreground/15 px-3 py-1 text-xs font-semibold">
+              ID {formatCampaignId(c.campaign_no)}
+            </span>
+          ) : null}
           <span className="text-xs uppercase tracking-wide text-brand">
             {category.en} · <span className="font-bengali">{category.bn}</span>
           </span>

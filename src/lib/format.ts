@@ -7,6 +7,11 @@ export function formatTaka(amount: number): string {
   return `৳${takaFormatter.format(amount)}`;
 }
 
+// Public campaign reference number, e.g. SH-1042.
+export function formatCampaignId(no: number | null | undefined): string | null {
+  return no ? `SH-${no}` : null;
+}
+
 export function percentRaised(raised: number, goal: number): number {
   if (goal <= 0) return 0;
   return Math.min(100, Math.round((raised / goal) * 100));
