@@ -155,7 +155,9 @@ export async function createCampaign(
       occasion,
       is_recurring: isRecurring,
       cycle_anchor: cycleAnchor,
-      social_links: socialLinks,
+      // Only sent when links were given, so inserts keep working even if
+      // creator-socials.sql hasn't been run yet.
+      ...(socialLinks ? { social_links: socialLinks } : {}),
       ends_at: endsAt,
       creator_id: user.id,
       status: "pending",

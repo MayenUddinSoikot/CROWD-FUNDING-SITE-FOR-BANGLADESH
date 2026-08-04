@@ -48,19 +48,31 @@ function initialOf(name: string | null | undefined): string {
 // Always show fresh donation totals — never a stale build-time snapshot.
 export const dynamic = "force-dynamic";
 
+const CAMPAIGN_FIELDS =
+  "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, organizer_name, organizer_relationship, campaign_type, occasion, is_recurring, cycle_days, cycle_anchor, district, ends_at, created_at, creator_id";
+
 async function getCampaign(slug: string): Promise<Campaign | null> {
   if (!isSupabaseConfigured()) return null;
 
   try {
     const supabase = getSupabaseClient();
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from("campaigns")
-      .select(
-        "id, slug, title, title_bn, summary, summary_bn, story, story_bn, category, goal_amount, raised_amount, status, cover_image_url, video_url, beneficiary_name, organizer_name, organizer_relationship, campaign_type, occasion, is_recurring, cycle_days, cycle_anchor, district, ends_at, created_at, creator_id, social_links"
-      )
+      .select(`${CAMPAIGN_FIELDS}, social_links`)
       .eq("slug", slug)
       .in("status", ["approved", "completed"])
       .maybeSingle();
+
+    // social_links only exists after creator-socials.sql has been run —
+    // fall back to the base fields so campaigns never 404 because of it.
+    if (error) {
+      ({ data, error } = await supabase
+        .from("campaigns")
+        .select(CAMPAIGN_FIELDS)
+        .eq("slug", slug)
+        .in("status", ["approved", "completed"])
+        .maybeSingle());
+    }
 
     if (error) {
       console.error("Failed to load campaign:", error.message);
