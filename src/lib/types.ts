@@ -44,12 +44,42 @@ export type Campaign = {
   campaign_no?: number | null;
 };
 
-// Social platforms a creator can link on their fundraiser.
-export const SOCIAL_PLATFORMS: { key: string; label: string; emoji: string }[] = [
-  { key: "facebook", label: "Facebook", emoji: "📘" },
-  { key: "instagram", label: "Instagram", emoji: "📸" },
-  { key: "youtube", label: "YouTube", emoji: "▶️" },
-  { key: "tiktok", label: "TikTok", emoji: "🎵" },
+// Social platforms a creator can link on their page and fundraisers.
+export const SOCIAL_PLATFORMS: {
+  key: string;
+  label: string;
+  emoji: string;
+  color: string;
+  placeholder: string;
+}[] = [
+  {
+    key: "facebook",
+    label: "Facebook",
+    emoji: "📘",
+    color: "bg-[#1877F2]",
+    placeholder: "https://facebook.com/yourpage",
+  },
+  {
+    key: "instagram",
+    label: "Instagram",
+    emoji: "📸",
+    color: "bg-[#E4405F]",
+    placeholder: "https://instagram.com/yourhandle",
+  },
+  {
+    key: "youtube",
+    label: "YouTube",
+    emoji: "▶️",
+    color: "bg-[#FF0000]",
+    placeholder: "https://youtube.com/@yourchannel",
+  },
+  {
+    key: "tiktok",
+    label: "TikTok",
+    emoji: "🎵",
+    color: "bg-black",
+    placeholder: "https://tiktok.com/@yourhandle",
+  },
 ];
 
 // Optional special-occasion tag shown publicly on a campaign.
@@ -105,6 +135,7 @@ export type PublicCreator = {
   display_name: string | null;
   bio: string | null;
   avatar_url: string | null;
+  social_links?: Record<string, string> | null;
 };
 
 export type PublicCharity = {

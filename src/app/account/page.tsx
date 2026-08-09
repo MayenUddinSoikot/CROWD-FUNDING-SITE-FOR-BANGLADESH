@@ -34,16 +34,28 @@ export default async function AccountPage({
 
   const { created } = await searchParams;
 
-  const { data: profileRow } = await supabase
+  // social_links exists only after creator-page.sql — fall back.
+  const profileFields = "username, display_name, bio, avatar_url";
+  const firstProfile = await supabase
     .from("profiles")
-    .select("username, display_name, bio, avatar_url")
+    .select(`${profileFields}, social_links`)
     .eq("id", user.id)
     .maybeSingle();
+  let profileRow = firstProfile.data;
+  if (firstProfile.error) {
+    const retry = await supabase
+      .from("profiles")
+      .select(profileFields)
+      .eq("id", user.id)
+      .maybeSingle();
+    profileRow = retry.data as unknown as typeof profileRow;
+  }
   const profile = profileRow ?? {
     username: null,
     display_name: null,
     bio: null,
     avatar_url: null,
+    social_links: null,
   };
 
   const listFields =

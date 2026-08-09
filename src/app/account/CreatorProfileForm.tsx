@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { saveCreatorProfile } from "./actions";
+import { SOCIAL_PLATFORMS } from "@/lib/types";
 
 const inputClass =
   "mt-1 w-full rounded-xl border border-foreground/20 bg-card px-4 py-2.5 outline-none focus:border-brand";
@@ -12,6 +13,7 @@ type Profile = {
   display_name: string | null;
   bio: string | null;
   avatar_url: string | null;
+  social_links?: Record<string, string> | null;
 };
 
 export function CreatorProfileForm({ profile }: { profile: Profile }) {
@@ -22,6 +24,11 @@ export function CreatorProfileForm({ profile }: { profile: Profile }) {
   const [displayName, setDisplayName] = useState(profile.display_name ?? "");
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? "");
   const [bio, setBio] = useState(profile.bio ?? "");
+  const [socials, setSocials] = useState<Record<string, string>>(() =>
+    Object.fromEntries(
+      SOCIAL_PLATFORMS.map((p) => [p.key, profile.social_links?.[p.key] ?? ""])
+    )
+  );
 
   return (
     <form action={action} className="rounded-2xl border border-foreground/10 bg-card p-5">
@@ -85,6 +92,36 @@ export function CreatorProfileForm({ profile }: { profile: Profile }) {
         placeholder="What you create and why people should support you."
         className={inputClass}
       />
+
+      <p className="mt-5 text-sm font-medium">
+        Where people can find your work (optional)
+      </p>
+      <p className="mt-0.5 text-xs opacity-60">
+        Shown as buttons on your public page so supporters can see what you do.
+      </p>
+      <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {SOCIAL_PLATFORMS.map((p) => (
+          <div key={p.key}>
+            <label
+              className="block text-sm font-medium"
+              htmlFor={`social_${p.key}`}
+            >
+              {p.emoji} {p.label}
+            </label>
+            <input
+              id={`social_${p.key}`}
+              name={`social_${p.key}`}
+              type="url"
+              value={socials[p.key] ?? ""}
+              onChange={(e) =>
+                setSocials((cur) => ({ ...cur, [p.key]: e.target.value }))
+              }
+              placeholder={p.placeholder}
+              className={inputClass}
+            />
+          </div>
+        ))}
+      </div>
 
       {state?.error ? (
         <p className="mt-3 text-sm text-accent">{state.error}</p>

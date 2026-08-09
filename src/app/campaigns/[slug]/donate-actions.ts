@@ -21,15 +21,15 @@ export async function startDonation(
   const tip = Number.isFinite(tipRaw) && tipRaw > 0 ? Math.round(tipRaw) : 0;
   const donorName = String(formData.get("donor_name") ?? "").trim();
   const contact = String(formData.get("contact") ?? "").trim();
-  const message = String(formData.get("message") ?? "").trim().slice(0, 25);
+  const message = String(formData.get("message") ?? "").trim().slice(0, 200);
   const isAnonymous = formData.get("is_anonymous") === "on";
+  // Supporter asked for this to repeat every month. Recorded now;
+  // real recurring billing starts with SSLCommerz.
+  const isMonthly = formData.get("is_monthly") === "on";
 
   if (!campaignId) return { error: "Something went wrong. Please retry." };
   if (!amount || amount < 10) {
     return { error: "Please choose an amount of at least ৳10." };
-  }
-  if (!contact) {
-    return { error: "Add a phone or email so we can send a thank-you." };
   }
 
   const isEmail = contact.includes("@");
@@ -40,10 +40,13 @@ export async function startDonation(
     amount,
     tip_amount: tip,
     donor_name: donorName || null,
-    donor_email: isEmail ? contact : null,
-    donor_phone: isEmail ? null : contact,
+    donor_email: contact && isEmail ? contact : null,
+    donor_phone: contact && !isEmail ? contact : null,
     message: message || null,
     is_anonymous: isAnonymous,
+    // Only sent when ticked, so donations keep working before
+    // creator-page.sql has been run.
+    ...(isMonthly ? { is_monthly: true } : {}),
     // DEMO: mark paid immediately so the donation + message + live counter
     // show while testing. When SSLCommerz is added, insert 'initiated' here
     // and let the verified payment callback set 'paid'.

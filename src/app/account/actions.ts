@@ -32,15 +32,38 @@ export async function saveCreatorProfile(
     return { error: "Avatar link must start with https://" };
   }
 
-  const { error } = await supabase
+  const socialLinks: Record<string, string> = {};
+  for (const key of ["facebook", "instagram", "youtube", "tiktok"]) {
+    const value = String(formData.get(`social_${key}`) ?? "").trim();
+    if (!value) continue;
+    if (!/^https:\/\/\S+$/.test(value) || value.length > 300) {
+      return { error: `Your ${key} link must be a full https:// address.` };
+    }
+    socialLinks[key] = value;
+  }
+
+  const base = {
+    username: username || null,
+    display_name: displayName || null,
+    bio: bio || null,
+    avatar_url: avatarUrl || null,
+  };
+
+  let { error } = await supabase
     .from("profiles")
     .update({
-      username: username || null,
-      display_name: displayName || null,
-      bio: bio || null,
-      avatar_url: avatarUrl || null,
+      ...base,
+      social_links: Object.keys(socialLinks).length > 0 ? socialLinks : null,
     })
     .eq("id", user.id);
+
+  // social_links exists only after creator-page.sql — save the rest anyway.
+  if (error?.code === "42703") {
+    ({ error } = await supabase
+      .from("profiles")
+      .update(base)
+      .eq("id", user.id));
+  }
 
   if (error) {
     if (error.code === "23505") {
