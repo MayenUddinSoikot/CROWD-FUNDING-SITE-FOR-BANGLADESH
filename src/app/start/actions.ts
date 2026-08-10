@@ -134,40 +134,46 @@ export async function createCampaign(
     ? organizerRelationship
     : null;
 
-  const { data, error } = await supabase
-    .from("campaigns")
-    .insert({
-      slug: slugify(title),
-      title,
-      title_bn: titleBn || null,
-      category,
-      goal_amount: goalAmount,
-      beneficiary_name: beneficiaryName || null,
-      district: district || null,
-      summary: summary || null,
-      summary_bn: summaryBn || null,
-      story: story || null,
-      story_bn: storyBn || null,
-      cover_image_url: firstPhoto,
-      organizer_name: organizerName || null,
-      organizer_relationship: relationship,
-      campaign_type: campaignType,
-      occasion,
-      is_recurring: isRecurring,
-      cycle_anchor: cycleAnchor,
-      // Only sent when links were given, so inserts keep working even if
-      // creator-socials.sql hasn't been run yet.
-      ...(socialLinks ? { social_links: socialLinks } : {}),
-      ends_at: endsAt,
-      creator_id: user.id,
-      status: "pending",
-    })
-    .select("id")
-    .single();
+  const row: Record<string, unknown> = {
+    slug: slugify(title),
+    title,
+    title_bn: titleBn || null,
+    category,
+    goal_amount: goalAmount,
+    beneficiary_name: beneficiaryName || null,
+    district: district || null,
+    summary: summary || null,
+    summary_bn: summaryBn || null,
+    story: story || null,
+    story_bn: storyBn || null,
+    cover_image_url: firstPhoto,
+    organizer_name: organizerName || null,
+    organizer_relationship: relationship,
+    campaign_type: campaignType,
+    occasion,
+    is_recurring: isRecurring,
+    cycle_anchor: cycleAnchor,
+    ends_at: endsAt,
+    creator_id: user.id,
+    status: "pending",
+  };
+  if (socialLinks) row.social_links = socialLinks;
 
-  if (error) {
-    console.error("Failed to create campaign:", error.message);
-    return { error: "Something went wrong saving the campaign. Try again." };
+  const { data, error, dropped } = await insertCampaign(supabase, row);
+
+  if (dropped.length > 0) {
+    console.warn(
+      `Campaign saved without these columns (run the matching SQL script): ${dropped.join(", ")}`
+    );
+  }
+
+  if (error || !data) {
+    if (error) console.error("Failed to create campaign:", error.message, error.code);
+    return {
+      error: error
+        ? describeSaveError(error)
+        : "Could not save the campaign. Nothing you typed has been lost — please try again.",
+    };
   }
 
   // Private verification + payout details, stored in a separate table that
@@ -243,6 +249,77 @@ export async function createCampaign(
   }
 
   redirect(`/account?created=${data.id}`);
+}
+
+type DbError = { message: string; code?: string };
+type SupabaseLike = Awaited<ReturnType<typeof createServerSupabaseClient>>;
+
+// Columns that only exist after a later SQL script has been run. If the
+// database doesn't have one yet, drop it and save the rest rather than
+// failing the whole submission and losing everything they typed.
+const OPTIONAL_COLUMNS = new Set([
+  "social_links",
+  "is_recurring",
+  "cycle_anchor",
+  "occasion",
+  "campaign_type",
+  "organizer_name",
+  "organizer_relationship",
+]);
+
+function missingColumnFrom(error: DbError): string | null {
+  if (error.code !== "42703") return null;
+  const match = /column "([^"]+)"/.exec(error.message);
+  return match ? match[1] : null;
+}
+
+async function insertCampaign(
+  supabase: SupabaseLike,
+  row: Record<string, unknown>
+): Promise<{
+  data: { id: string } | null;
+  error: DbError | null;
+  dropped: string[];
+}> {
+  const payload = { ...row };
+  const dropped: string[] = [];
+
+  for (let attempt = 0; attempt <= OPTIONAL_COLUMNS.size; attempt++) {
+    const { data, error } = await supabase
+      .from("campaigns")
+      .insert(payload)
+      .select("id")
+      .single();
+
+    if (!error) return { data: data as { id: string }, error: null, dropped };
+
+    const missing = missingColumnFrom(error);
+    if (!missing || !OPTIONAL_COLUMNS.has(missing) || !(missing in payload)) {
+      return { data: null, error, dropped };
+    }
+    delete payload[missing];
+    dropped.push(missing);
+  }
+
+  return {
+    data: null,
+    error: { message: "Too many missing columns", code: "42703" },
+    dropped,
+  };
+}
+
+function describeSaveError(error: DbError): string {
+  if (error.code === "23505") {
+    return "A campaign with this title already exists. Change the title slightly and submit again.";
+  }
+  if (error.code === "42501" || error.code === "PGRST301") {
+    return "Your login session expired. Open the site in a new tab, log in again, then submit.";
+  }
+  const missing = missingColumnFrom(error);
+  if (missing) {
+    return `The database is missing the "${missing}" field — an admin needs to run the matching SQL script in Supabase. Nothing you typed has been lost.`;
+  }
+  return `Could not save the campaign: ${error.message}. Nothing you typed has been lost — please try again.`;
 }
 
 type UploadedDoc = { docType: string; path: string; fileName: string };

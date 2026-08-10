@@ -44,3 +44,11 @@ body {
     padding: 0 !important;
   }
 }
+
+/* The sticky header must never cover a field the browser scrolls to
+   (e.g. the first empty required field on submit, on mobile). */
+input,
+select,
+textarea {
+  scroll-margin-top: 6rem;
+}

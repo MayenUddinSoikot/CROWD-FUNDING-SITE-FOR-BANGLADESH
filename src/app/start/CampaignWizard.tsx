@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { createCampaign } from "./actions";
 import { CATEGORY_LABELS, OCCASION_LABELS } from "@/lib/types";
 import type { CampaignCategory } from "@/lib/types";
@@ -146,6 +146,15 @@ export function CampaignWizard({
   const [values, setValues] = useState<Values>(INITIAL_VALUES);
   const isCreator = type === "creator";
   const isOccasion = type === "occasion";
+
+  // Bring the error into view — on a long form it otherwise sits far
+  // below the button and the page looks like it did nothing.
+  const errorRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (state?.error) {
+      errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [state]);
 
   function set<K extends keyof Values>(field: K) {
     return (
@@ -816,7 +825,11 @@ export function CampaignWizard({
       </Section>
 
       {state?.error ? (
-        <p className="mt-4 rounded-xl border border-accent/40 bg-accent/10 p-3 text-sm text-accent">
+        <p
+          ref={errorRef}
+          role="alert"
+          className="mt-4 rounded-xl border border-accent/40 bg-accent/10 p-3 text-sm text-accent"
+        >
           {state.error}
         </p>
       ) : null}
