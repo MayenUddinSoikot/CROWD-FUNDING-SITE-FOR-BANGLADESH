@@ -21,10 +21,27 @@ const notoBengali = Noto_Sans_Bengali({
   weight: ["400", "500", "700"],
 });
 
+// Absolute base for links and share previews. Set NEXT_PUBLIC_SITE_URL in
+// Vercel; falls back to the live domain so previews still work locally.
+export const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://shohay.org";
+
+const title = "Shohay — সহায় | Crowdfunding for Bangladesh";
+const description =
+  "Shohay is a crowdfunding platform for Bangladesh. Support verified campaigns with bKash, Nagad, and cards. 0% platform fee.";
+
 export const metadata: Metadata = {
-  title: "Shohay — সহায় | Crowdfunding for Bangladesh",
-  description:
-    "Shohay is a crowdfunding platform for Bangladesh. Support verified campaigns with bKash, Nagad, and cards.",
+  metadataBase: new URL(siteUrl),
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    siteName: "Shohay সহায়",
+    locale: "en_GB",
+    type: "website",
+  },
+  twitter: { card: "summary_large_image", title, description },
 };
 
 export default function RootLayout({

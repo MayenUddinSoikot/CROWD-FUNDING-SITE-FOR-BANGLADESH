@@ -37,7 +37,7 @@ export function CreatorProfileForm({ profile }: { profile: Profile }) {
       </p>
       <p className="mt-1 text-xs opacity-60">
         Set a username to get a shareable profile page at
-        shohay.com/creator/&lt;username&gt;.
+        shohay.org/creator/&lt;username&gt;.
       </p>
 
       <label className="mt-4 block text-sm font-medium" htmlFor="username">

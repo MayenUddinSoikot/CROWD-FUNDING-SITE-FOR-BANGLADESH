@@ -214,9 +214,33 @@ export async function generateMetadata({
   const { slug } = await params;
   const campaign = await getCampaign(slug);
   if (!campaign) return { title: "Campaign not found — Shohay" };
+
+  const title = `${campaign.title} — Shohay সহায়`;
+  const description =
+    campaign.summary ??
+    `Help ${campaign.beneficiary_name ?? "this campaign"} on Shohay.`;
+
+  // A real photo and title in the share preview is what makes a campaign
+  // spread on Facebook and WhatsApp.
   return {
-    title: `${campaign.title} — Shohay সহায়`,
-    description: campaign.summary ?? undefined,
+    title,
+    description,
+    alternates: { canonical: `/campaigns/${campaign.slug}` },
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      url: `/campaigns/${campaign.slug}`,
+      images: campaign.cover_image_url
+        ? [{ url: campaign.cover_image_url }]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: campaign.cover_image_url ? [campaign.cover_image_url] : undefined,
+    },
   };
 }
 
