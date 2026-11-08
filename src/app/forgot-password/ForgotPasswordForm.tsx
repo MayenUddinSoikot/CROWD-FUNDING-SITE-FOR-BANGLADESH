@@ -20,7 +20,20 @@ export function ForgotPasswordForm() {
         { redirectTo: `${window.location.origin}/reset-password` }
       );
       if (err) {
-        setError("Could not send the email. Check the address and try again.");
+        // Say what actually went wrong — "check the address" is wrong
+        // and confusing when the server was the problem.
+        const status = err.status ?? 0;
+        if (status === 429) {
+          setError(
+            "Too many reset emails requested. Please wait an hour and try again."
+          );
+        } else if (status >= 500 || status === 0) {
+          setError(
+            "Our login service is temporarily unavailable — this is not a problem with your email. Please try again in a minute."
+          );
+        } else {
+          setError(`Could not send the email: ${err.message}`);
+        }
       } else {
         setSent(true);
       }
