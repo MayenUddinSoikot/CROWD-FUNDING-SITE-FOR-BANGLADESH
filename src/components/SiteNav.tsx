@@ -10,12 +10,12 @@ const MENUS: Record<string, { heading: string; items: MenuItem[] }> = {
   donate: {
     heading: "Discover campaigns to support",
     items: [
-      { title: "Browse all campaigns", subtitle: "Every live campaign", href: "/search" },
-      { title: "🎂 Occasion fundraisers", subtitle: "Birthdays, weddings & more", href: "/search?filter=birthday" },
-      { title: "☕ Support a creator", subtitle: "Buy creators a cha", href: "/search?filter=creators" },
-      { title: "Disaster relief", subtitle: "Give to verified relief", href: "/search?category=disaster_relief" },
-      { title: "Medical", subtitle: "Help with medical costs", href: "/search?category=medical" },
-      { title: "Education", subtitle: "Support students", href: "/search?category=education" },
+      { title: "Browse all campaigns", subtitle: "Every live campaign", href: "/campaigns" },
+      { title: "🎂 Occasion fundraisers", subtitle: "Birthdays, weddings & more", href: "/campaigns?filter=birthday" },
+      { title: "☕ Support a creator", subtitle: "Buy creators a cha", href: "/creators" },
+      { title: "Disaster relief", subtitle: "Give to verified relief", href: "/campaigns?category=disaster_relief" },
+      { title: "Medical", subtitle: "Help with medical costs", href: "/campaigns?category=medical" },
+      { title: "Education", subtitle: "Support students", href: "/campaigns?category=education" },
     ],
   },
   fundraise: {

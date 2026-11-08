@@ -253,13 +253,16 @@ export default async function CampaignPage({
   const campaign = await getCampaign(slug);
   if (!campaign) notFound();
 
-  const donations = await getDonations(campaign.id);
-  const updates = await getUpdates(campaign.id);
-  const media = await getMedia(campaign.id);
-  const charityAllocations = await getCharityAllocations(campaign.id);
-  const creator = campaign.creator_id
-    ? await getCreator(campaign.creator_id)
-    : null;
+  // These don't depend on each other, so fetch them together — one round
+  // trip to Supabase instead of five, which is most of this page's wait.
+  const [donations, updates, media, charityAllocations, creator] =
+    await Promise.all([
+      getDonations(campaign.id),
+      getUpdates(campaign.id),
+      getMedia(campaign.id),
+      getCharityAllocations(campaign.id),
+      campaign.creator_id ? getCreator(campaign.creator_id) : null,
+    ]);
   const category = CATEGORY_LABELS[campaign.category] ?? CATEGORY_LABELS.other;
   const remaining = daysLeft(campaign.ends_at);
   const cycleLeft = campaign.is_recurring
@@ -278,17 +281,19 @@ export default async function CampaignPage({
       data: { user },
     } = await supabase.auth.getUser();
     if (user) {
-      const { data: owned } = await supabase
-        .from("campaigns")
-        .select("id")
-        .eq("id", campaign.id)
-        .eq("creator_id", user.id)
-        .maybeSingle();
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("is_admin")
-        .eq("id", user.id)
-        .maybeSingle();
+      const [{ data: owned }, { data: profile }] = await Promise.all([
+        supabase
+          .from("campaigns")
+          .select("id")
+          .eq("id", campaign.id)
+          .eq("creator_id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", user.id)
+          .maybeSingle(),
+      ]);
       canPostUpdate = Boolean(owned) || Boolean(profile?.is_admin);
     }
   }

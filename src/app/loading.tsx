@@ -1,6 +1,10 @@
 export default function Loading() {
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
+    // min-h-screen keeps the document tall while loading. A short skeleton
+    // makes the page shrink, the browser clamps your scroll to the new
+    // bottom, and the next page then opens part-way down instead of at
+    // the top.
+    <main className="mx-auto min-h-screen w-full max-w-5xl flex-1 px-6 py-10">
       <div className="animate-pulse space-y-6">
         <div className="h-8 w-2/3 rounded-lg bg-foreground/10" />
         <div className="h-4 w-1/2 rounded bg-foreground/10" />

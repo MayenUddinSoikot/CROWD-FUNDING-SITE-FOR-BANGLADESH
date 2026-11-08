@@ -5,12 +5,12 @@ const COLUMNS: { heading: string; links: { label: string; href: string }[] }[] =
     {
       heading: "Donate",
       links: [
-        { label: "Browse campaigns", href: "/search" },
-        { label: "🎂 Occasion fundraisers", href: "/search?filter=birthday" },
-        { label: "☕ Support a creator", href: "/search?filter=creators" },
-        { label: "Medical", href: "/search?category=medical" },
-        { label: "Education", href: "/search?category=education" },
-        { label: "Disaster relief", href: "/search?category=disaster_relief" },
+        { label: "Browse campaigns", href: "/campaigns" },
+        { label: "🎂 Occasion fundraisers", href: "/campaigns?filter=birthday" },
+        { label: "☕ Support a creator", href: "/creators" },
+        { label: "Medical", href: "/campaigns?category=medical" },
+        { label: "Education", href: "/campaigns?category=education" },
+        { label: "Disaster relief", href: "/campaigns?category=disaster_relief" },
       ],
     },
     {
