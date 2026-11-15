@@ -4,6 +4,10 @@ import { useRef, useState } from "react";
 import type { CampaignMedia } from "@/lib/types";
 import { youtubeEmbedUrl } from "@/lib/types";
 
+/* A campaign's photos and video. The first thing a donor sees, so it
+   gets a proper stage: full-bleed media, thumbnails, swipe, arrows and
+   keyboard support — and it never letterboxes a photo. */
+
 export function MediaCarousel({
   media,
   fallbackEmoji,
@@ -16,7 +20,7 @@ export function MediaCarousel({
 
   if (media.length === 0) {
     return (
-      <div className="flex aspect-video w-full items-center justify-center rounded-2xl bg-gradient-to-br from-brand/20 to-brand/5 text-6xl">
+      <div className="flex aspect-[16/10] w-full items-center justify-center rounded-2xl bg-gradient-to-br from-brand-tint to-brand/5 text-6xl">
         {fallbackEmoji}
       </div>
     );
@@ -35,13 +39,27 @@ export function MediaCarousel({
     if (Math.abs(dx) > 40) go(index + (dx < 0 ? 1 : -1));
     touchX.current = null;
   }
+  function onKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      go(index - 1);
+    }
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      go(index + 1);
+    }
+  }
 
   return (
     <div>
       <div
-        className="relative aspect-video w-full overflow-hidden rounded-2xl border border-foreground/10 bg-foreground/5"
+        className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-foreground/5 shadow-soft"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
+        onKeyDown={onKeyDown}
+        tabIndex={count > 1 ? 0 : -1}
+        role={count > 1 ? "group" : undefined}
+        aria-label={count > 1 ? `Photo ${index + 1} of ${count}` : undefined}
       >
         {current.media_type === "image" ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -60,7 +78,8 @@ export function MediaCarousel({
           />
         ) : (
           <>
-            {/* Blurred first frame fills the letterbox area behind vertical videos. */}
+            {/* A blurred copy fills the frame behind a vertical phone video,
+                instead of hard black bars. */}
             <video
               src={current.url}
               muted
@@ -86,7 +105,7 @@ export function MediaCarousel({
               type="button"
               aria-label="Previous"
               onClick={() => go(index - 1)}
-              className="absolute left-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-2xl text-white backdrop-blur transition hover:bg-black/65 active:scale-95"
+              className="press absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-xl text-white backdrop-blur hover:bg-black/65"
             >
               ‹
             </button>
@@ -94,34 +113,59 @@ export function MediaCarousel({
               type="button"
               aria-label="Next"
               onClick={() => go(index + 1)}
-              className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-2xl text-white backdrop-blur transition hover:bg-black/65 active:scale-95"
+              className="press absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-xl text-white backdrop-blur hover:bg-black/65"
             >
               ›
             </button>
-            <span className="absolute bottom-2 right-2 rounded-full bg-black/50 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">
+            <span className="absolute bottom-3 right-3 rounded-full bg-black/55 px-3 py-1 text-xs font-bold text-white backdrop-blur">
               {index + 1} / {count}
             </span>
           </>
         ) : null}
       </div>
 
+      {/* Thumbnails */}
       {count > 1 ? (
-        <div className="mt-2 flex justify-center gap-1">
-          {media.map((m, i) => (
-            <button
-              key={m.id}
-              type="button"
-              aria-label={`Go to item ${i + 1}`}
-              onClick={() => setIndex(i)}
-              className="flex h-8 items-center px-1"
-            >
-              <span
-                className={`h-2 rounded-full transition-all ${
-                  i === index ? "w-6 bg-brand" : "w-2 bg-foreground/25"
+        <div className="scroll-x mt-3 flex gap-2.5 pb-1">
+          {media.map((m, i) => {
+            const active = i === index;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setIndex(i)}
+                aria-label={`Show item ${i + 1}`}
+                aria-current={active}
+                className={`press relative h-16 w-24 shrink-0 overflow-hidden rounded-xl ${
+                  active
+                    ? "ring-2 ring-brand ring-offset-2 ring-offset-background"
+                    : "opacity-70 hover:opacity-100"
                 }`}
-              />
-            </button>
-          ))}
+              >
+                {m.media_type === "image" ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={m.url}
+                    alt=""
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="flex h-full w-full items-center justify-center bg-foreground/80 text-white">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       ) : null}
     </div>

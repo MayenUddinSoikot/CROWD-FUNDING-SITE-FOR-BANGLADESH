@@ -1,10 +1,3 @@
-export function ProgressBar({ percent }: { percent: number }) {
-  return (
-    <div className="h-2 w-full overflow-hidden rounded-full bg-foreground/10">
-      <div
-        className="h-full rounded-full bg-brand transition-all"
-        style={{ width: `${percent}%` }}
-      />
-    </div>
-  );
-}
+// Kept so existing imports keep working — the one implementation now
+// lives in the shared UI kit.
+export { ProgressBar } from "@/components/ui";

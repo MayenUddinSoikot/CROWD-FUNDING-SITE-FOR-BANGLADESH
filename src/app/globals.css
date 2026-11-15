@@ -1,35 +1,165 @@
 @import "tailwindcss";
 
-/* Shohay design language: warm cream, deep green, Bengali-first. */
+/* ============================================================
+   Shohay design language
+   Warm cream + deep green, Bengali-first, depth over outlines.
+   Every colour, shadow and radius on the site comes from here.
+   ============================================================ */
 :root {
+  /* Surfaces & text */
   --background: #faf6ee;
-  --foreground: #22291f;
+  --card: #ffffff;
+  --foreground: #141a13;
+  --body-text: #41493f;
+  --muted: #5b6459;
+  --line: rgba(20, 26, 19, 0.09);
+  --track: #ede8de;
+
+  /* Brand */
   --brand: #11694a;
   --brand-dark: #0b4f36;
+  --brand-light: #1c8a62;
+  --brand-tint: #e7f0ea;
+
+  /* Urgent / destructive */
   --accent: #b43e2b;
-  --card: #ffffff;
+  --accent-tint: #fbe9e5;
+  --accent-ink: #8e2e1e;
+
+  /* Other statuses */
+  --warn-tint: #fdf1dc;
+  --warn-ink: #7a5410;
+  --info-tint: #e4edf4;
+  --info-ink: #1f4e6b;
+
+  /* Elevation — depth instead of thin borders */
+  --shadow-soft: 0 1px 2px rgba(20, 26, 19, 0.04), 0 10px 28px rgba(20, 26, 19, 0.07);
+  --shadow-lift: 0 2px 4px rgba(20, 26, 19, 0.05), 0 20px 46px rgba(20, 26, 19, 0.11);
+  --shadow-brand: 0 2px 4px rgba(11, 79, 54, 0.16), 0 12px 28px rgba(11, 79, 54, 0.2);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-body: var(--body-text);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-track: var(--track);
   --color-brand: var(--brand);
   --color-brand-dark: var(--brand-dark);
+  --color-brand-light: var(--brand-light);
+  --color-brand-tint: var(--brand-tint);
   --color-accent: var(--accent);
+  --color-accent-tint: var(--accent-tint);
+  --color-accent-ink: var(--accent-ink);
+  --color-warn-tint: var(--warn-tint);
+  --color-warn-ink: var(--warn-ink);
+  --color-info-tint: var(--info-tint);
+  --color-info-ink: var(--info-ink);
   --color-card: var(--card);
-  --font-sans: var(--font-geist-sans);
-  --font-serif: var(--font-serif-en);
+
+  --font-sans: var(--font-display);
+  /* Existing `font-serif` usages adopt the display face automatically. */
+  --font-serif: var(--font-display);
   --font-bengali: var(--font-bengali);
+
+  --shadow-soft: var(--shadow-soft);
+  --shadow-lift: var(--shadow-lift);
+  --shadow-brand: var(--shadow-brand);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), var(--font-bengali), Arial, Helvetica,
-    sans-serif;
+  font-family: var(--font-display), var(--font-bengali), -apple-system,
+    system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* Print: the donation report becomes a clean PDF — hide site chrome. */
+/* Headings read as one confident family, tightly set. */
+h1,
+h2,
+h3 {
+  letter-spacing: -0.025em;
+}
+
+/* A visible, consistent focus ring everywhere — keyboard and screen-reader
+   users should never have to guess where they are. */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Fields ring rather than just changing border colour. */
+.field-ring:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 4px rgba(17, 105, 74, 0.14);
+}
+
+/* Cards lift slightly on hover — enough to feel alive, not bouncy. */
+.lift {
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+@media (hover: hover) {
+  .lift:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lift);
+  }
+}
+
+/* Buttons and links settle quickly under the finger. */
+.press {
+  transition: background-color 140ms ease, color 140ms ease,
+    border-color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+}
+.press:active {
+  transform: translateY(1px);
+}
+
+/* Horizontal chip rows scroll cleanly on a phone, no visible scrollbar. */
+.scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.scroll-x::-webkit-scrollbar {
+  display: none;
+}
+
+/* Skeletons shimmer gently rather than just sitting grey. */
+@keyframes shimmer {
+  0% { opacity: 0.55; }
+  50% { opacity: 1; }
+  100% { opacity: 0.55; }
+}
+.skeleton {
+  background: var(--track);
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .lift, .press { transition: none; }
+  .lift:hover { transform: none; }
+  .skeleton { animation: none; }
+}
+
+/* The sticky header must never cover a field the browser scrolls to
+   (e.g. the first empty required field on submit, on mobile). */
+input,
+select,
+textarea {
+  scroll-margin-top: 6rem;
+}
+
+/* Print: reports become clean PDFs — hide site chrome. */
 @media print {
   header,
   footer,
@@ -43,12 +173,4 @@ body {
     max-width: 100% !important;
     padding: 0 !important;
   }
-}
-
-/* The sticky header must never cover a field the browser scrolls to
-   (e.g. the first empty required field on submit, on mobile). */
-input,
-select,
-textarea {
-  scroll-margin-top: 6rem;
 }

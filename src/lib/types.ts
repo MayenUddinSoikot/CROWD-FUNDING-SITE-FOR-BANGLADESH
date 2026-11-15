@@ -154,6 +154,20 @@ export type CampaignCharity = {
 
 export type MediaType = "image" | "video" | "youtube";
 
+// Photos and videos Shohay itself places on the site (homepage hero,
+// featured strip). Managed from Admin → Homepage media.
+export type SiteMedia = {
+  id: string;
+  slot: string;
+  media_type: MediaType;
+  url: string;
+  title: string | null;
+  subtitle: string | null;
+  link_url: string | null;
+  position: number;
+  published: boolean;
+};
+
 export type CampaignMedia = {
   id: string;
   campaign_id: string;

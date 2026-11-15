@@ -405,7 +405,8 @@ function parseMedia(raw: FormDataEntryValue | null): MediaItem[] {
           typeof m.type === "string" &&
           ALLOWED_MEDIA_TYPES.has(m.type)
       )
-      .slice(0, 6)
+      // Up to 6 photos plus one video.
+      .slice(0, 8)
       .map((m, i) => ({ ...m, position: Number(m.position) || i }));
   } catch {
     return [];
