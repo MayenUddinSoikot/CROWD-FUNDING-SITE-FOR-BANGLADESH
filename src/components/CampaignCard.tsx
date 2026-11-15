@@ -3,6 +3,7 @@ import type { Campaign } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
 import { formatTaka, percentRaised, formatCampaignId } from "@/lib/format";
 import { ProgressBar } from "@/components/ui";
+import { CoverImage } from "@/components/CoverImage";
 
 function daysLeft(endsAt: string | null): number | null {
   if (!endsAt) return null;
@@ -25,19 +26,11 @@ export function CampaignCard({ campaign }: { campaign: Campaign }) {
     >
       {/* Media */}
       <div className="relative aspect-[3/2] w-full overflow-hidden bg-brand-tint">
-        {campaign.cover_image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={campaign.cover_image_url}
-            alt=""
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-tint to-brand/10 text-5xl">
-            {category.emoji}
-          </div>
-        )}
+        <CoverImage
+          src={campaign.cover_image_url}
+          emoji={category.emoji}
+          className="transition-transform duration-500 group-hover:scale-[1.04]"
+        />
 
         <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-brand-dark">
           {campaign.is_recurring ? "☕ Monthly" : category.en}

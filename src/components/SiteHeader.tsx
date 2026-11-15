@@ -51,7 +51,12 @@ export async function SiteHeader() {
   return (
     <>
       <AnnouncementBar items={announcements} />
-      <header className="sticky top-0 z-40 border-b border-foreground/[0.07] bg-background/95 backdrop-blur-sm">
+      {/* NEVER put backdrop-blur (or any backdrop-filter, transform or
+          filter) on this header. It creates a containing block, which traps
+          the mobile menu's position:fixed panel inside the header — the menu
+          then renders as loose buttons over the page with no background.
+          Keep the background solid. */}
+      <header className="sticky top-0 z-40 border-b border-foreground/[0.07] bg-background">
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-3 sm:px-6">
         <Link
           href="/"
