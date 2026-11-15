@@ -154,6 +154,18 @@ export type CampaignCharity = {
 
 export type MediaType = "image" | "video" | "youtube";
 
+// Short lines that rotate in the bar at the very top of every page.
+// Managed from Admin → Announcements.
+export type Announcement = {
+  id: string;
+  message: string;
+  message_bn: string | null;
+  link_url: string | null;
+  tone: string;
+  position: number;
+  published: boolean;
+};
+
 // Photos and videos Shohay itself places on the site (homepage hero,
 // featured strip). Managed from Admin → Homepage media.
 export type SiteMedia = {

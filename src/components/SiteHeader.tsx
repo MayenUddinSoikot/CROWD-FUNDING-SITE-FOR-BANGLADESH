@@ -1,11 +1,35 @@
 import Link from "next/link";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getSupabaseClient } from "@/lib/supabase/anon";
+import type { Announcement } from "@/lib/types";
 import { SiteNav } from "@/components/SiteNav";
+import { AnnouncementBar } from "@/components/AnnouncementBar";
+
+// Silently empty until announcements.sql has been run, or until an
+// admin publishes a line.
+async function getAnnouncements(): Promise<Announcement[]> {
+  if (!isSupabaseConfigured()) return [];
+  try {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from("announcements")
+      .select("id, message, message_bn, link_url, tone, position, published")
+      .eq("published", true)
+      .order("position", { ascending: true })
+      .limit(5);
+    if (error) return [];
+    return (data ?? []) as Announcement[];
+  } catch {
+    return [];
+  }
+}
 
 export async function SiteHeader() {
   let isLoggedIn = false;
   let isAdmin = false;
+
+  const announcements = await getAnnouncements();
 
   if (isSupabaseConfigured()) {
     const supabase = await createServerSupabaseClient();
@@ -25,7 +49,9 @@ export async function SiteHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-foreground/[0.07] bg-background/95 backdrop-blur-sm">
+    <>
+      <AnnouncementBar items={announcements} />
+      <header className="sticky top-0 z-40 border-b border-foreground/[0.07] bg-background/95 backdrop-blur-sm">
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-3 sm:px-6">
         <Link
           href="/"
@@ -79,7 +105,8 @@ export async function SiteHeader() {
         <div className="ml-auto">
           <SiteNav isLoggedIn={isLoggedIn} isAdmin={isAdmin} />
         </div>
-      </div>
-    </header>
+        </div>
+      </header>
+    </>
   );
 }

@@ -159,6 +159,12 @@ export default async function AdminDashboard({
             🖼️ Homepage media
           </Link>
           <Link
+            href="/admin/announcements"
+            className="rounded-full border border-foreground/20 px-4 py-2 text-sm font-semibold hover:border-brand hover:text-brand"
+          >
+            📢 Announcements
+          </Link>
+          <Link
             href="/admin/charities"
             className="rounded-full border border-foreground/20 px-4 py-2 text-sm font-semibold hover:border-brand hover:text-brand"
           >
