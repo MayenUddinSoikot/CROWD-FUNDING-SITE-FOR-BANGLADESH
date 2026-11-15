@@ -25,29 +25,51 @@ export async function SiteHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-foreground/10 bg-background">
-      <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6">
-        <Link href="/" className="flex shrink-0 items-baseline gap-2">
+    <header className="sticky top-0 z-40 border-b border-foreground/[0.07] bg-background/95 backdrop-blur-sm">
+      <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-3 sm:px-6">
+        <Link
+          href="/"
+          className="press flex shrink-0 items-baseline gap-2"
+          aria-label="Shohay — home"
+        >
           <span className="font-bengali text-2xl font-bold text-brand">
             সহায়
           </span>
-          <span className="hidden text-xs font-semibold uppercase tracking-[0.25em] opacity-60 sm:inline">
+          <span className="hidden text-[11px] font-bold uppercase tracking-[0.22em] sm:inline">
             Shohay
           </span>
         </Link>
 
         {/* Search bar (desktop) */}
-        <form action="/search" className="hidden flex-1 md:block">
-          <div className="flex items-center gap-2 rounded-full border border-foreground/20 bg-card px-4 py-1.5 focus-within:border-brand">
-            <span className="opacity-50">🔍</span>
+        <form action="/campaigns" className="hidden flex-1 md:block">
+          <label htmlFor="site-search" className="sr-only">
+            Search campaigns
+          </label>
+          <div className="flex items-center gap-2 rounded-full border border-foreground/10 bg-card px-4 py-1.5 focus-within:border-brand focus-within:shadow-[0_0_0_4px_rgba(17,105,74,0.12)]">
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              className="shrink-0 text-muted"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="M20 20l-3.5-3.5" />
+            </svg>
             <input
+              id="site-search"
               name="q"
-              placeholder="Search fundraisers, creators, causes…"
-              className="w-full bg-transparent py-1 text-sm outline-none"
+              type="search"
+              placeholder="Search campaigns, creators, or ID"
+              className="w-full bg-transparent py-1.5 text-sm outline-none"
             />
             <button
               type="submit"
-              className="shrink-0 rounded-full bg-brand px-4 py-1.5 text-sm font-semibold text-white hover:bg-brand-dark"
+              className="press min-h-[36px] shrink-0 rounded-full bg-brand px-4 text-sm font-bold text-white hover:bg-brand-dark"
             >
               Search
             </button>

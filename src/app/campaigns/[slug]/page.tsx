@@ -23,6 +23,7 @@ import { RealtimeCampaignStats } from "@/components/RealtimeCampaignStats";
 import { ShareButtons } from "@/components/ShareButtons";
 import { MediaCarousel } from "@/components/MediaCarousel";
 import { CampaignUpdateForm } from "@/components/CampaignUpdateForm";
+import { ButtonLink, StatusBadge } from "@/components/ui";
 
 function daysLeft(endsAt: string | null): number | null {
   if (!endsAt) return null;
@@ -298,64 +299,72 @@ export default async function CampaignPage({
     }
   }
 
+  const urgent =
+    !campaign.is_recurring && remaining !== null && remaining >= 0 && remaining <= 7;
+
   const donateButton = (
-    <Link
+    <ButtonLink
       href={`/campaigns/${campaign.slug}/donate`}
-      className="block w-full rounded-full bg-brand px-6 py-3.5 text-center text-lg font-semibold text-white transition hover:bg-brand-dark"
+      size="lg"
+      full
+      className="!rounded-2xl"
     >
       {campaign.campaign_type === "creator" ? (
         <>Buy a cha ☕ · <span className="font-bengali">চা খাওয়ান</span></>
       ) : (
         <>Donate now · <span className="font-bengali">দান করুন</span></>
       )}
-    </Link>
+    </ButtonLink>
   );
 
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 sm:px-6">
+    <main className="mx-auto w-full max-w-6xl flex-1 px-5 pb-20 sm:px-6">
       <TrackView campaignId={campaign.id} />
-      <h1 className="mt-8 font-serif text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl">
+
+      {/* Badges above the title set the context before you read a word */}
+      <div className="mt-8 flex flex-wrap items-center gap-2">
+        {urgent ? <StatusBadge tone="urgent">Urgent</StatusBadge> : null}
+        {campaign.campaign_type === "creator" ? (
+          <StatusBadge tone="live">☕ Creator support</StatusBadge>
+        ) : null}
+        {campaign.occasion && OCCASION_LABELS[campaign.occasion] ? (
+          <StatusBadge tone="urgent">
+            {OCCASION_LABELS[campaign.occasion].emoji}{" "}
+            {OCCASION_LABELS[campaign.occasion].label} fundraiser
+          </StatusBadge>
+        ) : null}
+        <StatusBadge tone="live">
+          {category.en} · <span className="font-bengali">{category.bn}</span>
+        </StatusBadge>
+        {campaign.district ? (
+          <span className="text-sm font-semibold text-muted">
+            {campaign.district}
+          </span>
+        ) : null}
+        {formatCampaignId(campaign.campaign_no) ? (
+          <span className="text-sm font-semibold text-muted">
+            · ID {formatCampaignId(campaign.campaign_no)}
+          </span>
+        ) : null}
+      </div>
+
+      <h1 className="mt-4 max-w-3xl text-3xl font-extrabold leading-[1.12] sm:text-4xl lg:text-5xl">
         {campaign.title}
       </h1>
       {campaign.title_bn ? (
-        <p className="font-bengali mt-2 text-lg opacity-80 sm:text-xl">
+        <p className="font-bengali mt-2.5 max-w-3xl text-xl text-muted sm:text-2xl">
           {campaign.title_bn}
         </p>
       ) : null}
 
-      <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-10">
+      <div className="mt-7 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
         {/* ===== Left column, part 1: media + organizer line ===== */}
         <div className="lg:col-start-1">
           <MediaCarousel media={media} fallbackEmoji={category.emoji} />
 
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            {campaign.campaign_type === "creator" ? (
-              <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">
-                ☕ Creator support
-              </span>
-            ) : null}
-            {campaign.occasion && OCCASION_LABELS[campaign.occasion] ? (
-              <span className="rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
-                {OCCASION_LABELS[campaign.occasion].emoji}{" "}
-                {OCCASION_LABELS[campaign.occasion].label} fundraiser
-              </span>
-            ) : null}
-            <span className="text-xs font-medium uppercase tracking-wide text-brand">
-              {category.en} · <span className="font-bengali">{category.bn}</span>
-              {campaign.district ? (
-                <span className="opacity-70"> · {campaign.district}</span>
-              ) : null}
-            </span>
-            {formatCampaignId(campaign.campaign_no) ? (
-              <span className="rounded-full border border-foreground/15 px-2.5 py-0.5 text-xs font-medium opacity-60">
-                ID {formatCampaignId(campaign.campaign_no)}
-              </span>
-            ) : null}
-          </div>
-
           {campaign.organizer_name || campaign.beneficiary_name ? (
-            <div className="mt-4 flex items-center gap-3 border-b border-foreground/10 pb-4 text-sm">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/15 font-bold text-brand">
+            <div className="mt-6 flex items-center gap-3 border-b border-foreground/10 pb-6 text-sm">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-tint font-bold text-brand-dark">
                 {initialOf(campaign.organizer_name ?? campaign.beneficiary_name)}
               </span>
               <p>
@@ -384,7 +393,7 @@ export default async function CampaignPage({
 
         {/* ===== Right column: sticky money card (GoFundMe style) ===== */}
         <aside className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <div className="rounded-2xl border border-foreground/10 bg-card p-6 shadow-sm lg:sticky lg:top-24">
+          <div className="rounded-2xl bg-card p-6 shadow-lift lg:sticky lg:top-24">
             {campaign.is_recurring ? (
               <p className="mb-3 text-sm font-medium text-brand">
                 ☕ Monthly support · resets every 30 days
@@ -417,37 +426,46 @@ export default async function CampaignPage({
               monthly={campaign.is_recurring}
             />
 
-            <div className="mt-5">{donateButton}</div>
+            <div className="mt-6">{donateButton}</div>
 
-            <div className="mt-4 border-t border-foreground/10 pt-4">
+            <div className="mt-3">
               <ShareButtons title={campaign.title} />
             </div>
 
+            <p className="mt-4 text-center text-xs leading-relaxed text-muted">
+              Shohay takes 0% — only bank charges apply
+            </p>
+
             {donations.length > 0 ? (
-              <ul className="mt-5 space-y-4 border-t border-foreground/10 pt-5">
-                {donations.slice(0, 6).map((donation) => (
-                  <li key={donation.id} className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-foreground/10 text-sm font-bold">
-                      {donation.donor_name ? initialOf(donation.donor_name) : "🤲"}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">
-                        {donation.donor_name ?? (
-                          <span className="font-bengali">নাম প্রকাশে অনিচ্ছুক</span>
-                        )}
-                      </p>
-                      <p className="text-sm opacity-60">
-                        <span className="font-semibold text-foreground">
-                          {formatTaka(donation.amount)}
-                        </span>{" "}
-                        · {timeAgo(donation.paid_at)}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-6 border-t border-foreground/10 pt-5">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted">
+                  Recent donations
+                </p>
+                <ul className="mt-3 space-y-3.5">
+                  {donations.slice(0, 6).map((donation) => (
+                    <li key={donation.id} className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-track text-sm font-bold text-body">
+                        {donation.donor_name ? initialOf(donation.donor_name) : "🤲"}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold">
+                          {donation.donor_name ?? (
+                            <span className="font-bengali">নাম প্রকাশে অনিচ্ছুক</span>
+                          )}
+                        </p>
+                        <p className="text-sm text-muted">
+                          <span className="font-bold text-foreground">
+                            {formatTaka(donation.amount)}
+                          </span>{" "}
+                          · {timeAgo(donation.paid_at)}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ) : (
-              <p className="mt-5 border-t border-foreground/10 pt-5 text-sm opacity-60">
+              <p className="mt-6 border-t border-foreground/10 pt-5 text-sm text-muted">
                 Be the first to donate.{" "}
                 <span className="font-bengali">প্রথম দাতা হোন।</span>
               </p>
@@ -457,16 +475,41 @@ export default async function CampaignPage({
 
         {/* ===== Left column, part 2: story + everything else ===== */}
         <div className="lg:col-start-1">
+          {/* What we actually checked — stated plainly */}
+          <div className="flex gap-3 rounded-2xl bg-brand-tint p-5">
+            <svg
+              width="21"
+              height="21"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="mt-0.5 shrink-0 text-brand-dark"
+              aria-hidden="true"
+            >
+              <path d="M12 2l7 4v6c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
+            <p className="text-sm leading-relaxed text-brand-dark">
+              <strong className="font-bold">Verified by Shohay.</strong> We
+              checked this organiser&rsquo;s government ID, supporting
+              documents and payout account privately before this page went
+              live.
+            </p>
+          </div>
+
           {charityAllocations.length > 0 ? (
-            <div className="rounded-xl border border-brand/30 bg-brand/5 p-4 text-sm">
-              <p className="font-semibold text-brand">
+            <div className="mt-5 rounded-2xl bg-card p-5 shadow-soft">
+              <p className="font-bold text-brand">
                 💚 Funds go directly to verified charities
               </p>
-              <ul className="mt-2 space-y-1">
+              <ul className="mt-3 space-y-1.5 text-sm">
                 {charityAllocations.map((a) => (
-                  <li key={a.name} className="flex justify-between">
-                    <span>{a.name}</span>
-                    <span className="font-semibold">{a.percentage}%</span>
+                  <li key={a.name} className="flex justify-between gap-4">
+                    <span className="text-body">{a.name}</span>
+                    <span className="font-bold">{a.percentage}%</span>
                   </li>
                 ))}
               </ul>
@@ -474,18 +517,18 @@ export default async function CampaignPage({
           ) : null}
 
           {campaign.summary ? (
-            <p className="mt-6 text-lg leading-relaxed opacity-90">
+            <p className="mt-7 text-lg leading-relaxed text-body sm:text-xl">
               {campaign.summary}
             </p>
           ) : null}
           {campaign.summary_bn ? (
-            <p className="font-bengali mt-3 leading-relaxed opacity-80">
+            <p className="font-bengali mt-3 text-lg leading-loose text-body">
               {campaign.summary_bn}
             </p>
           ) : null}
 
           {campaign.story ? (
-            <div className="mt-5 whitespace-pre-line leading-relaxed opacity-80">
+            <div className="mt-5 whitespace-pre-line leading-relaxed text-body">
               {campaign.story}
             </div>
           ) : null}

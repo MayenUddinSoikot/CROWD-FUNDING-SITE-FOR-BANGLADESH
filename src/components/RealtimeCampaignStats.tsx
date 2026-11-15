@@ -55,27 +55,30 @@ export function RealtimeCampaignStats({
 
   return (
     <div>
-      <div className="flex items-baseline justify-between">
-        <p
-          className={`text-2xl font-bold text-brand transition-transform ${
-            justUpdated ? "scale-110" : ""
-          }`}
-        >
-          {formatTaka(raised)}
-        </p>
-        <p className="text-sm opacity-60">
-          {monthly
-            ? `this month of ${formatTaka(goalAmount)} monthly target`
-            : `raised of ${formatTaka(goalAmount)} goal`}
-        </p>
+      {/* Raised is the headline; the goal sits quietly beneath it. */}
+      <p
+        className={`text-4xl font-extrabold leading-none tracking-tight transition-transform duration-300 ${
+          justUpdated ? "scale-105 text-brand" : ""
+        }`}
+      >
+        {formatTaka(raised)}
+      </p>
+      <p className="mt-2.5 text-sm text-muted">
+        {monthly
+          ? `this month of ${formatTaka(goalAmount)} monthly target`
+          : `raised of ${formatTaka(goalAmount)} goal`}
+      </p>
+
+      <div className="mt-4">
+        <ProgressBar percent={percent} className="h-3" />
       </div>
-      <div className="mt-3">
-        <ProgressBar percent={percent} />
-      </div>
-      <p className="mt-2 flex items-center gap-2 text-sm opacity-60">
-        {percent}% funded · {donationCount} donation
-        {donationCount === 1 ? "" : "s"}
-        <span className="inline-flex items-center gap-1 text-xs text-brand">
+
+      <p className="mt-3.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm">
+        <span className="font-bold text-brand-dark">{percent}% funded</span>
+        <span className="text-muted">
+          {donationCount} donation{donationCount === 1 ? "" : "s"}
+        </span>
+        <span className="inline-flex items-center gap-1.5 text-muted">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand" />
           live
         </span>
