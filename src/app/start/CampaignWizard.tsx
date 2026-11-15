@@ -11,7 +11,7 @@ import { RELATIONSHIP_LABELS } from "@/lib/types";
 import type { PublicCharity } from "@/lib/types";
 
 const inputClass =
-  "mt-1 w-full rounded-xl border border-foreground/20 bg-card px-4 py-2.5 outline-none focus:border-brand";
+  "field-ring mt-1 w-full rounded-xl border border-foreground/15 bg-card px-4 py-3 text-base outline-none";
 
 function Req() {
   return <span className="text-accent" title="Required">*</span>;
@@ -27,12 +27,12 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="mt-6 rounded-2xl border border-foreground/10 bg-card p-5 sm:p-6">
+    <section className="mt-5 rounded-2xl bg-card p-5 shadow-soft sm:p-7">
       <h2 className="text-sm font-bold text-brand">{title}</h2>
       {subtitle ? (
-        <p className="mt-1 text-xs leading-relaxed opacity-60">{subtitle}</p>
+        <p className="mt-1.5 text-xs leading-relaxed text-muted">{subtitle}</p>
       ) : null}
-      <div className="mt-4">{children}</div>
+      <div className="mt-5">{children}</div>
     </section>
   );
 }
@@ -177,15 +177,16 @@ export function CampaignWizard({
               type="button"
               key={opt.key}
               onClick={() => setType(opt.key)}
-              className={`rounded-xl border p-4 text-left transition ${
+              aria-pressed={type === opt.key}
+              className={`press rounded-2xl border-2 p-5 text-left ${
                 type === opt.key
-                  ? "border-brand bg-brand/5 ring-1 ring-brand"
-                  : "border-foreground/20 hover:border-brand/50"
+                  ? "border-brand bg-brand-tint"
+                  : "border-foreground/10 bg-background hover:border-brand/50"
               }`}
             >
-              <p className="text-2xl">{opt.emoji}</p>
-              <p className="mt-1 font-semibold">{opt.title}</p>
-              <p className="mt-1 text-sm opacity-70">{opt.desc}</p>
+              <p className="text-3xl">{opt.emoji}</p>
+              <p className="mt-2 font-bold">{opt.title}</p>
+              <p className="mt-1 text-sm leading-relaxed text-muted">{opt.desc}</p>
             </button>
           ))}
         </div>
@@ -859,7 +860,7 @@ export function CampaignWizard({
       <button
         type="submit"
         disabled={pending}
-        className="mt-4 w-full rounded-xl bg-brand px-6 py-3 font-semibold text-white transition hover:bg-brand-dark disabled:opacity-60"
+        className="press mt-5 flex min-h-[56px] w-full items-center justify-center rounded-2xl bg-brand px-6 py-4 text-lg font-bold text-white shadow-brand hover:bg-brand-dark disabled:bg-foreground/20 disabled:text-foreground/50 disabled:shadow-none"
       >
         {pending ? "Submitting…" : "Submit for review · পর্যালোচনার জন্য জমা দিন"}
       </button>

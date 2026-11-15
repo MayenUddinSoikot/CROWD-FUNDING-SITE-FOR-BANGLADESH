@@ -3,6 +3,7 @@ import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/anon";
 import type { Campaign, CampaignCategory } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
 import { CampaignCard } from "@/components/CampaignCard";
+import { EmptyState } from "@/components/ui";
 
 export const FILTERS: { key: string; label: string; bn: string }[] = [
   { key: "creators", label: "Creators ☕", bn: "ক্রিয়েটর" },
@@ -127,9 +128,10 @@ export async function BrowseCampaigns({
   results = applySpecialFilter(results, filter);
 
   const chipBase =
-    "rounded-full border px-4 py-1.5 text-sm transition whitespace-nowrap";
+    "press inline-flex min-h-[44px] shrink-0 items-center whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold";
   const chipOn = "border-brand bg-brand text-white";
-  const chipOff = "border-foreground/20 hover:border-brand hover:text-brand";
+  const chipOff =
+    "border-foreground/15 bg-card hover:border-brand hover:text-brand";
 
   const linkWith = (params: URLSearchParams) => {
     const qs = params.toString();
@@ -137,18 +139,19 @@ export async function BrowseCampaigns({
   };
 
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-6 pb-16">
-      <h1 className="mt-8 text-2xl font-bold">
-        {heading} · <span className="font-bengali">{headingBn}</span>
-      </h1>
-      {intro ? <p className="mt-2 text-sm opacity-70">{intro}</p> : null}
+    <main className="mx-auto w-full max-w-6xl flex-1 px-5 pb-20 sm:px-6">
+      <h1 className="mt-8 text-3xl font-extrabold sm:text-4xl">{heading}</h1>
+      <p className="font-bengali mt-1.5 text-lg text-muted">{headingBn}</p>
+      {intro ? (
+        <p className="mt-3 max-w-2xl text-base leading-relaxed text-body">{intro}</p>
+      ) : null}
 
       {/* Search box */}
       <form action={basePath} className="mt-4">
         {lockedFilter && filter ? (
           <input type="hidden" name="filter" value={filter} />
         ) : null}
-        <div className="flex items-center gap-2 rounded-full border border-foreground/20 bg-card px-4 py-1.5 focus-within:border-brand">
+        <div className="flex items-center gap-2 rounded-full border border-foreground/10 bg-card px-4 py-2 focus-within:border-brand focus-within:shadow-[0_0_0_4px_rgba(17,105,74,0.12)]">
           <span className="opacity-50">🔍</span>
           <input
             name="q"
@@ -158,7 +161,7 @@ export async function BrowseCampaigns({
           />
           <button
             type="submit"
-            className="shrink-0 rounded-full bg-brand px-4 py-1.5 text-sm font-semibold text-white hover:bg-brand-dark"
+            className="press min-h-[40px] shrink-0 rounded-full bg-brand px-5 text-sm font-bold text-white hover:bg-brand-dark"
           >
             Search
           </button>
@@ -167,7 +170,7 @@ export async function BrowseCampaigns({
 
       {/* Special filters — hidden on a page that is already one filter */}
       {lockedFilter ? null : (
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="scroll-x -mx-5 mt-6 flex gap-2.5 px-5 pb-2 sm:mx-0 sm:flex-wrap sm:px-0">
           <Link
             href={linkWith(new URLSearchParams(q ? { q } : {}))}
             className={`${chipBase} ${
@@ -194,7 +197,7 @@ export async function BrowseCampaigns({
       )}
 
       {/* Category chips */}
-      <div className="mt-2 flex flex-wrap gap-2">
+      <div className="scroll-x -mx-5 mt-2.5 flex gap-2.5 px-5 pb-2 sm:mx-0 sm:flex-wrap sm:px-0">
         {(
           Object.entries(CATEGORY_LABELS) as [
             CampaignCategory,
@@ -220,17 +223,20 @@ export async function BrowseCampaigns({
       </div>
 
       {/* Results */}
-      <p className="mt-6 text-sm opacity-60">
+      <p className="mt-7 text-sm font-medium text-muted">
         {results.length} campaign{results.length === 1 ? "" : "s"} found
       </p>
 
       {results.length === 0 ? (
-        <div className="mt-4 rounded-2xl border border-foreground/10 bg-card p-8 text-center text-sm opacity-70">
-          No campaigns match your search.
-          <span className="font-bengali block pt-1">কিছু পাওয়া যায়নি।</span>
+        <div className="mt-4">
+          <EmptyState
+            title="No campaigns match your search"
+            bn="কিছু পাওয়া যায়নি"
+            hint="Try a different word, or browse by cause instead."
+          />
         </div>
       ) : (
-        <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-5 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {results.map((campaign) => (
             <CampaignCard key={campaign.id} campaign={campaign} />
           ))}

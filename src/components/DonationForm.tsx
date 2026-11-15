@@ -10,7 +10,7 @@ const CHA_PRESETS = [20, 50, 100, 200, 500, 1000];
 const TIP_PERCENTS = [0, 5, 10, 15];
 
 const inputClass =
-  "mt-1 w-full rounded-xl border border-foreground/20 bg-card px-4 py-2.5 outline-none focus:border-brand";
+  "field-ring mt-1 w-full rounded-xl border border-foreground/15 bg-card px-4 py-3 text-base outline-none";
 
 export function DonationForm({
   campaignId,
@@ -41,7 +41,7 @@ export function DonationForm({
 
   if (state?.pledged) {
     return (
-      <div className="rounded-2xl border border-brand/30 bg-brand/10 p-6 text-center">
+      <div className="rounded-2xl bg-brand-tint p-8 text-center shadow-soft">
         <p className="text-lg font-semibold text-brand">
           Thank you! · ধন্যবাদ 💚
         </p>
@@ -73,7 +73,7 @@ export function DonationForm({
       </p>
 
       {/* Big amount display */}
-      <div className="mt-2 flex items-center rounded-2xl border-2 border-foreground/15 bg-card px-4 py-4 focus-within:border-brand">
+      <div className="mt-2 flex items-center rounded-2xl border-2 border-foreground/10 bg-card px-5 py-5 focus-within:border-brand focus-within:shadow-[0_0_0_4px_rgba(17,105,74,0.12)]">
         <span className="text-3xl font-bold opacity-40">৳</span>
         <input
           type="number"
@@ -99,10 +99,10 @@ export function DonationForm({
                 setAmount(value);
                 setCustom("");
               }}
-              className={`rounded-xl border px-3 py-2 text-sm font-semibold transition ${
+              className={`press min-h-[48px] rounded-xl border-2 px-3 text-sm font-bold ${
                 active
                   ? "border-brand bg-brand text-white"
-                  : "border-foreground/20 hover:border-brand"
+                  : "border-foreground/10 bg-card hover:border-brand"
               }`}
             >
               {value === 100000 ? "৳1 lac" : formatTaka(value)}
@@ -112,7 +112,7 @@ export function DonationForm({
       </div>
 
       {/* Tip */}
-      <div className="mt-6 rounded-2xl border border-foreground/10 bg-card p-4">
+      <div className="mt-6 rounded-2xl bg-card p-5 shadow-soft">
         <p className="text-sm font-semibold">Support Shohay (optional)</p>
         <p className="mt-1 text-xs opacity-60">
           Shohay charges creators a <b>0% platform fee</b>. An optional tip
@@ -129,10 +129,10 @@ export function DonationForm({
                   setTipPercent(p);
                   setCustomTip("");
                 }}
-                className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
+                className={`press inline-flex min-h-[44px] items-center rounded-full border-2 px-5 text-sm font-bold ${
                   active
                     ? "border-brand bg-brand text-white"
-                    : "border-foreground/20 hover:border-brand"
+                    : "border-foreground/10 bg-card hover:border-brand"
                 }`}
               >
                 {p}%
@@ -145,7 +145,7 @@ export function DonationForm({
             placeholder="৳ custom"
             value={customTip}
             onChange={(e) => setCustomTip(e.target.value)}
-            className="w-28 rounded-full border border-foreground/20 bg-background px-3 py-1.5 text-sm outline-none focus:border-brand"
+            className="field-ring min-h-[44px] w-28 rounded-full border-2 border-foreground/10 bg-background px-4 text-sm outline-none"
           />
         </div>
       </div>
@@ -200,7 +200,7 @@ export function DonationForm({
       </label>
 
       {/* Totals */}
-      <div className="mt-5 rounded-2xl border border-foreground/10 bg-card p-4 text-sm">
+      <div className="mt-5 rounded-2xl bg-card p-5 text-sm shadow-soft">
         <div className="flex justify-between">
           <span className="opacity-70">Donation</span>
           <span className="font-medium">{formatTaka(effectiveAmount || 0)}</span>
@@ -222,7 +222,7 @@ export function DonationForm({
       <button
         type="submit"
         disabled={pending || !effectiveAmount}
-        className="mt-4 w-full rounded-xl bg-brand px-6 py-3.5 text-lg font-semibold text-white transition hover:bg-brand-dark disabled:opacity-60"
+        className="press mt-5 flex min-h-[56px] w-full items-center justify-center rounded-2xl bg-brand px-6 py-4 text-lg font-bold text-white shadow-brand hover:bg-brand-dark disabled:bg-foreground/20 disabled:text-foreground/50 disabled:shadow-none"
       >
         {pending
           ? "Please wait…"
