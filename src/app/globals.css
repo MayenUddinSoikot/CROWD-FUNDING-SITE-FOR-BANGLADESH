@@ -135,6 +135,21 @@ h3 {
   display: none;
 }
 
+/* Each announcement slides up as it replaces the one before it. */
+@keyframes announce-in {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.announce-in {
+  animation: announce-in 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 /* Skeletons shimmer gently rather than just sitting grey. */
 @keyframes shimmer {
   0% { opacity: 0.55; }
@@ -150,7 +165,7 @@ h3 {
   html { scroll-behavior: auto; }
   .lift, .press { transition: none; }
   .lift:hover { transform: none; }
-  .skeleton { animation: none; }
+  .skeleton, .announce-in { animation: none; }
 }
 
 /* The sticky header must never cover a field the browser scrolls to

@@ -8,7 +8,7 @@ import type { Announcement } from "@/lib/types";
    every few seconds, with arrows and swipe — the pattern used on
    kalonbd.com. One message alone just sits still. */
 
-const ROTATE_MS = 4000;
+const ROTATE_MS = 2000;
 
 export function AnnouncementBar({ items }: { items: Announcement[] }) {
   const [index, setIndex] = useState(0);
@@ -84,11 +84,16 @@ export function AnnouncementBar({ items }: { items: Announcement[] }) {
           aria-live="polite"
           aria-atomic="true"
         >
-          <p className="flex flex-wrap items-center justify-center gap-x-2 py-2 text-[11.5px] font-bold uppercase leading-snug tracking-wider sm:text-xs">
+          {/* key={index} remounts the line, so the animation replays
+              on every change. */}
+          <p
+            key={index}
+            className="announce-in flex flex-wrap items-center justify-center gap-x-2 py-2 text-[11.5px] font-bold uppercase leading-snug tracking-wider sm:text-xs"
+          >
             {current.link_url ? (
               <Link
                 href={current.link_url}
-                className="press inline-flex flex-wrap items-center justify-center gap-x-2 underline decoration-white/40 underline-offset-4 hover:decoration-white"
+                className="press inline-flex flex-wrap items-center justify-center gap-x-2 no-underline hover:opacity-80"
               >
                 {body}
               </Link>
