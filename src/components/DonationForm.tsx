@@ -34,9 +34,12 @@ export function DonationForm({
   const [isAnonymous, setIsAnonymous] = useState(false);
 
   const effectiveAmount = custom ? Math.max(0, Math.round(Number(custom))) : amount;
-  const tip = customTip
-    ? Math.max(0, Math.round(Number(customTip)))
-    : Math.round((effectiveAmount * tipPercent) / 100);
+  // Both the preset pills and the custom box are percentages of the
+  // donation, so the custom value can never be mistaken for taka.
+  const customPercent = Math.max(0, Math.min(100, Number(customTip) || 0));
+  const tip = Math.round(
+    (effectiveAmount * (customTip ? customPercent : tipPercent)) / 100
+  );
   const total = effectiveAmount + tip;
 
   if (state?.pledged) {
@@ -113,12 +116,22 @@ export function DonationForm({
 
       {/* Tip */}
       <div className="mt-6 rounded-2xl bg-card p-5 shadow-soft">
-        <p className="text-sm font-semibold">Support Shohay (optional)</p>
-        <p className="mt-1 text-xs opacity-60">
-          Shohay charges creators a <b>0% platform fee</b>. An optional tip
-          keeps the platform running. শহায় বিনামূল্যে — চাইলে সামান্য টিপ দিন।
+        <p className="text-sm font-bold">
+          Help keep Shohay free{" "}
+          <span className="font-medium text-muted">(optional)</span>
         </p>
-        <div className="mt-3 flex flex-wrap gap-2">
+        <p className="mt-1.5 text-xs leading-relaxed text-muted">
+          Families and creators pay us <b className="text-foreground">nothing</b> —
+          a 0% platform fee — so every taka reaches the person who needs it. A
+          small tip covers our verification team, our office and the cost of
+          keeping Shohay running for people in need.
+        </p>
+        <p className="font-bengali mt-2 text-xs leading-relaxed text-muted">
+          সহায় সম্পূর্ণ বিনামূল্যে — প্রতিটি টাকা অভাবী মানুষের কাছে পৌঁছায়।
+          চাইলে সামান্য টিপ দিয়ে আমাদের যাচাই টিম ও অফিস চালু রাখতে সাহায্য করুন।
+        </p>
+
+        <div className="mt-4 flex flex-wrap gap-2">
           {TIP_PERCENTS.map((p) => {
             const active = !customTip && tipPercent === p;
             return (
@@ -129,6 +142,7 @@ export function DonationForm({
                   setTipPercent(p);
                   setCustomTip("");
                 }}
+                aria-pressed={active}
                 className={`press inline-flex min-h-[44px] items-center rounded-full border-2 px-5 text-sm font-bold ${
                   active
                     ? "border-brand bg-brand text-white"
@@ -139,15 +153,39 @@ export function DonationForm({
               </button>
             );
           })}
-          <input
-            type="number"
-            min={0}
-            placeholder="৳ custom"
-            value={customTip}
-            onChange={(e) => setCustomTip(e.target.value)}
-            className="field-ring min-h-[44px] w-28 rounded-full border-2 border-foreground/10 bg-background px-4 text-sm outline-none"
-          />
+
+          {/* Custom tip is a PERCENTAGE too, so it can't be misread as taka
+              sitting in a row of percentages. */}
+          <div
+            className={`flex min-h-[44px] items-center rounded-full border-2 pl-4 pr-3 ${
+              customTip
+                ? "border-brand bg-brand-tint"
+                : "border-foreground/10 bg-background"
+            }`}
+          >
+            <label htmlFor="custom-tip" className="sr-only">
+              Custom tip percentage
+            </label>
+            <input
+              id="custom-tip"
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={100}
+              placeholder="Other"
+              value={customTip}
+              onChange={(e) => setCustomTip(e.target.value)}
+              className="w-16 bg-transparent text-sm font-bold outline-none"
+            />
+            <span className="text-sm font-bold text-muted">%</span>
+          </div>
         </div>
+
+        {tip > 0 ? (
+          <p className="mt-3 text-xs font-semibold text-brand-dark">
+            Your tip: {formatTaka(tip)}
+          </p>
+        ) : null}
       </div>
 
       {/* Donor details */}
