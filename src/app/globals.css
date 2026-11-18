@@ -68,9 +68,11 @@
   --shadow-brand: var(--shadow-brand);
 }
 
-html {
-  scroll-behavior: smooth;
-}
+/* NEVER set `scroll-behavior: smooth` on html. It animates *every*
+   programmatic scroll, including the jump back to the top when a new
+   page opens — so opening a campaign visibly glides through the whole
+   page instead of starting at the top. Anchor links jump instantly,
+   which is what people expect. */
 
 body {
   background: var(--background);

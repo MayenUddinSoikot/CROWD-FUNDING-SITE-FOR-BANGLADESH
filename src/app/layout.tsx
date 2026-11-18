@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Noto_Sans_Bengali } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { ScrollToTop } from "@/components/ScrollToTop";
 
 // One family across the site, with Bengali weight-matched so bilingual
 // lines don't look lopsided.
@@ -54,6 +55,7 @@ export default function RootLayout({
       className={`${display.variable} ${notoBengali.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <ScrollToTop />
         <SiteHeader />
         {children}
         <SiteFooter />
