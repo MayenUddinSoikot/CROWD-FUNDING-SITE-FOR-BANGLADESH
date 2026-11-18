@@ -176,6 +176,20 @@ textarea {
   scroll-margin-top: 6rem;
 }
 
+/* iOS Safari zooms the whole page when you tap a field whose text is
+   smaller than 16px — and once it has zoomed, the page is wider than
+   the screen and drifts left and right, which reads as the layout
+   breaking. Keeping every control at 16px on phones stops the zoom.
+   !important because Tailwind's text-sm / text-xs utilities would
+   otherwise win on specificity. */
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* Print: reports become clean PDFs — hide site chrome. */
 @media print {
   header,

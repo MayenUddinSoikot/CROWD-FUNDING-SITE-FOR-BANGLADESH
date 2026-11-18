@@ -157,7 +157,7 @@ export function DonationForm({
           {/* Custom tip is a PERCENTAGE too, so it can't be misread as taka
               sitting in a row of percentages. */}
           <div
-            className={`flex min-h-[44px] items-center rounded-full border-2 pl-4 pr-3 ${
+            className={`flex min-h-[44px] items-center gap-0.5 rounded-full border-2 px-4 ${
               customTip
                 ? "border-brand bg-brand-tint"
                 : "border-foreground/10 bg-background"
@@ -175,9 +175,9 @@ export function DonationForm({
               placeholder="Other"
               value={customTip}
               onChange={(e) => setCustomTip(e.target.value)}
-              className="w-16 bg-transparent text-sm font-bold outline-none"
+              className="w-14 bg-transparent text-base font-bold outline-none"
             />
-            <span className="text-sm font-bold text-muted">%</span>
+            <span className="text-base font-bold text-muted">%</span>
           </div>
         </div>
 
