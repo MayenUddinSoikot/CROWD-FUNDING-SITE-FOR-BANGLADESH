@@ -77,25 +77,80 @@ asks for the code, checks it, and handles the backup link at
 
 ---
 
-## 2. Connect a real email sender (required before launch)
+## 2. Send from "Shohay", not "Supabase Auth" — do this now, not later
 
-Supabase's built-in email service is for testing only and is capped at a
-**handful of messages per hour across the whole project**. With real
-traffic most people would simply never receive their code.
+Right now the emails come from **Supabase Auth
+&lt;noreply@mail.app.supabase.io&gt;**, which looks like spam next to a
+donation request. Worse, Supabase's built-in sender has a hard limit
+that is easy to miss:
 
-Authentication → **Emails** → **SMTP Settings** → turn on *Enable Custom
-SMTP*, using any of:
+> It only delivers to the email addresses of the project's own team
+> members. Everybody else is refused with `email_address_not_authorized`.
 
-- **Resend** — free for 3,000 emails/month, easiest to set up
-- **Brevo** (formerly Sendinblue) — free for 300/day
-- **SendGrid**, **Mailgun**, or Google Workspace SMTP
+So **no real campaigner can sign up at all** until this is done. It is
+not a polish item. The app shows a plain message when it happens, but
+the only real fix is below.
 
-Sender address should be something like `login@shohay.org`, and the
-domain needs the SPF/DKIM records the provider gives you added at
-GoDaddy — otherwise codes land in spam.
+Changing the sender name and address is the same job: both live in
+Supabase's custom SMTP settings. Roughly 20 minutes, most of it waiting
+for DNS.
 
-Then raise Authentication → **Rate Limits** → *Emails per hour* to
-something sensible (e.g. 100).
+### Step 1 — Resend account (free, 3,000 emails/month)
+
+1. Go to **resend.com** and sign up.
+2. **Domains** → **Add Domain** → type `shohay.org` → choose the region
+   closest to Bangladesh (Ireland is usually fine) → **Add**.
+3. Resend now shows a table of **DNS records** — normally three: one
+   `MX`, and two `TXT` (DKIM and SPF). Leave this page open.
+
+### Step 2 — Put those records into GoDaddy
+
+1. GoDaddy → **My Products** → next to shohay.org click **DNS**.
+2. For each row Resend showed: **Add New Record**, pick the same Type,
+   and copy **Name** and **Value** across exactly.
+   - GoDaddy sometimes adds `.shohay.org` to the end of the Name by
+     itself. If Resend says `send`, type `send`, not `send.shohay.org`.
+   - Priority for the MX record is whatever Resend shows (usually 10).
+3. Back in Resend, click **Verify**. It can take anywhere from two
+   minutes to an hour. Wait for every row to turn green.
+
+### Step 3 — Resend API key
+
+Resend → **API Keys** → **Create API Key** → name it `shohay-login`,
+permission **Sending access** → copy the key (starts `re_`). It is shown
+only once.
+
+### Step 4 — Point Supabase at it
+
+Supabase → **Authentication** → **Emails** → **SMTP Settings** → turn on
+**Enable Custom SMTP**, then fill in:
+
+| Field | Value |
+| --- | --- |
+| Sender email | `login@shohay.org` |
+| Sender name | `Shohay` |
+| Host | `smtp.resend.com` |
+| Port | `465` |
+| Username | `resend` |
+| Password | the `re_...` API key from step 3 |
+
+Save. Emails now arrive from **Shohay &lt;login@shohay.org&gt;**.
+
+> The sender address doesn't need a real mailbox — nobody replies to it.
+> If you'd rather people *could* reply, use an address you actually read.
+
+### Step 5 — Raise the rate limit
+
+Supabase drops new SMTP setups to **30 emails per hour** to protect your
+domain's reputation. Authentication → **Rate Limits** → *Emails per
+hour* → raise it to **100** or more, depending on how many sign-ups you
+expect in a busy hour.
+
+### Step 6 — Check it
+
+Sign up with an address that is **not** your own — a friend's, or a
+second Gmail. Before step 4 that would have failed outright; now it
+should arrive from Shohay with six digits in it.
 
 ---
 

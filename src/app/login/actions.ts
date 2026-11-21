@@ -40,6 +40,17 @@ export async function sendLoginCode(
     const status = error.status ?? 0;
     const message = error.message ?? "";
 
+    // Until custom SMTP is switched on, the built-in sender only
+    // delivers to the project team's own addresses.
+    if (
+      error.code === "email_address_not_authorized" ||
+      /not authorized|not_authorized/i.test(message)
+    ) {
+      return {
+        error:
+          "We can't email codes to that address yet — our email sender is still being connected. Please message us on Facebook and we'll help you in.",
+      };
+    }
     if (/signups not allowed|not found|no user/i.test(message)) {
       return {
         error:

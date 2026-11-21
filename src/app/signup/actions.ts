@@ -34,8 +34,18 @@ function normalisePhone(raw: string): string | null {
 function describeOtpError(
   status: number,
   message: string,
-  what: "send" | "verify"
+  what: "send" | "verify",
+  code?: string
 ): string {
+  // Until custom SMTP is switched on in Supabase, the built-in sender
+  // only delivers to the project team's own addresses — everyone else
+  // is refused outright. Say so rather than blaming their email.
+  if (
+    code === "email_address_not_authorized" ||
+    /not authorized|not_authorized/i.test(message)
+  ) {
+    return "Sign-ups aren't open yet — our email sender is still being connected. Please try again later, or message us on Facebook and we'll set your account up by hand.";
+  }
   if (status === 429 || /rate limit|too many/i.test(message)) {
     return "Too many codes requested. Please wait a few minutes before asking for another one.";
   }
@@ -84,7 +94,12 @@ export async function sendSignupCode(
 
   if (error) {
     return {
-      error: describeOtpError(error.status ?? 0, error.message ?? "", "send"),
+      error: describeOtpError(
+        error.status ?? 0,
+        error.message ?? "",
+        "send",
+        error.code
+      ),
     };
   }
 
@@ -113,7 +128,12 @@ export async function verifySignupCode(
 
   if (error) {
     return {
-      error: describeOtpError(error.status ?? 0, error.message ?? "", "verify"),
+      error: describeOtpError(
+        error.status ?? 0,
+        error.message ?? "",
+        "verify",
+        error.code
+      ),
     };
   }
 
