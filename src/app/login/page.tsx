@@ -11,9 +11,9 @@ export const metadata: Metadata = { title: "Log in — Shohay সহায়" }
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ confirmed?: string }>;
+  searchParams: Promise<{ confirmed?: string; link?: string }>;
 }) {
-  const { confirmed } = await searchParams;
+  const { confirmed, link } = await searchParams;
 
   if (isSupabaseConfigured()) {
     const supabase = await createServerSupabaseClient();
@@ -36,6 +36,14 @@ export default async function LoginPage({
       {confirmed ? (
         <p className="mt-5 w-full rounded-xl bg-brand-tint px-4 py-3 text-sm font-semibold text-brand-dark">
           ✓ Email confirmed — log in below to start your campaign.
+        </p>
+      ) : null}
+
+      {/* A link from an old email, or one that has already been used. */}
+      {link === "expired" ? (
+        <p className="mt-5 w-full rounded-xl bg-accent-tint px-4 py-3 text-sm font-medium text-accent-ink">
+          That link has expired or was already used. Enter your email below and
+          we&rsquo;ll send a fresh code.
         </p>
       ) : null}
 
