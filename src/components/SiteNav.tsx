@@ -129,9 +129,14 @@ export function SiteNav({
             </button>
           </form>
         ) : (
-          <Link href="/login" className="hover:text-brand">
-            Sign in
-          </Link>
+          <>
+            <Link href="/login" className="hover:text-brand">
+              Log in
+            </Link>
+            <Link href="/signup" className="font-semibold hover:text-brand">
+              Sign up
+            </Link>
+          </>
         )}
         <Link
           href="/start"
@@ -236,13 +241,22 @@ export function SiteNav({
                   </button>
                 </form>
               ) : (
-                <Link
-                  href="/login"
-                  onClick={close}
-                  className="block rounded-full border border-foreground/20 px-5 py-3 text-center font-semibold"
-                >
-                  Log in
-                </Link>
+                <>
+                  <Link
+                    href="/signup"
+                    onClick={close}
+                    className="block rounded-full border border-foreground/20 px-5 py-3 text-center font-semibold"
+                  >
+                    Create an account
+                  </Link>
+                  <Link
+                    href="/login"
+                    onClick={close}
+                    className="block px-5 py-2 text-center text-sm font-semibold text-brand"
+                  >
+                    Log in
+                  </Link>
+                </>
               )}
             </div>
           </div>

@@ -36,16 +36,23 @@ export default async function StartCampaignPage() {
             ক্যাম্পেইন শুরু করুন
           </h1>
           <p className="mt-2 text-xl font-semibold">Start a campaign</p>
-          <p className="mt-6 max-w-md leading-relaxed opacity-70">
-            Log in to open the campaign wizard. Every campaign is personally
-            verified before going live — 0% platform fee, direct payout.
+          <p className="mt-6 max-w-md leading-relaxed text-body">
+            Create a free account to open the campaign form. Every campaign is
+            checked by our internal verification team before going live — 0%
+            platform fee, direct payout.
           </p>
           <Link
-            href="/login"
-            className="mt-10 rounded-full bg-brand px-6 py-3 font-semibold text-white hover:bg-brand-dark"
+            href="/signup"
+            className="press mt-8 inline-flex min-h-[52px] items-center justify-center rounded-full bg-brand px-7 text-lg font-bold text-white shadow-brand hover:bg-brand-dark"
           >
-            Log in to continue
+            Create a free account
           </Link>
+          <p className="mt-4 text-sm text-muted">
+            Already have one?{" "}
+            <Link href="/login" className="font-bold text-brand">
+              Log in
+            </Link>
+          </p>
         </main>
       </>
     );
