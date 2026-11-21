@@ -2,11 +2,19 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { signUp } from "./actions";
+import { sendSignupCode, verifySignupCode } from "./actions";
 import { Button, inputClass } from "@/components/ui";
+import { CodeField } from "@/components/CodeField";
 
 export function SignupForm() {
-  const [state, action, pending] = useActionState(signUp, undefined);
+  const [sendState, sendAction, sending] = useActionState(
+    sendSignupCode,
+    undefined
+  );
+  const [verifyState, verifyAction, verifying] = useActionState(
+    verifySignupCode,
+    undefined
+  );
 
   // Every field is controlled. React resets *uncontrolled* inputs once a
   // form action finishes — including when it finishes with an error — so
@@ -15,50 +23,90 @@ export function SignupForm() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [token, setToken] = useState("");
 
   const errorRef = useRef<HTMLParagraphElement | null>(null);
   useEffect(() => {
-    if (state?.error) {
+    if (sendState?.error || verifyState?.error) {
       errorRef.current?.scrollIntoView({ block: "center" });
     }
-  }, [state]);
+  }, [sendState, verifyState]);
 
-  if (state?.confirmEmail) {
+  const sent = sendState?.sent;
+
+  /* ---------- Step 2: type the code ---------- */
+  if (sent) {
     return (
-      <div className="mt-8 w-full rounded-2xl bg-brand-tint p-6 text-center shadow-soft">
-        <p className="text-2xl" aria-hidden="true">
-          📬
+      <div className="mt-8 w-full text-left">
+        <div className="rounded-2xl bg-brand-tint px-5 py-4 text-center">
+          <p className="text-2xl" aria-hidden="true">
+            📬
+          </p>
+          <p className="mt-1 font-bold text-brand-dark">
+            We emailed you a 6-digit code
+          </p>
+          <p className="mt-1 text-sm text-body">
+            Sent to <span className="font-semibold">{sent.email}</span>
+          </p>
+          <p className="font-bengali mt-1 text-sm text-muted">
+            আপনার ইমেইলে ৬ সংখ্যার কোড পাঠানো হয়েছে
+          </p>
+        </div>
+
+        <form action={verifyAction} className="mt-6">
+          <input type="hidden" name="email" value={sent.email} />
+
+          <label className="block text-sm font-semibold" htmlFor="token">
+            Enter the code
+          </label>
+          <CodeField value={token} onChange={setToken} />
+
+          {verifyState?.error ? (
+            <p
+              ref={errorRef}
+              className="mt-4 rounded-xl bg-accent-tint px-4 py-3 text-sm font-medium text-accent-ink"
+              role="alert"
+            >
+              {verifyState.error}
+            </p>
+          ) : null}
+
+          <Button
+            type="submit"
+            size="lg"
+            full
+            disabled={verifying || token.length !== 6}
+            className="mt-5"
+          >
+            {verifying ? "Checking…" : "Create my account"}
+          </Button>
+        </form>
+
+        {/* Ask for a fresh code — same details, sent again. */}
+        <form action={sendAction} className="mt-4 text-center">
+          <input type="hidden" name="full_name" value={sent.fullName} />
+          <input type="hidden" name="email" value={sent.email} />
+          <input type="hidden" name="phone" value={sent.phone} />
+          <button
+            type="submit"
+            disabled={sending}
+            className="press text-sm font-bold text-brand disabled:opacity-60"
+          >
+            {sending ? "Sending…" : "Send a new code"}
+          </button>
+        </form>
+
+        <p className="mt-4 text-center text-xs leading-relaxed text-muted">
+          Can&rsquo;t see the email? Check your spam or promotions folder. The
+          code is good for one hour.
         </p>
-        <p className="mt-2 text-lg font-bold text-brand-dark">
-          Confirm your email to finish
-        </p>
-        <p className="mt-2 text-sm leading-relaxed text-body">
-          We sent a confirmation link to{" "}
-          <span className="font-semibold">{state.confirmEmail}</span>. Click it
-          and you&rsquo;ll be able to log in and start your campaign.
-        </p>
-        <p className="font-bengali mt-2 text-sm leading-relaxed text-muted">
-          আপনার ইমেইলে একটি নিশ্চিতকরণ লিংক পাঠানো হয়েছে — লিংকে ক্লিক করে লগ
-          ইন করুন।
-        </p>
-        <p className="mt-4 text-xs text-muted">
-          Can&rsquo;t see it? Check your spam or promotions folder.
-        </p>
-        <Link
-          href="/login"
-          className="press mt-5 inline-block text-sm font-bold text-brand"
-        >
-          Go to log in →
-        </Link>
       </div>
     );
   }
 
+  /* ---------- Step 1: your details ---------- */
   return (
-    <form action={action} className="mt-8 w-full text-left">
+    <form action={sendAction} className="mt-8 w-full text-left">
       <label className="block text-sm font-semibold" htmlFor="full_name">
         Your full name
       </label>
@@ -88,7 +136,7 @@ export function SignupForm() {
         className={inputClass}
       />
       <p className="mt-1 text-xs text-muted">
-        We use this to log you in and to send campaign updates.
+        We send your login code here — no password to remember.
       </p>
 
       <label className="mt-4 block text-sm font-semibold" htmlFor="phone">
@@ -111,64 +159,18 @@ export function SignupForm() {
         it.
       </p>
 
-      <label className="mt-4 block text-sm font-semibold" htmlFor="password">
-        Password
-      </label>
-      <input
-        id="password"
-        name="password"
-        type={showPassword ? "text" : "password"}
-        required
-        minLength={8}
-        autoComplete="new-password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className={inputClass}
-      />
-
-      <label
-        className="mt-4 block text-sm font-semibold"
-        htmlFor="confirm_password"
-      >
-        Repeat password
-      </label>
-      <input
-        id="confirm_password"
-        name="confirm_password"
-        type={showPassword ? "text" : "password"}
-        required
-        minLength={8}
-        autoComplete="new-password"
-        value={confirm}
-        onChange={(e) => setConfirm(e.target.value)}
-        className={inputClass}
-      />
-
-      <label className="mt-3 flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={showPassword}
-          onChange={(e) => setShowPassword(e.target.checked)}
-          className="h-4 w-4"
-        />
-        Show passwords
-      </label>
-      <p className="mt-1 text-xs text-muted">
-        At least 8 characters. · কমপক্ষে ৮ অক্ষর।
-      </p>
-
-      {state?.error ? (
+      {sendState?.error ? (
         <p
           ref={errorRef}
           className="mt-4 rounded-xl bg-accent-tint px-4 py-3 text-sm font-medium text-accent-ink"
           role="alert"
         >
-          {state.error}
+          {sendState.error}
         </p>
       ) : null}
 
-      <Button type="submit" size="lg" full disabled={pending} className="mt-6">
-        {pending ? "Creating your account…" : "Create my account"}
+      <Button type="submit" size="lg" full disabled={sending} className="mt-6">
+        {sending ? "Sending code…" : "Send me a code"}
       </Button>
 
       <p className="mt-4 text-center text-xs leading-relaxed text-muted">

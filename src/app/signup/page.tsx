@@ -54,6 +54,10 @@ export default async function SignupPage() {
             afterwards. Donors never need one — anyone can give without
             signing up.
           </p>
+          <p className="mt-3 max-w-md text-sm leading-relaxed text-muted">
+            There is no password. We email you a 6-digit code each time you
+            log in, so there is nothing to invent and nothing to forget.
+          </p>
 
           <ul className="mt-8 space-y-5">
             {PROMISES.map((item) => (
