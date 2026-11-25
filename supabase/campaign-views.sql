@@ -115,3 +115,20 @@ as $$
 $$;
 
 grant execute on function public.my_campaign_dashboard() to authenticated;
+
+-- ---------- Who may call the owner-only functions ----------
+-- Supabase grants EXECUTE to anon directly, not only through PUBLIC,
+-- so revoking from PUBLIC alone leaves anon able to call these. They
+-- all filter on auth.uid() and return nothing to a signed-out caller,
+-- but a logged-out visitor has no business calling them at all.
+revoke execute on function public.my_campaign_dashboard() from public, anon;
+revoke execute on function public.my_referral_stats(timestamptz) from public, anon;
+revoke execute on function public.my_referral_campaigns(integer) from public, anon;
+revoke execute on function public.my_overlay_key() from public, anon;
+revoke execute on function public.my_membership_stats() from public, anon;
+
+grant execute on function public.my_campaign_dashboard() to authenticated;
+grant execute on function public.my_referral_stats(timestamptz) to authenticated;
+grant execute on function public.my_referral_campaigns(integer) to authenticated;
+grant execute on function public.my_overlay_key() to authenticated;
+grant execute on function public.my_membership_stats() to authenticated;
