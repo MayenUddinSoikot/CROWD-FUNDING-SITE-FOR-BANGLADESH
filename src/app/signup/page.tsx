@@ -39,54 +39,39 @@ export default async function SignupPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-12 sm:px-6 sm:py-16">
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-16">
-        {/* Why you'd want an account */}
-        <div className="order-2 lg:order-1">
-          <h1 className="text-3xl font-extrabold leading-tight sm:text-4xl">
-            Start raising on Shohay
-          </h1>
-          <p className="font-bengali mt-2 text-lg text-muted">
-            সহায়-এ শুরু করুন
-          </p>
-          <p className="mt-4 max-w-md leading-relaxed text-body">
-            Build a page, bring the people who already follow you, and raise
-            for someone who needs it. Donors never need an account — anyone
-            can give without signing up.
-          </p>
-          <p className="mt-3 max-w-md text-sm leading-relaxed text-muted">
-            There is no password. We email you a short code each time you
-            log in, so there is nothing to invent and nothing to forget.
-          </p>
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 py-12 sm:py-16">
+      {/* One centred column, as Patreon's signup is. The two-column
+          version put a wall of marketing beside the only thing on the
+          page anyone came for. */}
+      <h1 className="text-center text-3xl font-extrabold leading-tight sm:text-4xl">
+        Start raising on Shohay
+      </h1>
+      <p className="font-bengali mt-2 text-center text-lg text-muted">
+        সহায়-এ শুরু করুন
+      </p>
+      <p className="mx-auto mt-4 max-w-sm text-center leading-relaxed text-body">
+        Shohay takes <b className="text-foreground">0%</b>. Build a page,
+        bring the people who already follow you, and raise for someone who
+        needs it.
+      </p>
 
-          <ul className="mt-8 space-y-5">
-            {PROMISES.map((item) => (
-              <li key={item.title} className="flex gap-4">
-                <span className="font-bengali flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-tint text-base font-bold text-brand-dark">
-                  {item.icon}
-                </span>
-                <span>
-                  <span className="block font-bold">{item.title}</span>
-                  <span className="mt-0.5 block text-sm leading-relaxed text-muted">
-                    {item.body}
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
+      <SignupForm />
 
-        {/* The form */}
-        <div className="order-1 lg:order-2">
-          <div className="rounded-2xl bg-card p-6 shadow-lift sm:p-7">
-            <p className="text-xl font-extrabold">Create your account</p>
-            <p className="font-bengali text-sm font-semibold text-muted">
-              অ্যাকাউন্ট খুলুন
-            </p>
-            <SignupForm />
-          </div>
-        </div>
-      </div>
+      <ul className="mt-10 space-y-4 border-t border-foreground/10 pt-8">
+        {PROMISES.map((item) => (
+          <li key={item.title} className="flex gap-3">
+            <span className="font-bengali flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-tint text-sm font-bold text-brand-dark">
+              {item.icon}
+            </span>
+            <span>
+              <span className="block text-sm font-bold">{item.title}</span>
+              <span className="mt-0.5 block text-sm leading-relaxed text-muted">
+                {item.body}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ul>
     </main>
   );
 }

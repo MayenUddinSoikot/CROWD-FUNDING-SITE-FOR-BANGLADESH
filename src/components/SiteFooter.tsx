@@ -3,23 +3,23 @@ import Link from "next/link";
 const COLUMNS: { heading: string; links: { label: string; href: string }[] }[] =
   [
     {
-      heading: "Donate",
+      heading: "Creators",
       links: [
-        { label: "Browse campaigns", href: "/campaigns" },
-        { label: "🎂 Occasion fundraisers", href: "/campaigns?filter=birthday" },
+        { label: "Browse creators", href: "/creators" },
         { label: "☕ Support a creator", href: "/creators" },
-        { label: "Medical", href: "/campaigns?category=medical" },
-        { label: "Education", href: "/campaigns?category=education" },
-        { label: "Disaster relief", href: "/campaigns?category=disaster_relief" },
+        { label: "🏆 Top creators", href: "/leaderboard" },
+        { label: "Become a creator", href: "/setup" },
       ],
     },
     {
-      heading: "Fundraise",
+      heading: "Fundraising",
       links: [
-        { label: "Start a fundraiser", href: "/start" },
-        { label: "Occasion fundraiser", href: "/start" },
-        { label: "Creator page", href: "/start" },
-        { label: "How it works", href: "/about#how" },
+        { label: "Browse campaigns", href: "/campaigns" },
+        { label: "Start a campaign", href: "/start" },
+        { label: "🎂 Occasion fundraisers", href: "/campaigns?filter=birthday" },
+        { label: "Medical", href: "/campaigns?category=medical" },
+        { label: "Education", href: "/campaigns?category=education" },
+        { label: "Disaster relief", href: "/campaigns?category=disaster_relief" },
       ],
     },
     {

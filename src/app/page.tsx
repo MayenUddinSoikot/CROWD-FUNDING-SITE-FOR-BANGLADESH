@@ -3,7 +3,6 @@ import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/anon";
 import type { Campaign, CampaignCategory, SiteMedia } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
 import { formatTaka, percentRaised, formatCampaignId } from "@/lib/format";
-import { RealtimeCampaignGrid } from "@/components/RealtimeCampaignGrid";
 import { MediaFrame } from "@/components/MediaTile";
 import { ButtonLink, Card, EmptyState, ProgressBar, SectionHeading } from "@/components/ui";
 import { CreatorCard } from "@/components/CreatorCard";
@@ -104,11 +103,6 @@ export default async function Home({
     )[0] ??
     campaigns?.[0] ??
     null;
-
-  const chip =
-    "press shrink-0 rounded-full border px-4 py-2 text-sm font-semibold whitespace-nowrap min-h-[44px] inline-flex items-center";
-  const chipOn = "border-brand bg-brand text-white";
-  const chipOff = "border-foreground/15 bg-card hover:border-brand hover:text-brand";
 
   return (
     <main className="flex-1 pb-20">
@@ -312,7 +306,6 @@ export default async function Home({
         </div>
       </section>
 
-      {/* ===== Campaigns ===== */}
       {/* ===== Creators ===== */}
       {/* Faces before listings. A creator platform that opens on a grid
           of causes reads as a charity directory; opening on the people
@@ -347,78 +340,6 @@ export default async function Home({
         )}
       </section>
 
-      <section id="campaigns" className="mx-auto max-w-6xl scroll-mt-24 px-5 pt-6 sm:px-6">
-        <SectionHeading title="Needs help right now" bn="এখনই সাহায্য দরকার">
-          <Link
-            href="/campaigns"
-            className="press inline-flex min-h-[44px] items-center gap-2 text-sm font-bold text-brand hover:text-brand-dark"
-          >
-            See all campaigns
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
-          </Link>
-        </SectionHeading>
-
-        {/* Category chips — scroll sideways on a phone */}
-        <div className="scroll-x -mx-5 mt-6 flex gap-2.5 px-5 pb-2 sm:mx-0 sm:flex-wrap sm:px-0">
-          <Link
-            href="/#campaigns"
-            className={`${chip} ${activeCategory === null ? chipOn : chipOff}`}
-          >
-            All causes
-          </Link>
-          {(
-            Object.entries(CATEGORY_LABELS) as [
-              CampaignCategory,
-              (typeof CATEGORY_LABELS)[CampaignCategory],
-            ][]
-          ).map(([key, label]) => (
-            <Link
-              key={key}
-              href={`/?category=${key}#campaigns`}
-              className={`${chip} ${activeCategory === key ? chipOn : chipOff}`}
-            >
-              {label.emoji} {label.en}
-            </Link>
-          ))}
-        </div>
-
-        <div className="mt-6">
-          {campaigns === null ? (
-            <EmptyState
-              title="The database isn't connected yet"
-              hint="Add the Supabase environment variables in Vercel and redeploy."
-            />
-          ) : campaigns.length === 0 ? (
-            <EmptyState
-              title="No campaigns in this category yet"
-              bn="এই ক্যাটাগরিতে এখনো কোনো ক্যাম্পেইন নেই"
-              action={
-                <ButtonLink href="/#campaigns" variant="secondary">
-                  See all causes
-                </ButtonLink>
-              }
-            />
-          ) : (
-            <RealtimeCampaignGrid
-              key={activeCategory ?? "all"}
-              initialCampaigns={campaigns}
-              activeCategory={activeCategory}
-            />
-          )}
-        </div>
-      </section>
 
       {/* ===== Stories from Shohay — your own photos and videos ===== */}
       {featured.length > 0 ? (
@@ -614,45 +535,6 @@ export default async function Home({
         </div>
       </section>
 
-      {/* ===== How it works ===== */}
-      <section id="how" className="mx-auto mt-20 max-w-6xl scroll-mt-24 px-5 sm:px-6">
-        <SectionHeading title="How Shohay works" bn="সহায় যেভাবে কাজ করে" />
-        <div className="mt-8 grid gap-6 sm:grid-cols-3">
-          {[
-            {
-              n: "1",
-              en: "Tell your story",
-              bn: "আপনার কথা বলুন",
-              desc: "Add photos, a video, a goal and your documents. It takes about ten minutes.",
-            },
-            {
-              n: "2",
-              en: "We verify it",
-              bn: "আমরা যাচাই করি",
-              desc: "Our team checks every ID and document privately before your page goes live.",
-            },
-            {
-              n: "3",
-              en: "Get paid out",
-              bn: "টাকা পান",
-              desc: "Funds reach your bKash or bank three days after your campaign ends.",
-            },
-          ].map((item) => (
-            <Card key={item.n} className="p-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-tint text-lg font-extrabold text-brand-dark">
-                {item.n}
-              </div>
-              <h3 className="mt-4 text-lg font-bold">{item.en}</h3>
-              <p className="font-bengali mt-1 text-sm font-semibold text-brand">
-                {item.bn}
-              </p>
-              <p className="mt-2.5 text-sm leading-relaxed text-body">
-                {item.desc}
-              </p>
-            </Card>
-          ))}
-        </div>
-      </section>
 
       {/* ===== Closing call to action =====
           Patreon ends every scroll on the same ask, and the page used to
