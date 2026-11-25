@@ -205,7 +205,7 @@ export function CampaignWizard({
           onChange={set("title")}
           placeholder={
             isCreator
-              ? "e.g. Dhaka Street Stories — monthly support"
+              ? "e.g. Monthly support for Dhaka Street Stories"
               : isOccasion
                 ? "e.g. My birthday fundraiser for clean water"
                 : "e.g. Support urgent treatment for a family"
@@ -366,7 +366,13 @@ export function CampaignWizard({
           value={values.title_bn}
           onChange={set("title_bn")}
           className={`font-bengali ${inputClass}`}
-          placeholder="রহিমের হার্ট সার্জারিতে সাহায্য করুন"
+          placeholder={
+            isCreator
+              ? "আমার কাজের জন্য মাসিক সহায়তা"
+              : isOccasion
+                ? "আমার জন্মদিনে অন্যের জন্য তহবিল"
+                : "রহিমের হার্ট সার্জারিতে সাহায্য করুন"
+          }
         />
       </Section>
 
@@ -792,7 +798,7 @@ export function CampaignWizard({
                 rows={3}
                 value={values.notes}
                 onChange={set("notes")}
-                placeholder="e.g. equipment, travel for stories, a documentary series…"
+                placeholder="e.g. a camera, travel to reach the families, editing each month…"
                 className={inputClass}
               />
             </>

@@ -6,6 +6,8 @@ import { formatTaka, percentRaised, formatCampaignId } from "@/lib/format";
 import { RealtimeCampaignGrid } from "@/components/RealtimeCampaignGrid";
 import { MediaFrame } from "@/components/MediaTile";
 import { ButtonLink, Card, EmptyState, ProgressBar, SectionHeading } from "@/components/ui";
+import { CreatorCard } from "@/components/CreatorCard";
+import { getCreators } from "@/lib/creators";
 
 // Always show fresh donation totals — never a stale build-time snapshot.
 export const dynamic = "force-dynamic";
@@ -75,9 +77,10 @@ export default async function Home({
       ? (category as CampaignCategory)
       : null;
 
-  const [campaigns, siteMedia] = await Promise.all([
+  const [campaigns, siteMedia, creators] = await Promise.all([
     getCampaigns(activeCategory),
     getSiteMedia(),
+    getCreators(8),
   ]);
 
   const hero = siteMedia.find((m) => m.slot === "hero") ?? null;
@@ -106,22 +109,25 @@ export default async function Home({
                 0% platform fee — always
               </span>
 
-              <h1 className="mt-5 text-4xl font-extrabold leading-[1.08] sm:text-5xl lg:text-6xl">
-                Bangladesh helps its own.
+              <h1 className="mt-5 text-[2.6rem] font-extrabold leading-[1.03] tracking-tight sm:text-6xl lg:text-7xl">
+                The people who
+                <br className="hidden sm:block" /> follow you can
+                <br className="hidden sm:block" />{" "}
+                <span className="text-brand">change a life.</span>
               </h1>
-              <p className="font-bengali mt-3 text-2xl font-semibold text-brand sm:text-3xl">
-                বাংলাদেশ পাশে দাঁড়ায়
+              <p className="font-bengali mt-4 text-2xl font-semibold text-brand-dark sm:text-3xl">
+                আপনার সঙ্গে যাঁরা আছেন, তাঁরাই পারেন
               </p>
 
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-body sm:text-lg">
-                Raise money for medical care, education and disaster relief.
-                Every campaign is checked by our team before it goes live, and
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-body">
+                Build a page, bring your audience, and raise for the people who
+                need it. Shohay takes <b className="text-foreground">0%</b> —
                 every taka reaches the person you sent it to.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <ButtonLink href="/start" size="lg">
-                  Start a campaign
+                <ButtonLink href="/setup" size="lg">
+                  Create your page
                 </ButtonLink>
                 <ButtonLink href="#campaigns" variant="secondary" size="lg">
                   Browse campaigns
@@ -130,9 +136,9 @@ export default async function Home({
 
               <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2.5">
                 {[
-                  "Verified by our team",
-                  "bKash · Nagad · card",
-                  "Audited every year",
+                  "Every campaign verified",
+                  "0% platform fee",
+                  "Paid straight to bKash or bank",
                 ].map((item) => (
                   <li
                     key={item}
@@ -254,6 +260,40 @@ export default async function Home({
       </section>
 
       {/* ===== Campaigns ===== */}
+      {/* ===== Creators ===== */}
+      {/* Faces before listings. A creator platform that opens on a grid
+          of causes reads as a charity directory; opening on the people
+          doing the raising is what makes Patreon feel like Patreon. */}
+      <section className="mx-auto mt-16 max-w-6xl px-5 sm:px-6">
+        <SectionHeading
+          title="Creators raising for Bangladesh"
+          bn="যাঁরা সাহায্য তুলছেন"
+        >
+          {creators.length > 0 ? (
+            <ButtonLink href="/creators" variant="secondary" size="sm">
+              See all creators
+            </ButtonLink>
+          ) : null}
+        </SectionHeading>
+
+        {creators.length === 0 ? (
+          <div className="mt-6">
+            <EmptyState
+              title="Be the first creator on Shohay"
+              bn="প্রথম ক্রিয়েটর হোন"
+              hint="Build a page, bring the people who already follow you, and raise for someone who needs it."
+              action={<ButtonLink href="/setup">Create your page</ButtonLink>}
+            />
+          </div>
+        ) : (
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {creators.slice(0, 4).map((creator) => (
+              <CreatorCard key={creator.id} creator={creator} />
+            ))}
+          </div>
+        )}
+      </section>
+
       <section id="campaigns" className="mx-auto max-w-6xl scroll-mt-24 px-5 pt-6 sm:px-6">
         <SectionHeading title="Needs help right now" bn="এখনই সাহায্য দরকার">
           <Link

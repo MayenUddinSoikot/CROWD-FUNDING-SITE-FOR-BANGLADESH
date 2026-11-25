@@ -6,26 +6,26 @@ import { SignupForm } from "./SignupForm";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Create an account — Shohay সহায়",
+  title: "Start raising — Shohay সহায়",
   description:
-    "Create a free Shohay account to start a campaign. 0% platform fee — every taka reaches the person who needs it.",
+    "Build a page on Shohay and raise for the people who need it. 0% platform fee — every taka reaches them.",
 };
 
 const PROMISES = [
   {
     icon: "০%",
-    title: "0% platform fee",
-    body: "Shohay takes nothing from your campaign. Donors may leave an optional tip.",
+    title: "Keep everything you raise",
+    body: "Shohay takes 0%. The only deduction is the bank's charge for moving the money.",
+  },
+  {
+    icon: "♡",
+    title: "Monthly supporters, not one-offs",
+    body: "Tiers, supporters-only posts and a page of your own — so you can plan, not start from zero each time.",
   },
   {
     icon: "✓",
-    title: "Verified campaigns",
-    body: "Our internal team checks every campaign before it goes live, so donors trust yours.",
-  },
-  {
-    icon: "৳",
-    title: "Direct payout",
-    body: "Funds go to your own bKash, Nagad or bank account 3 days after the campaign ends.",
+    title: "Verified, so people trust you",
+    body: "Our team checks every campaign before it goes live. That is why strangers give.",
   },
 ];
 
@@ -44,15 +44,15 @@ export default async function SignupPage() {
         {/* Why you'd want an account */}
         <div className="order-2 lg:order-1">
           <h1 className="text-3xl font-extrabold leading-tight sm:text-4xl">
-            Create your free Shohay account
+            Start raising on Shohay
           </h1>
           <p className="font-bengali mt-2 text-lg text-muted">
-            বিনামূল্যে সহায় অ্যাকাউন্ট খুলুন
+            সহায়-এ শুরু করুন
           </p>
           <p className="mt-4 max-w-md leading-relaxed text-body">
-            You need an account to start a campaign and to manage it
-            afterwards. Donors never need one — anyone can give without
-            signing up.
+            Build a page, bring the people who already follow you, and raise
+            for someone who needs it. Donors never need an account — anyone
+            can give without signing up.
           </p>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-muted">
             There is no password. We email you a short code each time you
@@ -79,8 +79,10 @@ export default async function SignupPage() {
         {/* The form */}
         <div className="order-1 lg:order-2">
           <div className="rounded-2xl bg-card p-6 shadow-lift sm:p-7">
-            <p className="font-bengali text-xl font-bold">অ্যাকাউন্ট খুলুন</p>
-            <p className="text-sm font-semibold text-muted">Sign up</p>
+            <p className="text-xl font-extrabold">Create your account</p>
+            <p className="font-bengali text-sm font-semibold text-muted">
+              অ্যাকাউন্ট খুলুন
+            </p>
             <SignupForm />
           </div>
         </div>

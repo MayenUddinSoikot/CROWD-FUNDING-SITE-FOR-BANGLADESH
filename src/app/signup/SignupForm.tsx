@@ -129,7 +129,7 @@ export function SignupForm() {
         autoComplete="name"
         value={fullName}
         onChange={(e) => setFullName(e.target.value)}
-        placeholder="As written on your NID"
+        placeholder="Your name, or your page name"
         className={inputClass}
       />
 
