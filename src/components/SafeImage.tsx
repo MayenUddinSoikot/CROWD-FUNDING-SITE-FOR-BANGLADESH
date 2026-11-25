@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { optimisedSrcSet } from "@/lib/image-srcset";
 
 /* An image that never leaves a broken icon on the page.
 
@@ -21,14 +22,25 @@ export function SafeImage({
   className,
   fallback,
   loading,
+  sizes = "100vw",
 }: {
   src: string | null | undefined;
   alt: string;
   className?: string;
   fallback: ReactNode;
   loading?: "lazy" | "eager";
+  /* How wide this image is drawn, so the browser can pick the right
+     file. Give a real value where the image is not full-width. */
+  sizes?: string;
 }) {
   const [failed, setFailed] = useState(false);
+  /* If a resized copy will not load — the optimiser is down, or the
+     host is not one it is allowed to fetch — fall back to the original
+     file before giving up on the picture altogether. Hiding every photo
+     on the site because a resizing service hiccuped would be a far
+     worse failure than serving a photo that is larger than it needs
+     to be. */
+  const [plainOnly, setPlainOnly] = useState(false);
   const ref = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
@@ -43,10 +55,16 @@ export function SafeImage({
     <img
       ref={ref}
       src={src}
+      srcSet={plainOnly ? undefined : optimisedSrcSet(src)}
+      sizes={plainOnly ? undefined : sizes}
       alt={alt}
       loading={loading}
+      decoding="async"
       className={className}
-      onError={() => setFailed(true)}
+      onError={() => {
+        if (!plainOnly && optimisedSrcSet(src)) setPlainOnly(true);
+        else setFailed(true);
+      }}
     />
   );
 }

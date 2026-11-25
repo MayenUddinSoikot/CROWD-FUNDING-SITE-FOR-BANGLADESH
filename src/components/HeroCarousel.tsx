@@ -1,7 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import Link from "next/link";
+import { optimisedSrcSet } from "@/lib/image-srcset";
 
 /* The homepage hero, built the way Patreon's is: a full-bleed photo or
    video with one very large headline over it and a credit line for
@@ -26,6 +33,37 @@ export type HeroSlide = {
 };
 
 const INTERVAL = 7000;
+
+/* Whether this connection should be asked to carry a hero video.
+
+   Read through useSyncExternalStore rather than an effect: it is a
+   value that lives outside React and can change mid-visit when someone
+   turns on data saver or walks out of Wi-Fi. The server snapshot is
+   true, so the video is in the first paint for everyone who can afford
+   it, and drops out for anyone who cannot. */
+type Conn = {
+  saveData?: boolean;
+  effectiveType?: string;
+  addEventListener?: (t: string, cb: () => void) => void;
+  removeEventListener?: (t: string, cb: () => void) => void;
+};
+
+function connectionOf(): Conn | undefined {
+  return (navigator as Navigator & { connection?: Conn }).connection;
+}
+
+function subscribeToConnection(onChange: () => void) {
+  const conn = connectionOf();
+  conn?.addEventListener?.("change", onChange);
+  return () => conn?.removeEventListener?.("change", onChange);
+}
+
+function connectionCarriesVideo(): boolean {
+  const conn = connectionOf();
+  if (!conn) return true;
+  if (conn.saveData === true) return false;
+  return conn.effectiveType ? !/^(slow-)?2g$/.test(conn.effectiveType) : true;
+}
 
 /* The headline animates a word at a time. Splitting on spaces keeps
    each word whole so nothing breaks mid-word as it rises. */
@@ -62,6 +100,11 @@ export function HeroCarousel({
 }) {
   const [index, setIndex] = useState(0);
   const [reduced, setReduced] = useState(false);
+  const heavyOk = useSyncExternalStore(
+    subscribeToConnection,
+    connectionCarriesVideo,
+    () => true
+  );
   const [paused, setPaused] = useState(false);
   const count = slides.length;
 
@@ -115,13 +158,17 @@ export function HeroCarousel({
             i === index ? "opacity-100" : "opacity-0"
           }`}
         >
-          {slide.kind === "video" && slide.url ? (
+          {slide.kind === "video" && slide.url && heavyOk ? (
             <video
               src={slide.url}
               autoPlay={!reduced}
               muted
               loop
               playsInline
+              /* "metadata", not the default "auto": the browser takes
+                 the header and then only what it needs to play, instead
+                 of racing to buffer the whole file against everything
+                 else the page is loading. */
               preload="metadata"
               className="h-full w-full object-cover"
             />
@@ -129,12 +176,22 @@ export function HeroCarousel({
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={slide.url}
+              srcSet={optimisedSrcSet(slide.url)}
+              sizes="100vw"
               alt=""
+              decoding="async"
               onError={(e) => {
-                // Same rule as everywhere else on the site: never leave a
-                // broken image on a page asking strangers for money. The
-                // wash below carries the headline on its own.
-                e.currentTarget.style.display = "none";
+                const img = e.currentTarget;
+                // A resized copy failed: try the original file once
+                // before giving up on the picture.
+                if (img.srcset) {
+                  img.srcset = "";
+                  return;
+                }
+                // Same rule as everywhere else on the site: never leave
+                // a broken image on a page asking strangers for money.
+                // The wash below carries the headline on its own.
+                img.style.display = "none";
               }}
               className={`h-full w-full object-cover ${
                 reduced ? "" : "hero-drift"

@@ -7,6 +7,7 @@ import { Button, Card, EmptyState, StatusBadge } from "@/components/ui";
 import { MediaFrame } from "@/components/MediaTile";
 import { SiteMediaForm } from "./SiteMediaForm";
 import { SectionCard } from "./ContentEditor";
+import { HomepagePreview } from "./HomepagePreview";
 import { toggleSection } from "./content-actions";
 import { HOMEPAGE_GROUPS } from "@/lib/homepage-fields";
 import { removeSiteMedia, toggleSiteMedia } from "./actions";
@@ -72,6 +73,14 @@ export default async function HomepageMediaPage() {
 
       <div className="mt-6">
         <SiteMediaForm />
+      </div>
+
+      {/* ===== See it as a visitor does ===== */}
+      <h2 className="mt-12 text-lg font-bold">
+        Preview · <span className="font-bengali">দেখে নিন</span>
+      </h2>
+      <div className="mt-3">
+        <HomepagePreview />
       </div>
 
       {/* ===== Words, and which blocks show at all ===== */}

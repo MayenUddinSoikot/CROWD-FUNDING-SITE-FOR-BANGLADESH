@@ -32,6 +32,7 @@ export function SiteMediaUpload({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [name, setName] = useState<string | null>(null);
+  const [sizeMb, setSizeMb] = useState<number | null>(null);
   const input = useRef<HTMLInputElement>(null);
 
   async function upload(file: File | undefined) {
@@ -73,6 +74,7 @@ export function SiteMediaUpload({
       onChange(data.publicUrl);
       onKindChange?.(isVideo ? "video" : "image");
       setName(file.name);
+      setSizeMb(file.size / 1024 / 1024);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Could not upload that file."
@@ -110,6 +112,7 @@ export function SiteMediaUpload({
             onClick={() => {
               onChange("");
               setName(null);
+              setSizeMb(null);
             }}
             className="press text-sm font-semibold text-muted hover:text-accent"
           >
@@ -153,7 +156,19 @@ export function SiteMediaUpload({
           </div>
           <p className="truncate px-3 py-2 text-xs text-muted">
             {name ?? value}
+            {sizeMb !== null ? ` · ${sizeMb.toFixed(1)} MB` : ""}
           </p>
+          {/* Most people in Bangladesh will open this on a phone, on
+              mobile data. A heavy hero is the difference between the
+              page appearing and the page being abandoned. */}
+          {sizeMb !== null && isVideo && sizeMb > 3 ? (
+            <p className="border-t border-foreground/10 px-3 py-2 text-xs leading-relaxed text-warn-ink">
+              <b>That is {sizeMb.toFixed(1)} MB.</b> Every visitor on a phone
+              downloads it before the banner moves. Aim for under 3 MB — a
+              clip of 6–10 seconds at 1280 wide is usually enough, and
+              nobody can tell the difference behind the headline.
+            </p>
+          ) : null}
         </div>
       ) : null}
     </div>
