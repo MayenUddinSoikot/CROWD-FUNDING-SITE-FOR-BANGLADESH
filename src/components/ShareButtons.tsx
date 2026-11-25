@@ -2,20 +2,62 @@
 
 import { useState } from "react";
 
+/* The share sheet.
+
+   Two halves: the usual send-a-link buttons, and — when we know which
+   campaign this is — a kit of ready-made images sized for a story, a
+   feed post and a link preview, each with a QR code baked in. Removing
+   the design work is most of what makes a creator post at all.
+
+   If the person looking at this has a creator username, every link and
+   every image carries ?via=<them>, so whatever it raises is credited to
+   them on the leaderboard. */
+
+const IMAGE_FORMATS = [
+  {
+    key: "story",
+    label: "Story",
+    hint: "Instagram & Facebook story · 1080×1920",
+    ratio: "aspect-[9/16]",
+  },
+  {
+    key: "square",
+    label: "Feed post",
+    hint: "Instagram & Facebook feed · 1080×1080",
+    ratio: "aspect-square",
+  },
+  {
+    key: "og",
+    label: "Link preview",
+    hint: "WhatsApp & X · 1200×630",
+    ratio: "aspect-[1200/630]",
+  },
+] as const;
+
 export function ShareButtons({
   title,
   path,
+  slug,
+  via,
 }: {
   title: string;
   path?: string;
+  slug?: string;
+  via?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState("");
+  const [origin, setOrigin] = useState("");
   const [copied, setCopied] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
 
   function openModal() {
     if (typeof window !== "undefined") {
-      setUrl(path ? `${window.location.origin}${path}` : window.location.href);
+      const base = path
+        ? `${window.location.origin}${path}`
+        : `${window.location.origin}${window.location.pathname}`;
+      setOrigin(window.location.origin);
+      setUrl(via ? `${base}?via=${via}` : base);
     }
     setOpen(true);
   }
@@ -56,6 +98,12 @@ export function ShareButtons({
     },
   ];
 
+  function cardUrl(format: string): string {
+    const q = new URLSearchParams({ format });
+    if (via) q.set("via", via);
+    return `${origin}/campaigns/${slug}/share-card?${q.toString()}`;
+  }
+
   async function copyLink() {
     try {
       await navigator.clipboard.writeText(url);
@@ -93,7 +141,7 @@ export function ShareButtons({
 
       {open ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 py-8"
           onClick={() => setOpen(false)}
         >
           <div
@@ -101,7 +149,7 @@ export function ShareButtons({
             onClick={(ev) => ev.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold">Quick share</h2>
+              <h2 className="text-lg font-bold">Share this campaign</h2>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
@@ -112,6 +160,13 @@ export function ShareButtons({
               </button>
             </div>
 
+            {via ? (
+              <p className="mt-3 rounded-xl bg-brand-tint px-4 py-3 text-sm font-medium text-brand-dark">
+                Everything here carries your link — whatever it raises is
+                counted under <b>@{via}</b>.
+              </p>
+            ) : null}
+
             <div className="mt-4 flex items-center gap-2 rounded-xl border border-foreground/15 bg-card p-2">
               <span className="flex-1 truncate px-2 text-sm opacity-70">
                 {url}
@@ -119,13 +174,72 @@ export function ShareButtons({
               <button
                 type="button"
                 onClick={copyLink}
-                className="shrink-0 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
+                className="press shrink-0 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
               >
                 {copied ? "Copied ✓" : "Copy link"}
               </button>
             </div>
 
-            <p className="mt-5 text-sm font-semibold">Reach more donors</p>
+            {/* Ready-made images */}
+            {slug ? (
+              <>
+                <p className="mt-6 text-sm font-semibold">
+                  Ready-made posts
+                  <span className="ml-2 font-normal text-muted">
+                    photo, progress and a QR code
+                  </span>
+                </p>
+                <div className="mt-3 space-y-2">
+                  {IMAGE_FORMATS.map((f) => (
+                    <div
+                      key={f.key}
+                      className="flex items-center gap-3 rounded-xl border border-foreground/10 bg-card p-3"
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-bold">
+                          {f.label}
+                        </span>
+                        <span className="block text-xs text-muted">
+                          {f.hint}
+                        </span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPreview(preview === f.key ? null : f.key)
+                        }
+                        className="press shrink-0 rounded-lg border border-foreground/15 px-3 py-2 text-xs font-bold hover:border-brand hover:text-brand"
+                      >
+                        {preview === f.key ? "Hide" : "Preview"}
+                      </button>
+                      <a
+                        href={cardUrl(f.key)}
+                        download={`shohay-${slug}-${f.key}.png`}
+                        className="press shrink-0 rounded-lg bg-brand px-3 py-2 text-xs font-bold text-white hover:bg-brand-dark"
+                      >
+                        Save
+                      </a>
+                    </div>
+                  ))}
+                </div>
+
+                {preview ? (
+                  <div className="mt-3 overflow-hidden rounded-xl border border-foreground/10 bg-card p-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={cardUrl(preview)}
+                      alt={`${preview} preview`}
+                      className="mx-auto max-h-[420px] w-auto rounded-lg"
+                    />
+                    <p className="mt-2 text-center text-xs text-muted">
+                      On a phone, press and hold the image to save it.
+                    </p>
+                  </div>
+                ) : null}
+              </>
+            ) : null}
+
+            <p className="mt-6 text-sm font-semibold">Send it to someone</p>
             <div className="mt-3 grid grid-cols-2 gap-2">
               {links.map((l) => (
                 <a

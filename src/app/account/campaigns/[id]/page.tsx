@@ -81,6 +81,14 @@ export default async function ManageCampaignPage({
   if (!data) notFound();
   const c = data as Campaign;
 
+  // So the share kit hands them a link that credits them.
+  const { data: me } = await supabase
+    .from("profiles")
+    .select("username")
+    .eq("id", user.id)
+    .maybeSingle();
+  const myUsername = (me?.username as string | null) ?? null;
+
   const status = STATUS_LABEL[c.status];
   const created = daysAgo(c.created_at);
   const remaining = c.is_recurring
@@ -184,7 +192,12 @@ export default async function ManageCampaignPage({
             Campaigns shared on Facebook and WhatsApp raise far more.
           </p>
           <div className="mt-3">
-            <ShareButtons title={c.title} path={`/campaigns/${c.slug}`} />
+            <ShareButtons
+              title={c.title}
+              path={`/campaigns/${c.slug}`}
+              slug={c.slug}
+              via={myUsername}
+            />
           </div>
         </div>
       ) : null}

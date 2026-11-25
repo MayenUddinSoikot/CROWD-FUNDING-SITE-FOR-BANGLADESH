@@ -275,7 +275,10 @@ export default async function CampaignPage({
   ).map((p) => ({ ...p, url: campaign.social_links![p.key] }));
 
   // Can the current viewer post updates? (the creator, or an admin)
+  // Their username comes back too, so the share kit can hand them a link
+  // that credits them for whatever it brings in.
   let canPostUpdate = false;
+  let viewerUsername: string | null = null;
   if (isSupabaseConfigured()) {
     const supabase = await createServerSupabaseClient();
     const {
@@ -291,11 +294,12 @@ export default async function CampaignPage({
           .maybeSingle(),
         supabase
           .from("profiles")
-          .select("is_admin")
+          .select("is_admin, username")
           .eq("id", user.id)
           .maybeSingle(),
       ]);
       canPostUpdate = Boolean(owned) || Boolean(profile?.is_admin);
+      viewerUsername = (profile?.username as string | null) ?? null;
     }
   }
 
@@ -429,7 +433,11 @@ export default async function CampaignPage({
             <div className="mt-6">{donateButton}</div>
 
             <div className="mt-3">
-              <ShareButtons title={campaign.title} />
+              <ShareButtons
+                title={campaign.title}
+                slug={campaign.slug}
+                via={viewerUsername}
+              />
             </div>
 
             <p className="mt-4 text-center text-xs leading-relaxed text-muted">
