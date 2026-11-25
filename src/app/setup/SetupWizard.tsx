@@ -264,8 +264,16 @@ export function SetupWizard({
           </button>
         ) : null}
 
+        {/* Distinct keys on purpose. Without them React keeps the same
+            DOM button between steps and only swaps its type from
+            "button" to "submit" — so a tap landing just after the step
+            changes submits the form instead of advancing, losing
+            whatever the last step was for. On a phone, where people tap
+            quickly, that happens easily. A new key means a new element
+            and no inherited click. */}
         {step < STEPS.length - 1 ? (
           <Button
+            key="continue"
             type="button"
             size="lg"
             disabled={!canContinue}
@@ -275,7 +283,13 @@ export function SetupWizard({
             Continue
           </Button>
         ) : (
-          <Button type="submit" size="lg" disabled={pending} className="flex-1">
+          <Button
+            key="create"
+            type="submit"
+            size="lg"
+            disabled={pending}
+            className="flex-1"
+          >
             {pending ? "Creating your page…" : "Create my page"}
           </Button>
         )}
@@ -283,6 +297,7 @@ export function SetupWizard({
 
       {step === STEPS.length - 1 ? (
         <button
+          key="skip"
           type="submit"
           disabled={pending}
           className="press mt-3 w-full text-center text-sm font-bold text-muted hover:text-brand"
