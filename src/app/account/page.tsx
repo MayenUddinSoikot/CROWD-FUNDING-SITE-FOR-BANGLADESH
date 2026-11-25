@@ -6,6 +6,12 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { formatTaka, formatCampaignId } from "@/lib/format";
 import type { Campaign } from "@/lib/types";
 import { CreatorProfileForm } from "./CreatorProfileForm";
+import { ReferralPanel } from "@/components/ReferralPanel";
+import type {
+  ReferralStats,
+  ReferredCampaign,
+} from "@/components/ReferralPanel";
+import { siteUrl } from "@/app/layout";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "My campaigns — Shohay সহায়" };
@@ -79,12 +85,37 @@ export default async function AccountPage({
   if (error) console.error("Failed to load your campaigns:", error.message);
   const campaigns = (data ?? []) as Campaign[];
 
+  // What this creator has brought in through their own link. Silently
+  // zero until referrals.sql has been run.
+  const [statsResult, referredResult] = await Promise.all([
+    supabase.rpc("my_referral_stats", { since: null }),
+    supabase.rpc("my_referral_campaigns", { max_rows: 5 }),
+  ]);
+  const referralStats: ReferralStats = (statsResult.data?.[0] as
+    | ReferralStats
+    | undefined) ?? {
+    total_raised: 0,
+    donation_count: 0,
+    supporters: 0,
+    campaigns_helped: 0,
+  };
+  const referredCampaigns = (referredResult.data ?? []) as ReferredCampaign[];
+
   return (
     <>
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 pb-16">
         <h1 className="mt-10 text-2xl font-bold">
           My campaigns · <span className="font-bengali">আমার ক্যাম্পেইন</span>
         </h1>
+
+        <div className="mt-6">
+          <ReferralPanel
+            username={profile.username}
+            siteUrl={siteUrl}
+            stats={referralStats}
+            campaigns={referredCampaigns}
+          />
+        </div>
 
         <div className="mt-6">
           <CreatorProfileForm profile={profile} />

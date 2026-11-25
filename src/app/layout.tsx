@@ -4,6 +4,7 @@ import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { ReferralCapture } from "@/components/ReferralCapture";
 
 // One family across the site, with Bengali weight-matched so bilingual
 // lines don't look lopsided.
@@ -56,6 +57,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <ScrollToTop />
+        <ReferralCapture />
         <SiteHeader />
         {children}
         <SiteFooter />

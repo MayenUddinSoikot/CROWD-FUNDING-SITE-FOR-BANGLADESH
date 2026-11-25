@@ -13,6 +13,7 @@ const MENUS: Record<string, { heading: string; items: MenuItem[] }> = {
       { title: "Browse all campaigns", subtitle: "Every live campaign", href: "/campaigns" },
       { title: "🎂 Occasion fundraisers", subtitle: "Birthdays, weddings & more", href: "/campaigns?filter=birthday" },
       { title: "☕ Support a creator", subtitle: "Buy creators a cha", href: "/creators" },
+      { title: "🏆 Top fundraisers", subtitle: "Who raised the most", href: "/leaderboard" },
       { title: "Disaster relief", subtitle: "Give to verified relief", href: "/campaigns?category=disaster_relief" },
       { title: "Medical", subtitle: "Help with medical costs", href: "/campaigns?category=medical" },
       { title: "Education", subtitle: "Support students", href: "/campaigns?category=education" },
