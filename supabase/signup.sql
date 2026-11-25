@@ -41,3 +41,37 @@ begin
       for each row execute function public.handle_new_user();
   end if;
 end $$;
+
+-- ============================================================
+-- Social login (added later)
+-- Google returns the name under "name" or "full_name" and the photo
+-- under "avatar_url" or "picture". Take whichever arrived, so someone
+-- who signs up with Google still has a name and a photo rather than a
+-- blank profile.
+-- ============================================================
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  insert into public.profiles (id, full_name, phone, avatar_url)
+  values (
+    new.id,
+    nullif(trim(coalesce(
+      new.raw_user_meta_data ->> 'full_name',
+      new.raw_user_meta_data ->> 'name'
+    )), ''),
+    nullif(trim(new.raw_user_meta_data ->> 'phone'), ''),
+    nullif(trim(coalesce(
+      new.raw_user_meta_data ->> 'avatar_url',
+      new.raw_user_meta_data ->> 'picture'
+    )), '')
+  )
+  on conflict (id) do update
+    set full_name = coalesce(public.profiles.full_name, excluded.full_name),
+        phone = coalesce(public.profiles.phone, excluded.phone),
+        avatar_url = coalesce(public.profiles.avatar_url, excluded.avatar_url);
+  return new;
+end;
+$$;

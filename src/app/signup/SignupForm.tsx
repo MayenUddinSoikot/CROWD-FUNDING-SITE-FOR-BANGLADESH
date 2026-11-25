@@ -5,6 +5,7 @@ import Link from "next/link";
 import { sendSignupCode, verifySignupCode } from "./actions";
 import { Button, inputClass } from "@/components/ui";
 import { CodeField, CODE_MIN } from "@/components/CodeField";
+import { GoogleButton } from "@/components/GoogleButton";
 
 export function SignupForm() {
   const [sendState, sendAction, sending] = useActionState(
@@ -106,7 +107,18 @@ export function SignupForm() {
 
   /* ---------- Step 1: your details ---------- */
   return (
-    <form action={sendAction} className="mt-8 w-full text-left">
+    <div className="mt-8 w-full text-left">
+      <GoogleButton label="Sign up with Google" />
+
+      <div className="my-6 flex items-center gap-3">
+        <span className="h-px flex-1 bg-foreground/10" />
+        <span className="text-xs font-bold uppercase tracking-wider text-muted">
+          or use your email
+        </span>
+        <span className="h-px flex-1 bg-foreground/10" />
+      </div>
+
+      <form action={sendAction}>
       <label className="block text-sm font-semibold" htmlFor="full_name">
         Your full name
       </label>
@@ -191,6 +203,7 @@ export function SignupForm() {
           Log in
         </Link>
       </p>
-    </form>
+      </form>
+    </div>
   );
 }

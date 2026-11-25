@@ -11,9 +11,9 @@ export const metadata: Metadata = { title: "Log in — Shohay সহায়" }
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ confirmed?: string; link?: string }>;
+  searchParams: Promise<{ confirmed?: string; link?: string; social?: string }>;
 }) {
-  const { confirmed, link } = await searchParams;
+  const { confirmed, link, social } = await searchParams;
 
   if (isSupabaseConfigured()) {
     const supabase = await createServerSupabaseClient();
@@ -36,6 +36,17 @@ export default async function LoginPage({
       {confirmed ? (
         <p className="mt-5 w-full rounded-xl bg-brand-tint px-4 py-3 text-sm font-semibold text-brand-dark">
           ✓ Email confirmed — log in below to start your campaign.
+        </p>
+      ) : null}
+
+      {/* Coming back from Google without a session. */}
+      {social ? (
+        <p className="mt-5 w-full rounded-xl bg-accent-tint px-4 py-3 text-sm font-medium text-accent-ink">
+          {social === "cancelled"
+            ? "Google sign-in was cancelled. You can try again, or use your email below."
+            : social === "unavailable"
+              ? "Google sign-in isn't switched on yet. Please use your email below."
+              : "Google sign-in didn't complete. Please try again, or use your email below."}
         </p>
       ) : null}
 

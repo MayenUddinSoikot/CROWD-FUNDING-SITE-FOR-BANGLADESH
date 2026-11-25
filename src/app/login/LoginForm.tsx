@@ -5,6 +5,7 @@ import Link from "next/link";
 import { login, sendLoginCode, verifyLoginCode } from "./actions";
 import { Button, inputClass } from "@/components/ui";
 import { CodeField, CODE_MIN } from "@/components/CodeField";
+import { GoogleButton } from "@/components/GoogleButton";
 
 export function LoginForm() {
   // Code by email is the default; password is there for accounts that
@@ -13,6 +14,16 @@ export function LoginForm() {
 
   return (
     <div className="mt-8 w-full text-left">
+      <GoogleButton label="Log in with Google" />
+
+      <div className="my-6 flex items-center gap-3">
+        <span className="h-px flex-1 bg-foreground/10" />
+        <span className="text-xs font-bold uppercase tracking-wider text-muted">
+          or
+        </span>
+        <span className="h-px flex-1 bg-foreground/10" />
+      </div>
+
       <div className="flex rounded-full bg-track p-1" role="tablist">
         <TabButton
           active={mode === "code"}
