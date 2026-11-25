@@ -7,6 +7,7 @@ import { ButtonLink, Card, EmptyState, SectionHeading } from "@/components/ui";
 import { CreatorCard } from "@/components/CreatorCard";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import type { HeroSlide } from "@/components/HeroCarousel";
+import { SafeImage } from "@/components/SafeImage";
 import { Reveal } from "@/components/Reveal";
 import { PhotoMosaic } from "@/components/PhotoMosaic";
 import type { MosaicTile } from "@/components/PhotoMosaic";
@@ -372,6 +373,44 @@ export default async function Home({
                 {t("control.cta")}
               </ButtonLink>
             </div>
+
+            {/* A loose stack of pages, the way the reference shows
+                cards of a creator's work. Decorative, so it carries a
+                credit and no caption about who anyone is. */}
+            <div className="mt-10 flex gap-4 sm:gap-5">
+              {[
+                {
+                  u: "https://images.unsplash.com/photo-1722285789347-d780539ddfa0?w=700&q=75&auto=format&fit=crop",
+                  tilt: "-rotate-3",
+                },
+                {
+                  u: "https://images.unsplash.com/photo-1619271816535-07433c30e8bb?w=700&q=75&auto=format&fit=crop",
+                  tilt: "rotate-2 translate-y-4",
+                },
+                {
+                  u: "https://images.unsplash.com/photo-1723056416947-4ca0f01c229a?w=700&q=75&auto=format&fit=crop",
+                  tilt: "-rotate-1 -translate-y-2",
+                },
+              ].map((shot) => (
+                <div
+                  key={shot.u}
+                  className={`aspect-[3/4] w-1/3 overflow-hidden rounded-2xl bg-brand-tint shadow-lift ${shot.tilt}`}
+                >
+                  <SafeImage
+                    src={shot.u}
+                    alt=""
+                    loading="lazy"
+                    sizes="(min-width: 1024px) 15vw, 30vw"
+                    className="h-full w-full object-cover"
+                    fallback={<span className="block h-full w-full" />}
+                  />
+                </div>
+              ))}
+            </div>
+            <p className="mt-4 text-xs text-muted">
+              Photos by Shariar Kabir, Shafin Ashraf and Refat Ul Islam on
+              Unsplash
+            </p>
           </div>
         </div>
       </section>
@@ -380,24 +419,34 @@ export default async function Home({
 
       {shows("direct") ? (
       <Reveal>
-      <section className="mt-20 w-full bg-foreground/[0.04] px-5 py-16 sm:px-6 sm:py-20">
-        <div className="mx-auto max-w-6xl">
+      <section className="relative mt-20 w-full overflow-hidden bg-[#0b1a14] px-5 py-20 text-white sm:px-10 sm:py-28">
+        <SafeImage
+          src="https://images.unsplash.com/photo-1528726164383-33c4a223b78c?w=2000&q=75&auto=format&fit=crop"
+          alt=""
+          loading="lazy"
+          sizes="100vw"
+          className="absolute inset-0 h-full w-full object-cover"
+          fallback={null}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0b1a14] via-[#0b1a14]/85 to-[#0b1a14]/40" />
+        <div className="relative mx-auto max-w-[1600px]">
           <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
-            <h2 className="text-[2.2rem] font-extrabold leading-[1.02] tracking-tight sm:text-5xl">
+            <h2 className="text-[clamp(2.2rem,5vw,4.5rem)] font-light leading-[0.95] tracking-[-0.02em]">
               {t("direct.title")}
             </h2>
             <div>
-              <p className="font-bengali text-xl font-semibold text-brand-dark">
+              <p className="font-bengali text-xl font-semibold text-white/80">
                 {t("direct.title_bn")}
               </p>
-              <p className="mt-3 text-lg leading-relaxed text-body">
+              <p className="mt-3 text-lg leading-relaxed text-white/80">
                 {t("direct.body")}
               </p>
-              <div className="mt-7">
-                <ButtonLink href="/about#fee" size="lg" variant="secondary">
-                  {t("direct.cta")}
-                </ButtonLink>
-              </div>
+              <Link
+                href="/about#fee"
+                className="press mt-7 inline-flex min-h-[52px] items-center justify-center rounded-full bg-white px-8 text-lg font-bold text-[#0b1a14] no-underline"
+              >
+                {t("direct.cta")}
+              </Link>
             </div>
           </div>
         </div>
