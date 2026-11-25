@@ -2,7 +2,8 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { saveSetup, checkUsername, FOCUS_OPTIONS } from "./actions";
+import { saveSetup, checkUsername } from "./actions";
+import { FOCUS_OPTIONS } from "@/lib/creator-focus";
 import { Button, inputClass } from "@/components/ui";
 import { SOCIAL_PLATFORMS } from "@/lib/types";
 

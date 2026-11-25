@@ -6,17 +6,6 @@ import { getSupabaseClient } from "@/lib/supabase/anon";
 
 export type SetupState = { error?: string; done?: boolean } | undefined;
 
-export const FOCUS_OPTIONS = [
-  "Medical",
-  "Education",
-  "Disaster relief",
-  "Community",
-  "Creator / content",
-  "Occasion fundraisers",
-  "Animals",
-  "Other",
-] as const;
-
 /** Is this username free? Checked as they type, the way Patreon does,
     so nobody fills in a whole form only to be told at the end. */
 export async function checkUsername(
