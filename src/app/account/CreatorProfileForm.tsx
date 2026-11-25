@@ -13,10 +13,18 @@ type Profile = {
   display_name: string | null;
   bio: string | null;
   avatar_url: string | null;
+  full_name?: string | null;
+  phone?: string | null;
   social_links?: Record<string, string> | null;
 };
 
-export function CreatorProfileForm({ profile }: { profile: Profile }) {
+export function CreatorProfileForm({
+  profile,
+  email,
+}: {
+  profile: Profile;
+  email?: string | null;
+}) {
   const [state, action, pending] = useActionState(saveCreatorProfile, undefined);
   // Controlled so a validation error (e.g. username taken) never wipes
   // out edits you just typed into the other fields.
@@ -24,6 +32,8 @@ export function CreatorProfileForm({ profile }: { profile: Profile }) {
   const [displayName, setDisplayName] = useState(profile.display_name ?? "");
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? "");
   const [bio, setBio] = useState(profile.bio ?? "");
+  const [fullName, setFullName] = useState(profile.full_name ?? "");
+  const [phone, setPhone] = useState(profile.phone ?? "");
   const [socials, setSocials] = useState<Record<string, string>>(() =>
     Object.fromEntries(
       SOCIAL_PLATFORMS.map((p) => [p.key, profile.social_links?.[p.key] ?? ""])
@@ -39,6 +49,49 @@ export function CreatorProfileForm({ profile }: { profile: Profile }) {
         Set a username to get a shareable profile page at
         shohay.org/creator/&lt;username&gt;.
       </p>
+
+      <p className="mt-5 text-sm font-bold">Your details</p>
+      <p className="mt-0.5 text-xs opacity-60">
+        Private &amp; confidential — only our internal verification team sees
+        these. They are never shown on your public page.
+      </p>
+
+      <label className="mt-3 block text-sm font-medium" htmlFor="full_name">
+        Your name or organisation
+      </label>
+      <input
+        id="full_name"
+        name="full_name"
+        value={fullName}
+        onChange={(e) => setFullName(e.target.value)}
+        placeholder="As written on your NID, or your organisation's name"
+        className={inputClass}
+      />
+
+      <label className="mt-3 block text-sm font-medium" htmlFor="phone">
+        Mobile number
+      </label>
+      <input
+        id="phone"
+        name="phone"
+        type="tel"
+        inputMode="numeric"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        placeholder="01712345678"
+        className={inputClass}
+      />
+
+      <p className="mt-3 block text-sm font-medium">Email</p>
+      <p className="mt-1 rounded-xl bg-background px-4 py-2.5 text-sm opacity-70">
+        {email ?? "—"}
+      </p>
+      <p className="mt-1 text-xs opacity-60">
+        This is how you log in, so it can&rsquo;t be changed here. Message us
+        if you need it moved to another address.
+      </p>
+
+      <p className="mt-6 text-sm font-bold">Your public page</p>
 
       <label className="mt-4 block text-sm font-medium" htmlFor="username">
         Username

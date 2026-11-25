@@ -81,6 +81,20 @@ export default async function ManageCampaignPage({
   if (!data) notFound();
   const c = data as Campaign;
 
+  // Views, donors and conversion for this one campaign. Silently zero
+  // until campaign-views.sql has been run.
+  const { data: dashboardRows } = await supabase.rpc("my_campaign_dashboard");
+  const stats = (
+    (dashboardRows ?? []) as {
+      campaign_id: string;
+      views: number;
+      views_7d: number;
+      donations: number;
+      donors: number;
+      biggest_gift: number;
+    }[]
+  ).find((row) => row.campaign_id === id);
+
   // So the share kit hands them a link that credits them.
   const { data: me } = await supabase
     .from("profiles")
@@ -153,6 +167,32 @@ export default async function ManageCampaignPage({
           <ProgressBar percent={percent} />
         </div>
         <p className="mt-2 text-sm opacity-60">{percent}% funded</p>
+
+        {/* How the page itself is performing. Views answers "is anyone
+            arriving"; the percentage answers "is the page convincing
+            the ones who do". */}
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Figure
+            value={(Number(stats?.views) || 0).toLocaleString("en-US")}
+            label="Views"
+          />
+          <Figure
+            value={(Number(stats?.views_7d) || 0).toLocaleString("en-US")}
+            label="Views, 7 days"
+          />
+          <Figure
+            value={(Number(stats?.donors) || 0).toLocaleString("en-US")}
+            label="Donors"
+          />
+          <Figure
+            value={
+              Number(stats?.views) > 0
+                ? `${(((Number(stats?.donations) || 0) / Number(stats?.views)) * 100).toFixed(1)}%`
+                : "—"
+            }
+            label="Gave after viewing"
+          />
+        </div>
 
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
@@ -227,5 +267,14 @@ export default async function ManageCampaignPage({
         <CampaignUpdateForm campaignId={c.id} slug={c.slug} />
       </div>
     </main>
+  );
+}
+
+function Figure({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="rounded-xl bg-background px-3 py-2.5">
+      <p className="text-base font-extrabold">{value}</p>
+      <p className="mt-0.5 text-[11px] leading-tight text-muted">{label}</p>
+    </div>
   );
 }

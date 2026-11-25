@@ -21,6 +21,8 @@ export async function saveCreatorProfile(
   const displayName = String(formData.get("display_name") ?? "").trim();
   const bio = String(formData.get("bio") ?? "").trim();
   const avatarUrl = String(formData.get("avatar_url") ?? "").trim();
+  const fullName = String(formData.get("full_name") ?? "").trim();
+  const phoneRaw = String(formData.get("phone") ?? "").trim();
 
   if (username && !/^[a-z0-9_-]{3,30}$/.test(username)) {
     return {
@@ -30,6 +32,20 @@ export async function saveCreatorProfile(
   }
   if (avatarUrl && !/^https:\/\/\S+$/.test(avatarUrl)) {
     return { error: "Avatar link must start with https://" };
+  }
+
+  // Stored as 11 digits (01XXXXXXXXX) so the creator directory can match
+  // the same person across campaigns.
+  let phone: string | null = null;
+  if (phoneRaw) {
+    const digits = phoneRaw.replace(/\D/g, "").slice(-11);
+    if (!/^01\d{9}$/.test(digits)) {
+      return {
+        error:
+          "Please enter your mobile as 11 digits starting 01 — for example 01712345678.",
+      };
+    }
+    phone = digits;
   }
 
   const socialLinks: Record<string, string> = {};
@@ -47,6 +63,8 @@ export async function saveCreatorProfile(
     display_name: displayName || null,
     bio: bio || null,
     avatar_url: avatarUrl || null,
+    full_name: fullName || null,
+    phone,
   };
 
   let { error } = await supabase
