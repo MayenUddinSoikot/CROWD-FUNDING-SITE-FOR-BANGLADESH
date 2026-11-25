@@ -33,13 +33,10 @@ export async function addSiteMedia(
     return { error: "The button link must start with https:// or /" };
   }
 
-  // Only one hero at a time — adding a new one retires the old.
-  if (slot === "hero") {
-    await supabase
-      .from("site_media")
-      .update({ published: false })
-      .eq("slot", "hero");
-  }
+  /* Heroes used to replace each other — adding one retired the last.
+     The homepage hero is a carousel now, so every published hero row is
+     a slide and they rotate in "position" order. Retiring one is done
+     with its own Hide button. */
 
   const { error } = await supabase.from("site_media").insert({
     slot,

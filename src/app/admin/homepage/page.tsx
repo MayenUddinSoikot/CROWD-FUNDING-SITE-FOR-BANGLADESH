@@ -36,8 +36,11 @@ export default async function HomepageMediaPage() {
         🖼️ Homepage media · <span className="font-bengali">ছবি ও ভিডিও</span>
       </h1>
       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-        Photos and videos you put on the homepage yourself — a hero image
-        beside the headline, and a strip of stories below the campaigns.
+        Photos and videos you put on the homepage yourself. Every
+        published <b>Hero</b> is one slide of the big rotating banner at
+        the top — add two or three and they cycle, in <b>position</b>
+        order. A video slide plays itself, silently and on a loop, so use
+        a short clip with nothing important in the sound.
       </p>
 
       {missingTable ? (

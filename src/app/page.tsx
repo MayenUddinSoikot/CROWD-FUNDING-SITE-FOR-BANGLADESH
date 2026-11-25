@@ -5,7 +5,9 @@ import { CATEGORY_LABELS } from "@/lib/types";
 import { MediaFrame } from "@/components/MediaTile";
 import { ButtonLink, Card, EmptyState, SectionHeading } from "@/components/ui";
 import { CreatorCard } from "@/components/CreatorCard";
-import { SafeImage } from "@/components/SafeImage";
+import { HeroCarousel } from "@/components/HeroCarousel";
+import type { HeroSlide } from "@/components/HeroCarousel";
+import { Reveal } from "@/components/Reveal";
 import { DashboardPreview } from "@/components/DashboardPreview";
 import { getCreators } from "@/lib/creators";
 
@@ -83,7 +85,33 @@ export default async function Home({
     getCreators(8),
   ]);
 
-  const hero = siteMedia.find((m) => m.slot === "hero") ?? null;
+  /* Every published hero row is a slide, in position order, so Shohay
+     can rotate several photos or videos from /admin/homepage without a
+     deploy. With none set, one slide of brand colour — credited to the
+     campaign currently raising the most, which is the nearest thing we
+     have to Patreon's creator credit. */
+  const heroMedia = siteMedia.filter((m) => m.slot === "hero");
+  const heroSlides: HeroSlide[] = heroMedia.length
+    ? heroMedia.map((m) => ({
+        id: m.id,
+        kind: m.media_type === "video" ? "video" : "image",
+        url: m.url,
+        title: m.title,
+        titleBn: null,
+        credit: m.subtitle,
+        creditHref: m.link_url,
+      }))
+    : [
+        {
+          id: "default",
+          kind: "color",
+          url: null,
+          title: null,
+          titleBn: null,
+          credit: null,
+          creditHref: null,
+        },
+      ];
   const featured = siteMedia.filter((m) => m.slot === "featured");
 
   /* The campaign shown in the hero card when no hero media is set.
@@ -105,119 +133,26 @@ export default async function Home({
 
   return (
     <main className="flex-1 pb-20">
-      {/* ===== Hero =====
-          Patreon's hero is one photograph filling the screen with the
-          headline over it and a credit line for whoever is in the shot.
-          Ours is built the same way: the image is the background, not a
-          card beside the text. Until a photo is set in /admin/homepage it
-          falls back to a deep field of brand colour, which still reads as
-          a hero rather than as a broken image. */}
-      <section className="relative w-full overflow-hidden bg-[#0b1a14] text-white">
-        {hero?.media_type === "image" && hero.url ? (
-          <SafeImage
-            src={hero.url}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-            fallback={null}
-          />
-        ) : spotlight?.cover_image_url ? (
-          <SafeImage
-            src={spotlight.cover_image_url}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-            fallback={null}
-          />
-        ) : null}
-
-        {/* Dark wash so the type stays readable over any photograph */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0b1a14] via-[#0b1a14]/85 to-[#11694a]/70" />
-
-        <div className="relative mx-auto flex min-h-[72vh] max-w-6xl flex-col justify-end px-5 pb-12 pt-20 sm:px-6 sm:pb-16 sm:pt-28">
-          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/25 px-4 py-1.5 text-xs font-bold sm:text-sm">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#35c08a]" />
-            0% platform fee — always
-          </span>
-
-          <h1 className="mt-6 max-w-4xl text-[2.9rem] font-normal leading-[0.95] tracking-tight sm:text-7xl lg:text-[5.5rem]">
-            The people who follow you can change a life.
-          </h1>
-          <p className="font-bengali mt-5 max-w-2xl text-xl font-semibold text-white/85 sm:text-2xl">
-            আপনার সঙ্গে যাঁরা আছেন, তাঁরাই পারেন
-          </p>
-
-          <p className="mt-5 max-w-xl leading-relaxed text-white/75">
-            Build a page, bring your audience, and raise for the people who
-            need it. Shohay takes 0% — every taka reaches the person you
-            sent it to.
-          </p>
-
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href="/setup"
-              className="press inline-flex min-h-[52px] items-center justify-center rounded-full bg-white px-8 text-lg font-bold text-[#0b1a14] no-underline"
-            >
-              Create your page
-            </Link>
-            <Link
-              href="/creators"
-              className="press inline-flex min-h-[52px] items-center justify-center rounded-full border border-white/40 px-8 text-lg font-bold text-white no-underline hover:bg-white/10"
-            >
-              Find a creator
-            </Link>
-          </div>
-
-          <form action="/campaigns" className="mt-7 max-w-lg">
-            <label htmlFor="hero-search" className="sr-only">
-              Find a creator or a campaign
-            </label>
-            <div className="flex items-center gap-2 rounded-full border border-white/30 px-4 py-2 focus-within:border-white">
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                className="shrink-0 text-white/60"
-                aria-hidden="true"
-              >
-                <circle cx="11" cy="11" r="7" />
-                <path d="M20 20l-3.5-3.5" />
-              </svg>
-              <input
-                id="hero-search"
-                name="q"
-                type="search"
-                placeholder="Find a creator or a campaign"
-                className="w-full bg-transparent py-1.5 text-white outline-none placeholder:text-white/50"
-              />
-              <button
-                type="submit"
-                className="press min-h-[40px] shrink-0 rounded-full bg-white px-5 text-sm font-bold text-[#0b1a14]"
-              >
-                Search
-              </button>
-            </div>
-          </form>
-
-          {/* The credit line Patreon runs under its hero photograph */}
-          {spotlight ? (
-            <Link
-              href={`/campaigns/${spotlight.slug}`}
-              className="press mt-10 flex w-fit items-center gap-2 text-sm font-semibold text-white/80 no-underline hover:text-white"
-            >
-              Raising now: {spotlight.title}
-              <span aria-hidden="true">→</span>
-            </Link>
-          ) : null}
-        </div>
-      </section>
+      {/* ===== Hero ===== */}
+      <HeroCarousel
+        slides={heroSlides.map((s) =>
+          s.id === "default" && spotlight
+            ? {
+                ...s,
+                credit: `Raising now: ${spotlight.title}`,
+                creditHref: `/campaigns/${spotlight.slug}`,
+              }
+            : s
+        )}
+        fallbackTitle="The people who follow you can change a life."
+        fallbackTitleBn="আপনার সঙ্গে যাঁরা আছেন, তাঁরাই পারেন"
+      />
 
       {/* ===== Creators ===== */}
       {/* Faces before listings. A creator platform that opens on a grid
           of causes reads as a charity directory; opening on the people
           doing the raising is what makes Patreon feel like Patreon. */}
+      <Reveal>
       <section className="mx-auto mt-16 max-w-6xl px-5 sm:px-6">
         <SectionHeading
           title="Creators raising for Bangladesh"
@@ -247,6 +182,7 @@ export default async function Home({
           </div>
         )}
       </section>
+      </Reveal>
 
 
       {/* ===== Stories from Shohay — your own photos and videos ===== */}
@@ -294,6 +230,7 @@ export default async function Home({
           Patreon's "More ways to earn": the argument that the platform
           is not one fundraiser but a living income. Ours is the same
           argument in taka. */}
+      <Reveal>
       <section className="mx-auto mt-20 max-w-6xl px-5 sm:px-6">
         <h2 className="max-w-3xl text-[2.2rem] font-extrabold leading-[1.05] tracking-tight sm:text-5xl">
           More ways to raise
@@ -350,10 +287,12 @@ export default async function Home({
           </ButtonLink>
         </div>
       </section>
+      </Reveal>
 
       {/* ===== See what is working =====
           Patreon's "Unlock growth", which sells the back office with a
           picture of it. We built that dashboard, so show it. */}
+      <Reveal>
       <section className="mx-auto mt-20 max-w-6xl px-5 sm:px-6">
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_380px] lg:gap-16">
           <div>
@@ -397,8 +336,10 @@ export default async function Home({
           </div>
         </div>
       </section>
+      </Reveal>
 
       {/* ===== Trust band ===== */}
+      <Reveal>
       <section className="mt-20 w-full bg-gradient-to-br from-brand to-brand-dark px-5 py-16 text-white sm:px-6 sm:py-20">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-extrabold leading-tight sm:text-4xl">
@@ -442,12 +383,14 @@ export default async function Home({
           </div>
         </div>
       </section>
+      </Reveal>
 
 
       {/* ===== Closing call to action =====
           Patreon ends every scroll on the same ask, and the page used to
           finish on "How it works" — a reader who went all the way down
           had nowhere to go. */}
+      <Reveal>
       <section className="mt-20 w-full bg-brand-tint px-5 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-extrabold leading-tight text-brand-dark sm:text-5xl">
@@ -471,6 +414,7 @@ export default async function Home({
           </div>
         </div>
       </section>
+      </Reveal>
     </main>
   );
 }

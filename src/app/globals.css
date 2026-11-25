@@ -205,3 +205,57 @@ textarea {
     padding: 0 !important;
   }
 }
+
+/* ===== Motion =====
+   Two effects, both off for anyone whose device asks for less motion:
+   a slow drift across the hero photograph, and a short rise as a
+   section first comes into view. Nothing here moves on a loop in the
+   reader's eyeline while they are trying to read. */
+
+@keyframes hero-drift {
+  from {
+    transform: scale(1.06) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.16) translate3d(-1.5%, -1.5%, 0);
+  }
+}
+
+.hero-drift {
+  animation: hero-drift 22s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Hidden until observed, so nothing flashes before it animates. The
+   component adds .is-visible; if JavaScript never runs, the fallback
+   below keeps the content visible rather than blank. */
+.reveal {
+  opacity: 0;
+}
+
+.reveal.is-visible {
+  animation: rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-drift {
+    animation: none;
+  }
+
+  .reveal,
+  .reveal.is-visible {
+    opacity: 1;
+    animation: none;
+  }
+}
