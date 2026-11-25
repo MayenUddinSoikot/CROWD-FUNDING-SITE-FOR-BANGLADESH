@@ -135,6 +135,7 @@ export type PublicCreator = {
   display_name: string | null;
   bio: string | null;
   avatar_url: string | null;
+  cover_url?: string | null;
   social_links?: Record<string, string> | null;
 };
 

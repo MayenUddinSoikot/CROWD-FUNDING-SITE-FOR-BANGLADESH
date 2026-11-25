@@ -44,7 +44,7 @@ export default async function AccountPage({
   const profileFields = "username, display_name, bio, avatar_url";
   const firstProfile = await supabase
     .from("profiles")
-    .select(`${profileFields}, social_links, full_name, phone`)
+    .select(`${profileFields}, social_links, full_name, phone, cover_url`)
     .eq("id", user.id)
     .maybeSingle();
   let profileRow = firstProfile.data;
@@ -61,6 +61,7 @@ export default async function AccountPage({
     display_name: null,
     bio: null,
     avatar_url: null,
+    cover_url: null,
     full_name: null,
     phone: null,
     social_links: null,

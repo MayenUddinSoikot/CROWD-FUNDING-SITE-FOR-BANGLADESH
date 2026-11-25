@@ -7,10 +7,18 @@ import { SOCIAL_PLATFORMS } from "@/lib/types";
 import { formatTaka } from "@/lib/format";
 import { CampaignCard } from "@/components/CampaignCard";
 import { CreatorSupportBox } from "@/components/CreatorSupportBox";
-import { PostMedia } from "@/components/PostMedia";
-import { getTiers, getSupporters, getPublicPosts } from "@/lib/memberships";
+import { CreatorTabs } from "@/components/CreatorTabs";
+import { PostCard } from "@/components/PostCard";
+import { EmptyState, ButtonLink } from "@/components/ui";
+import {
+  getTiers,
+  getSupporters,
+  getPostTeasers,
+  type MembershipTier,
+  type PublicSupporter,
+  type PostTeaser,
+} from "@/lib/memberships";
 
-// Always show the creator's live campaigns and totals.
 export const dynamic = "force-dynamic";
 
 const CREATOR_FIELDS = "id, username, display_name, bio, avatar_url";
@@ -19,10 +27,10 @@ async function getCreator(username: string): Promise<PublicCreator | null> {
   if (!isSupabaseConfigured()) return null;
   try {
     const supabase = getSupabaseClient();
-    // social_links exists only after creator-page.sql — fall back.
+    // cover_url / social_links each arrive with a later SQL script.
     const first = await supabase
       .from("public_creators")
-      .select(`${CREATOR_FIELDS}, social_links`)
+      .select(`${CREATOR_FIELDS}, cover_url, social_links`)
       .eq("username", username)
       .maybeSingle();
 
@@ -63,7 +71,6 @@ async function getCreatorCampaigns(creatorId: string): Promise<Campaign[]> {
         .in("status", ["approved", "completed"])
         .order("created_at", { ascending: false });
 
-    // social_links / campaign_no exist only after their SQL scripts.
     let { data, error } = await run(`${CAMPAIGN_FIELDS}, social_links`);
     if (error) ({ data, error } = await run(CAMPAIGN_FIELDS));
     if (error) {
@@ -98,9 +105,19 @@ export async function generateMetadata({
   const creator = await getCreator(username);
   if (!creator) return { title: "Creator not found — Shohay" };
   const name = creator.display_name ?? creator.username;
+  const description = creator.bio ?? `Support ${name} on Shohay.`;
   return {
     title: `${name} — Shohay সহায়`,
-    description: creator.bio ?? `Support ${name} on Shohay.`,
+    description,
+    openGraph: {
+      title: name,
+      description,
+      images: creator.cover_url
+        ? [creator.cover_url]
+        : creator.avatar_url
+          ? [creator.avatar_url]
+          : undefined,
+    },
   };
 }
 
@@ -117,11 +134,16 @@ export default async function CreatorProfilePage({
     getCreatorCampaigns(creator.id),
     getTiers(creator.id),
     getSupporters(creator.id),
-    getPublicPosts(creator.id, 6),
+    getPostTeasers(creator.id, 24),
   ]);
+
   const name = creator.display_name ?? creator.username;
-  const totalRaised = campaigns.reduce((sum, c) => sum + (c.raised_amount ?? 0), 0);
+  const totalRaised = campaigns.reduce(
+    (sum, c) => sum + (c.raised_amount ?? 0),
+    0
+  );
   const target = supportTarget(campaigns);
+  const joinHref = `/creator/${creator.username}/join`;
 
   // Profile links win; anything missing is filled from their campaign.
   const campaignLinks = campaigns.find((c) => c.social_links)?.social_links ?? {};
@@ -131,254 +153,375 @@ export default async function CreatorProfilePage({
     url: merged[p.key],
   }));
 
+  const joinButton =
+    tiers.length > 0 ? (
+      <ButtonLink href={joinHref} size="sm" className="shadow-brand">
+        Join now
+      </ButtonLink>
+    ) : target ? (
+      <ButtonLink href={`/campaigns/${target.slug}/donate`} size="sm">
+        Support
+      </ButtonLink>
+    ) : null;
+
+  const [featured, ...rest] = posts;
+
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 sm:px-6">
-      {/* Banner */}
-      <div className="mt-6 h-32 w-full rounded-3xl bg-gradient-to-r from-brand/25 via-brand/10 to-accent/15 sm:h-40" />
+    <main className="mx-auto w-full max-w-5xl flex-1 px-5 pb-20 sm:px-6">
+      {/* ===== Cover ===== */}
+      <div className="relative -mx-5 sm:mx-0 sm:mt-6 sm:rounded-3xl sm:overflow-hidden">
+        <div className="aspect-[3/1] w-full bg-gradient-to-br from-brand-dark via-brand to-brand-light sm:aspect-[4/1]">
+          {creator.cover_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={creator.cover_url}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ) : null}
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-10">
-        {/* ===== Left: identity, about, campaigns ===== */}
-        <div>
-          <div className="-mt-12 flex flex-col items-start gap-3 px-1 sm:-mt-14">
-            {creator.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={creator.avatar_url}
-                alt=""
-                className="h-24 w-24 rounded-full object-cover ring-4 ring-background sm:h-28 sm:w-28"
-              />
-            ) : (
-              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-brand/15 text-3xl font-bold text-brand ring-4 ring-background sm:h-28 sm:w-28">
-                {name.charAt(0).toUpperCase()}
-              </div>
-            )}
-
-            <div>
-              <h1 className="font-serif text-3xl font-bold leading-tight">
-                {name}
-              </h1>
-              <p className="mt-0.5 text-sm opacity-50">@{creator.username}</p>
-            </div>
-
-            {socials.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {socials.map((s) => (
-                  <a
-                    key={s.key}
-                    href={s.url}
-                    target="_blank"
-                    rel="noopener noreferrer nofollow"
-                    title={`${name} on ${s.label}`}
-                    className="flex items-center gap-2 rounded-full border border-foreground/15 py-1.5 pl-1.5 pr-3.5 text-sm font-medium transition hover:border-brand hover:text-brand"
-                  >
-                    <span
-                      className={`flex h-7 w-7 items-center justify-center rounded-full text-xs ${s.color}`}
-                    >
-                      {s.emoji}
-                    </span>
-                    {s.label}
-                  </a>
-                ))}
-              </div>
-            ) : null}
-
-            <div className="flex flex-wrap gap-2 text-sm">
-              <span className="rounded-full bg-brand/10 px-3 py-1 font-semibold text-brand">
-                {campaigns.length} campaign{campaigns.length === 1 ? "" : "s"}
-              </span>
-              {totalRaised > 0 ? (
-                <span className="rounded-full bg-brand/10 px-3 py-1 font-semibold text-brand">
-                  {formatTaka(totalRaised)} raised
-                </span>
-              ) : null}
-            </div>
+      {/* ===== Identity ===== */}
+      <div className="relative -mt-12 px-1 sm:-mt-14">
+        {creator.avatar_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={creator.avatar_url}
+            alt=""
+            className="h-24 w-24 rounded-full object-cover ring-4 ring-background sm:h-28 sm:w-28"
+          />
+        ) : (
+          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-brand-tint text-3xl font-bold text-brand-dark ring-4 ring-background sm:h-28 sm:w-28">
+            {name.charAt(0).toUpperCase()}
           </div>
+        )}
 
-          {/* About */}
-          <section className="mt-6 rounded-2xl border border-foreground/10 bg-card p-6">
-            <h2 className="text-sm font-bold text-brand">
-              About {name} · <span className="font-bengali">পরিচিতি</span>
-            </h2>
-            {creator.bio ? (
-              <p className="mt-3 whitespace-pre-line leading-relaxed opacity-85">
-                {creator.bio}
-              </p>
-            ) : (
-              <p className="mt-3 text-sm opacity-60">
-                This creator hasn&rsquo;t written a bio yet.
-              </p>
-            )}
-          </section>
-
-          {/* Monthly membership */}
-          {tiers.length > 0 ? (
-            <section className="mt-8">
-              <h2 className="text-xl font-bold">
-                Support {name} monthly ·{" "}
-                <span className="font-bengali">মাসিক সহায়</span>
-              </h2>
-              <p className="mt-1 text-sm text-muted">
-                Steady support is what lets a creator plan ahead.
-              </p>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {tiers.map((tier) => (
-                  <Link
-                    key={tier.id}
-                    href={`/creator/${creator.username}/join?tier=${tier.id}`}
-                    className="lift block rounded-2xl bg-card p-5 shadow-soft no-underline"
-                  >
-                    <span className="flex items-baseline justify-between gap-3">
-                      <span className="font-bold">{tier.name}</span>
-                      <span className="shrink-0 font-extrabold text-brand">
-                        {formatTaka(Number(tier.amount))}
-                        <span className="text-xs font-semibold text-muted">
-                          /mo
-                        </span>
-                      </span>
-                    </span>
-                    {tier.name_bn ? (
-                      <span className="font-bengali mt-0.5 block text-sm text-muted">
-                        {tier.name_bn}
-                      </span>
-                    ) : null}
-                    {tier.perks ? (
-                      <span className="mt-2 block whitespace-pre-line text-sm leading-relaxed text-body">
-                        {tier.perks}
-                      </span>
-                    ) : null}
-                  </Link>
-                ))}
-              </div>
-            </section>
+        <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-3xl font-extrabold leading-tight sm:text-4xl">
+              {name}
+            </h1>
+            <p className="mt-1 text-sm text-muted">@{creator.username}</p>
+          </div>
+          {joinButton ? (
+            <div className="shrink-0">
+              {tiers.length > 0 ? (
+                <ButtonLink href={joinHref} size="lg" className="shadow-brand">
+                  Become a supporter
+                </ButtonLink>
+              ) : (
+                joinButton
+              )}
+            </div>
           ) : null}
-
-          {/* Posts */}
-          {posts.length > 0 ? (
-            <section className="mt-8">
-              <h2 className="text-xl font-bold">
-                Updates · <span className="font-bengali">আপডেট</span>
-              </h2>
-              <ul className="mt-4 space-y-4">
-                {posts.map((post) => (
-                  <li
-                    key={post.id}
-                    className="overflow-hidden rounded-2xl bg-card shadow-soft"
-                  >
-                    <PostMedia
-                      imageUrl={post.image_url}
-                      videoUrl={post.video_url}
-                      alt={post.title}
-                    />
-                    <div className="p-5">
-                      <p className="text-xs text-muted">
-                        {new Date(post.created_at).toLocaleDateString("en-GB", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </p>
-                      <p className="mt-1 text-lg font-bold">{post.title}</p>
-                      {post.body ? (
-                        <p className="mt-2 whitespace-pre-line leading-relaxed text-body">
-                          {post.body}
-                        </p>
-                      ) : null}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-
-          {/* Supporter wall */}
-          {supporters.length > 0 ? (
-            <section className="mt-8">
-              <h2 className="text-xl font-bold">
-                Supporters · <span className="font-bengali">সমর্থকরা</span>
-              </h2>
-              <ul className="mt-4 flex flex-wrap gap-2">
-                {supporters.map((s, i) => (
-                  <li
-                    key={`${s.supporter_name}-${s.started_at}-${i}`}
-                    title={s.message ?? undefined}
-                    className="rounded-full bg-card px-4 py-2 text-sm font-semibold shadow-soft"
-                  >
-                    {s.supporter_name}
-                    {s.tier_name ? (
-                      <span className="ml-2 text-xs font-bold text-brand">
-                        {s.tier_name}
-                      </span>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-
-          {/* Campaigns */}
-          <section className="mt-8">
-            <h2 className="text-xl font-bold">
-              Campaigns · <span className="font-bengali">ক্যাম্পেইন</span>
-            </h2>
-
-            {campaigns.length === 0 ? (
-              <p className="mt-4 text-sm opacity-60">
-                No live campaigns yet.{" "}
-                <span className="font-bengali">এখনো কোনো ক্যাম্পেইন নেই।</span>
-              </p>
-            ) : (
-              <div className="mt-5 grid gap-6 sm:grid-cols-2">
-                {campaigns.map((campaign) => (
-                  <CampaignCard key={campaign.id} campaign={campaign} />
-                ))}
-              </div>
-            )}
-          </section>
         </div>
 
-        {/* ===== Right: support box ===== */}
-        <aside className="lg:pt-6">
-          <div className="lg:sticky lg:top-24">
-            {target ? (
-              <>
-                <CreatorSupportBox
-                  campaignId={target.id}
-                  slug={target.slug}
-                  creatorName={name}
-                />
-                {tiers.length > 0 ? (
-                  <Link
-                    href={`/creator/${creator.username}/join`}
-                    className="press mt-3 flex min-h-[52px] items-center justify-center rounded-2xl border-2 border-brand/30 bg-card px-5 text-base font-bold text-brand no-underline hover:border-brand"
-                  >
-                    Support monthly from{" "}
-                    {formatTaka(
-                      Math.min(...tiers.map((t) => Number(t.amount)))
-                    )}
-                  </Link>
-                ) : null}
-              </>
-            ) : (
-              <div className="rounded-2xl border border-foreground/10 bg-card p-6 text-center">
-                <p className="text-3xl">☕</p>
-                <p className="mt-2 font-semibold">
-                  {name} isn&rsquo;t taking support right now
-                </p>
-                <p className="mt-1 text-sm opacity-60">
-                  They have no live page yet. Check back soon.
-                </p>
-                <Link
-                  href="/creators"
-                  className="mt-4 inline-block rounded-full border border-foreground/20 px-5 py-2 text-sm font-semibold hover:border-brand hover:text-brand"
-                >
-                  Discover other creators →
-                </Link>
-              </div>
-            )}
+        {creator.bio ? (
+          <p className="mt-4 max-w-2xl whitespace-pre-line leading-relaxed text-body">
+            {creator.bio}
+          </p>
+        ) : null}
+
+        {socials.length > 0 ? (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {socials.map((s) => (
+              <a
+                key={s.key}
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                title={`${name} on ${s.label}`}
+                aria-label={`${name} on ${s.label}`}
+                className={`press flex h-10 w-10 items-center justify-center rounded-full text-base ${s.color}`}
+              >
+                {s.emoji}
+              </a>
+            ))}
           </div>
-        </aside>
+        ) : null}
+
+        <div className="mt-4 flex flex-wrap gap-2 text-sm">
+          {campaigns.length > 0 ? (
+            <span className="rounded-full bg-brand-tint px-3 py-1 font-bold text-brand-dark">
+              {campaigns.length} campaign{campaigns.length === 1 ? "" : "s"}
+            </span>
+          ) : null}
+          {totalRaised > 0 ? (
+            <span className="rounded-full bg-brand-tint px-3 py-1 font-bold text-brand-dark">
+              {formatTaka(totalRaised)} raised
+            </span>
+          ) : null}
+          {supporters.length > 0 ? (
+            <span className="rounded-full bg-brand-tint px-3 py-1 font-bold text-brand-dark">
+              {supporters.length} supporter{supporters.length === 1 ? "" : "s"}
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      {/* ===== Sections ===== */}
+      <div className="mt-8">
+        <CreatorTabs
+          action={joinButton}
+          tabs={[
+            {
+              key: "home",
+              label: "Home",
+              panel: (
+                <HomePanel
+                  name={name}
+                  featured={featured}
+                  rest={rest.slice(0, 3)}
+                  tiers={tiers}
+                  campaigns={campaigns}
+                  joinHref={joinHref}
+                  target={target}
+                />
+              ),
+            },
+            posts.length > 0
+              ? {
+                  key: "posts",
+                  label: "Posts",
+                  count: posts.length,
+                  panel: (
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      {posts.map((p) => (
+                        <PostCard key={p.id} post={p} joinHref={joinHref} />
+                      ))}
+                    </div>
+                  ),
+                }
+              : null,
+            campaigns.length > 0
+              ? {
+                  key: "campaigns",
+                  label: "Campaigns",
+                  count: campaigns.length,
+                  panel: (
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      {campaigns.map((c) => (
+                        <CampaignCard key={c.id} campaign={c} />
+                      ))}
+                    </div>
+                  ),
+                }
+              : null,
+            tiers.length > 0
+              ? {
+                  key: "membership",
+                  label: "Membership",
+                  panel: (
+                    <MembershipPanel
+                      tiers={tiers}
+                      joinHref={joinHref}
+                      name={name}
+                    />
+                  ),
+                }
+              : null,
+            supporters.length > 0
+              ? {
+                  key: "supporters",
+                  label: "Supporters",
+                  count: supporters.length,
+                  panel: <SupporterPanel supporters={supporters} />,
+                }
+              : null,
+          ].filter(Boolean) as {
+            key: string;
+            label: string;
+            count?: number;
+            panel: React.ReactNode;
+          }[]}
+        />
       </div>
     </main>
+  );
+}
+
+/* ---------- Panels ---------- */
+
+function HomePanel({
+  name,
+  featured,
+  rest,
+  tiers,
+  campaigns,
+  joinHref,
+  target,
+}: {
+  name: string;
+  featured: PostTeaser | undefined;
+  rest: PostTeaser[];
+  tiers: MembershipTier[];
+  campaigns: Campaign[];
+  joinHref: string;
+  target: Campaign | null;
+}) {
+  const nothingYet =
+    !featured && tiers.length === 0 && campaigns.length === 0;
+
+  if (nothingYet) {
+    return (
+      <EmptyState
+        title={`${name} hasn't posted yet`}
+        bn="এখনও কিছু পোস্ট করা হয়নি"
+        hint="Check back soon, or look through other creators in the meantime."
+        action={
+          <ButtonLink href="/creators" variant="secondary">
+            Discover other creators
+          </ButtonLink>
+        }
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-12">
+      {featured ? (
+        <section>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-muted">
+            Latest post
+          </h2>
+          <div className="mt-4 grid gap-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+            <PostCard post={featured} joinHref={joinHref} featured />
+            {target ? (
+              <CreatorSupportBox
+                campaignId={target.id}
+                slug={target.slug}
+                creatorName={name}
+              />
+            ) : null}
+          </div>
+        </section>
+      ) : target ? (
+        <section className="max-w-md">
+          <CreatorSupportBox
+            campaignId={target.id}
+            slug={target.slug}
+            creatorName={name}
+          />
+        </section>
+      ) : null}
+
+      {rest.length > 0 ? (
+        <section>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-muted">
+            Recent posts
+          </h2>
+          <div className="mt-4 grid gap-5 sm:grid-cols-3">
+            {rest.map((p) => (
+              <PostCard key={p.id} post={p} joinHref={joinHref} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {tiers.length > 0 ? (
+        <section>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-muted">
+            Membership
+          </h2>
+          <div className="mt-4">
+            <MembershipPanel tiers={tiers} joinHref={joinHref} name={name} />
+          </div>
+        </section>
+      ) : null}
+
+      {campaigns.length > 0 ? (
+        <section>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-muted">
+            Campaigns
+          </h2>
+          <div className="mt-4 grid gap-6 sm:grid-cols-2">
+            {campaigns.slice(0, 2).map((c) => (
+              <CampaignCard key={c.id} campaign={c} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
+function MembershipPanel({
+  tiers,
+  joinHref,
+  name,
+}: {
+  tiers: MembershipTier[];
+  joinHref: string;
+  name: string;
+}) {
+  return (
+    <>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {tiers.map((tier) => (
+          <Link
+            key={tier.id}
+            href={`${joinHref}?tier=${tier.id}`}
+            className="lift flex flex-col rounded-2xl bg-card p-6 shadow-soft no-underline"
+          >
+            <span className="text-lg font-bold">{tier.name}</span>
+            {tier.name_bn ? (
+              <span className="font-bengali mt-0.5 text-sm text-muted">
+                {tier.name_bn}
+              </span>
+            ) : null}
+            <span className="mt-3 text-2xl font-extrabold text-brand">
+              {formatTaka(Number(tier.amount))}
+              <span className="text-sm font-semibold text-muted"> /month</span>
+            </span>
+            {tier.perks ? (
+              <span className="mt-3 flex-1 whitespace-pre-line text-sm leading-relaxed text-body">
+                {tier.perks}
+              </span>
+            ) : null}
+            <span className="press mt-5 inline-flex min-h-[44px] items-center justify-center rounded-full bg-brand px-5 text-sm font-bold text-white">
+              Join
+            </span>
+          </Link>
+        ))}
+      </div>
+      <p className="mt-4 text-sm text-muted">
+        Monthly support is what lets {name} plan ahead. You can stop any time.
+      </p>
+    </>
+  );
+}
+
+function SupporterPanel({ supporters }: { supporters: PublicSupporter[] }) {
+  return (
+    <ul className="grid gap-3 sm:grid-cols-2">
+      {supporters.map((s, i) => (
+        <li
+          key={`${s.supporter_name}-${s.started_at}-${i}`}
+          className="rounded-2xl bg-card p-4 shadow-soft"
+        >
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-tint font-bold text-brand-dark">
+              {s.supporter_name.charAt(0).toUpperCase()}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate font-bold">
+                {s.supporter_name}
+              </span>
+              {s.tier_name ? (
+                <span className="block text-xs font-bold text-brand">
+                  {s.tier_name}
+                </span>
+              ) : null}
+            </span>
+          </div>
+          {s.message ? (
+            <p className="mt-3 text-sm italic leading-relaxed text-body">
+              “{s.message}”
+            </p>
+          ) : null}
+        </li>
+      ))}
+    </ul>
   );
 }

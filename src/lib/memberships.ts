@@ -25,6 +25,16 @@ export type PublicSupporter = {
   started_at: string;
 };
 
+export type PostTeaser = {
+  id: string;
+  title: string;
+  body: string | null;
+  image_url: string | null;
+  video_url: string | null;
+  locked: boolean;
+  created_at: string;
+};
+
 export type CreatorPost = {
   id: string;
   title: string;
@@ -86,6 +96,28 @@ export async function getPublicPosts(
       .limit(limit);
     if (error) return [];
     return (data ?? []) as CreatorPost[];
+  } catch {
+    return [];
+  }
+}
+
+/** Every post, with members-only ones returned as locked teasers —
+    title and date only. The body, photo and video are stripped in the
+    database view, so a locked post leaks nothing to the page. */
+export async function getPostTeasers(
+  creatorId: string,
+  limit = 24
+): Promise<PostTeaser[]> {
+  if (!isSupabaseConfigured()) return [];
+  try {
+    const { data, error } = await getSupabaseClient()
+      .from("public_creator_post_teasers")
+      .select("id, title, body, image_url, video_url, locked, created_at")
+      .eq("creator_id", creatorId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) return [];
+    return (data ?? []) as PostTeaser[];
   } catch {
     return [];
   }

@@ -21,6 +21,7 @@ export async function saveCreatorProfile(
   const displayName = String(formData.get("display_name") ?? "").trim();
   const bio = String(formData.get("bio") ?? "").trim();
   const avatarUrl = String(formData.get("avatar_url") ?? "").trim();
+  const coverUrl = String(formData.get("cover_url") ?? "").trim();
   const fullName = String(formData.get("full_name") ?? "").trim();
   const phoneRaw = String(formData.get("phone") ?? "").trim();
 
@@ -32,6 +33,9 @@ export async function saveCreatorProfile(
   }
   if (avatarUrl && !/^https:\/\/\S+$/.test(avatarUrl)) {
     return { error: "Avatar link must start with https://" };
+  }
+  if (coverUrl && !/^https:\/\/\S+$/.test(coverUrl)) {
+    return { error: "Cover image link must start with https://" };
   }
 
   // Stored as 11 digits (01XXXXXXXXX) so the creator directory can match
@@ -63,6 +67,7 @@ export async function saveCreatorProfile(
     display_name: displayName || null,
     bio: bio || null,
     avatar_url: avatarUrl || null,
+    cover_url: coverUrl || null,
     full_name: fullName || null,
     phone,
   };

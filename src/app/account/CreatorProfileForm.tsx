@@ -13,6 +13,7 @@ type Profile = {
   display_name: string | null;
   bio: string | null;
   avatar_url: string | null;
+  cover_url?: string | null;
   full_name?: string | null;
   phone?: string | null;
   social_links?: Record<string, string> | null;
@@ -31,6 +32,7 @@ export function CreatorProfileForm({
   const [username, setUsername] = useState(profile.username ?? "");
   const [displayName, setDisplayName] = useState(profile.display_name ?? "");
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? "");
+  const [coverUrl, setCoverUrl] = useState(profile.cover_url ?? "");
   const [bio, setBio] = useState(profile.bio ?? "");
   const [fullName, setFullName] = useState(profile.full_name ?? "");
   const [phone, setPhone] = useState(profile.phone ?? "");
@@ -132,6 +134,23 @@ export function CreatorProfileForm({
         placeholder="https://…"
         className={inputClass}
       />
+
+      <label className="mt-3 block text-sm font-medium" htmlFor="cover_url">
+        Cover image URL (optional)
+      </label>
+      <input
+        id="cover_url"
+        name="cover_url"
+        type="url"
+        value={coverUrl}
+        onChange={(e) => setCoverUrl(e.target.value)}
+        placeholder="https://…"
+        className={inputClass}
+      />
+      <p className="mt-1 text-xs opacity-60">
+        The wide banner across the top of your page. Landscape works best —
+        around 1500 x 500.
+      </p>
 
       <label className="mt-3 block text-sm font-medium" htmlFor="bio">
         Short bio
