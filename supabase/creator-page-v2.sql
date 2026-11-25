@@ -40,3 +40,31 @@ with (security_invoker = off) as
   from public.creator_posts;
 
 grant select on public.public_creator_post_teasers to anon, authenticated;
+
+-- ---------- Creator focus, and publishing ----------
+-- What this creator raises for — the equivalent of Patreon's "what do
+-- you create?" step. Used to group creators on the directory.
+alter table public.profiles
+  add column if not exists focus text[];
+
+-- A page stays unlisted until the creator chooses to publish it, so
+-- nobody's half-built page is the first thing a donor sees.
+alter table public.profiles
+  add column if not exists page_published boolean not null default false;
+
+-- Anyone who already picked a username had no publish step, so their
+-- page stays visible.
+update public.profiles
+   set page_published = true
+ where username is not null and page_published = false;
+
+drop view if exists public.public_creators;
+
+create view public.public_creators
+with (security_invoker = off) as
+  select id, username, display_name, bio, avatar_url, cover_url,
+         social_links, focus
+  from public.profiles
+  where username is not null;
+
+grant select on public.public_creators to anon, authenticated;

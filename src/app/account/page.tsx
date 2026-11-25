@@ -5,23 +5,17 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { formatTaka } from "@/lib/format";
 import { Card, ButtonLink, EmptyState } from "@/components/ui";
-import { CreatorProfileForm } from "./CreatorProfileForm";
-import { ReferralPanel } from "@/components/ReferralPanel";
-import type {
-  ReferralStats,
-  ReferredCampaign,
-} from "@/components/ReferralPanel";
-import { OverlayPanel } from "@/components/OverlayPanel";
 import { CampaignRow } from "@/components/CampaignRow";
 import type { DashboardCampaign } from "@/components/CampaignRow";
-import { siteUrl } from "@/app/layout";
+import { SetupChecklist } from "@/components/SetupChecklist";
+import type { ChecklistStep } from "@/components/SetupChecklist";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard — Shohay সহায়" };
 
 /* The bank takes roughly 3% to move money out. Showing the figure net
-   of that is the number a campaigner can actually plan around, rather
-   than one they'll be disappointed by later. */
+   of that is what a campaigner can plan around, rather than a number
+   they'll be disappointed by later. */
 const BANK_FEE = 0.03;
 
 export default async function AccountPage({
@@ -39,12 +33,10 @@ export default async function AccountPage({
 
   const { created } = await searchParams;
 
-  // social_links / full_name / phone each arrive with a later SQL
-  // script, so fall back rather than breaking the whole page.
   const profileFields = "username, display_name, bio, avatar_url";
   const firstProfile = await supabase
     .from("profiles")
-    .select(`${profileFields}, social_links, full_name, phone, cover_url`)
+    .select(`${profileFields}, cover_url, full_name, phone`)
     .eq("id", user.id)
     .maybeSingle();
   let profileRow = firstProfile.data;
@@ -64,34 +56,34 @@ export default async function AccountPage({
     cover_url: null,
     full_name: null,
     phone: null,
-    social_links: null,
   };
 
-  const [dashboardResult, statsResult, referredResult, overlayResult, memberResult] =
+  const [dashboardResult, memberResult, postsResult, referralResult] =
     await Promise.all([
       supabase.rpc("my_campaign_dashboard"),
-      supabase.rpc("my_referral_stats", { since: null }),
-      supabase.rpc("my_referral_campaigns", { max_rows: 5 }),
-      supabase.rpc("my_overlay_key"),
       supabase.rpc("my_membership_stats"),
+      supabase
+        .from("creator_posts")
+        .select("id", { count: "exact", head: true })
+        .eq("creator_id", user.id),
+      supabase.rpc("my_referral_stats", { since: null }),
     ]);
 
   const campaigns = (dashboardResult.data ?? []) as DashboardCampaign[];
-  const overlayKey = (overlayResult.data as string | null) ?? null;
-  const referralStats: ReferralStats = (statsResult.data?.[0] as
-    | ReferralStats
-    | undefined) ?? {
-    total_raised: 0,
-    donation_count: 0,
-    supporters: 0,
-    campaigns_helped: 0,
-  };
-  const referredCampaigns = (referredResult.data ?? []) as ReferredCampaign[];
   const memberStats = (memberResult.data?.[0] as
     | { supporters: number; monthly_total: number }
     | undefined) ?? { supporters: 0, monthly_total: 0 };
+  const postCount = postsResult.count ?? 0;
+  const referred = (referralResult.data?.[0] as
+    | { total_raised: number }
+    | undefined) ?? { total_raised: 0 };
 
-  // Totals across every campaign they run.
+  const { count: tierCount } = await supabase
+    .from("membership_tiers")
+    .select("id", { count: "exact", head: true })
+    .eq("creator_id", user.id)
+    .eq("active", true);
+
   const totalRaised = campaigns.reduce(
     (sum, c) => sum + (Number(c.raised_amount) || 0),
     0
@@ -118,59 +110,74 @@ export default async function AccountPage({
     user.email?.split("@")[0] ??
     "there";
 
+  const steps: ChecklistStep[] = [
+    {
+      key: "page",
+      title: "Set up your page",
+      hint: "Your address, your name and what you raise for",
+      href: profile.username ? "/account/my-page" : "/setup",
+      done: Boolean(profile.username),
+    },
+    {
+      key: "photo",
+      title: "Add a photo and a few words",
+      hint: "People give to a face and a reason, not a blank page",
+      href: "/account/my-page",
+      done: Boolean(profile.avatar_url && profile.bio),
+    },
+    {
+      key: "post",
+      title: "Write your first post",
+      hint: "Something public, so the page isn't empty when people arrive",
+      href: "/account/posts",
+      done: postCount > 0,
+    },
+    {
+      key: "tier",
+      title: "Add a monthly supporter tier",
+      hint: "Steady support is what lets you plan ahead",
+      href: "/account/supporters",
+      done: (tierCount ?? 0) > 0,
+    },
+    {
+      key: "campaign",
+      title: "Start your first campaign",
+      hint: "Checked by our team before it goes live",
+      href: "/start",
+      done: campaigns.length > 0,
+    },
+  ];
+
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 px-5 pb-20 sm:px-6">
-      {/* ===== Who you are ===== */}
-      <Card className="mt-8 p-6">
-        <div className="flex flex-wrap items-center gap-5">
-          {profile.avatar_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={profile.avatar_url}
-              alt=""
-              className="h-16 w-16 shrink-0 rounded-full object-cover"
-            />
-          ) : (
-            <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand-tint text-2xl font-bold text-brand-dark">
-              {name.charAt(0).toUpperCase()}
-            </span>
-          )}
-
-          <div className="min-w-0 flex-1">
-            <h1 className="truncate text-2xl font-extrabold">{name}</h1>
-            <p className="mt-0.5 truncate text-sm text-muted">
-              {user.email}
-              {profile.phone ? ` · ${profile.phone}` : ""}
-            </p>
-            {profile.username ? (
-              <Link
-                href={`/creator/${profile.username}`}
-                className="press mt-1 inline-block text-sm font-bold text-brand"
-              >
-                shohay.org/creator/{profile.username} →
-              </Link>
-            ) : (
-              <p className="mt-1 text-sm text-muted">
-                No public page yet — pick a username below.
-              </p>
-            )}
-          </div>
-
-          <ButtonLink href="/start" size="sm" className="shrink-0">
-            Start a campaign
-          </ButtonLink>
+    <>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-extrabold sm:text-3xl">
+            Welcome back, {name}
+          </h1>
+          <p className="mt-1 text-sm text-muted">
+            {user.email}
+            {profile.phone ? ` · ${profile.phone}` : ""}
+          </p>
         </div>
-      </Card>
+        <ButtonLink href="/start" size="sm" className="shrink-0">
+          Start a campaign
+        </ButtonLink>
+      </div>
 
       {created ? (
-        <p className="mt-4 rounded-xl bg-brand-tint px-4 py-3 text-sm font-semibold text-brand-dark">
+        <p className="mt-5 rounded-xl bg-brand-tint px-4 py-3 text-sm font-semibold text-brand-dark">
           Submitted — your campaign is with our verification team and will
           appear publicly once approved.
         </p>
       ) : null}
 
+      <div className="mt-6">
+        <SetupChecklist steps={steps} />
+      </div>
+
       {/* ===== The numbers ===== */}
-      <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat
           value={formatTaka(totalRaised)}
           label="Raised, all campaigns"
@@ -196,20 +203,36 @@ export default async function AccountPage({
           }
         />
         <Stat
-          value={String(live)}
-          label={live === 1 ? "Campaign live" : "Campaigns live"}
+          value={formatTaka(Number(memberStats.monthly_total))}
+          label="Pledged each month"
           hint={
-            Number(memberStats.monthly_total) > 0
-              ? `+ ${formatTaka(Number(memberStats.monthly_total))}/mo pledged`
+            Number(memberStats.supporters) > 0
+              ? `${memberStats.supporters} supporter${Number(memberStats.supporters) === 1 ? "" : "s"}`
               : undefined
           }
         />
       </div>
 
+      {Number(referred.total_raised) > 0 ? (
+        <p className="mt-3 text-sm text-muted">
+          Plus{" "}
+          <b className="text-brand">
+            {formatTaka(Number(referred.total_raised))}
+          </b>{" "}
+          you brought in for other people&rsquo;s campaigns —{" "}
+          <Link href="/account/insights" className="font-semibold text-brand">
+            see where
+          </Link>
+          .
+        </p>
+      ) : null}
+
       {/* ===== Campaigns ===== */}
-      <h2 className="mt-10 text-xl font-bold">
-        Your campaigns · <span className="font-bengali">আপনার ক্যাম্পেইন</span>
-      </h2>
+      <div className="mt-10 flex items-center justify-between gap-4">
+        <h2 className="text-xl font-bold">
+          Your campaigns{live > 0 ? ` · ${live} live` : ""}
+        </h2>
+      </div>
 
       {campaigns.length === 0 ? (
         <div className="mt-4">
@@ -229,47 +252,7 @@ export default async function AccountPage({
           ))}
         </ul>
       )}
-
-      {/* ===== Tools ===== */}
-      <h2 className="mt-12 text-xl font-bold">Grow your support</h2>
-
-      <div className="mt-4 space-y-5">
-        <ReferralPanel
-          username={profile.username}
-          siteUrl={siteUrl}
-          stats={referralStats}
-          campaigns={referredCampaigns}
-        />
-
-        <Link
-          href="/account/supporters"
-          className="lift flex items-center justify-between gap-4 rounded-2xl bg-card p-5 shadow-soft no-underline"
-        >
-          <span>
-            <span className="block font-bold">
-              Monthly supporters
-              {Number(memberStats.supporters) > 0 ? (
-                <span className="ml-2 text-brand">
-                  {memberStats.supporters}
-                </span>
-              ) : null}
-            </span>
-            <span className="mt-0.5 block text-sm text-muted">
-              Tiers, supporters-only posts and who&rsquo;s supporting you
-            </span>
-          </span>
-          <span className="shrink-0 text-xl opacity-40">›</span>
-        </Link>
-
-        <OverlayPanel overlayKey={overlayKey} siteUrl={siteUrl} />
-      </div>
-
-      {/* ===== Profile ===== */}
-      <h2 className="mt-12 text-xl font-bold">Your profile</h2>
-      <div className="mt-4">
-        <CreatorProfileForm profile={profile} email={user.email} />
-      </div>
-    </main>
+    </>
   );
 }
 
@@ -286,9 +269,7 @@ function Stat({
 }) {
   return (
     <Card className="p-5">
-      <p
-        className={`text-2xl font-extrabold ${highlight ? "text-brand" : ""}`}
-      >
+      <p className={`text-2xl font-extrabold ${highlight ? "text-brand" : ""}`}>
         {value}
       </p>
       <p className="mt-1 text-sm font-medium text-body">{label}</p>

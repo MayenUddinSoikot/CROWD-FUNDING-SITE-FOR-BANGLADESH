@@ -5,8 +5,8 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { formatTaka } from "@/lib/format";
 import { Card } from "@/components/ui";
-import { TierForm, PostForm } from "./Forms";
-import { removeTier, removePost } from "./actions";
+import { TierForm } from "./Forms";
+import { removeTier } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -34,13 +34,6 @@ type Supporter = {
   next_due_at: string;
 };
 
-type Post = {
-  id: string;
-  title: string;
-  members_only: boolean;
-  created_at: string;
-};
-
 function date(iso: string): string {
   return new Date(iso).toLocaleDateString("en-GB", {
     day: "numeric",
@@ -58,7 +51,7 @@ export default async function SupportersPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [profileResult, tiersResult, supportersResult, postsResult, statsResult] =
+  const [profileResult, tiersResult, supportersResult, statsResult] =
     await Promise.all([
       supabase.from("profiles").select("username").eq("id", user.id).maybeSingle(),
       supabase
@@ -74,18 +67,12 @@ export default async function SupportersPage() {
         )
         .eq("creator_id", user.id)
         .order("started_at", { ascending: false }),
-      supabase
-        .from("creator_posts")
-        .select("id, title, members_only, created_at")
-        .eq("creator_id", user.id)
-        .order("created_at", { ascending: false }),
       supabase.rpc("my_membership_stats"),
     ]);
 
   const username = (profileResult.data?.username as string | null) ?? null;
   const tiers = (tiersResult.data ?? []) as Tier[];
   const supporters = (supportersResult.data ?? []) as Supporter[];
-  const posts = (postsResult.data ?? []) as Post[];
   const stats = (statsResult.data?.[0] as
     | { supporters: number; monthly_total: number }
     | undefined) ?? { supporters: 0, monthly_total: 0 };
@@ -93,12 +80,8 @@ export default async function SupportersPage() {
   const active = supporters.filter((s) => s.status === "active");
 
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-5 pb-16 sm:px-6">
-      <Link href="/account" className="press mt-8 inline-block text-sm font-bold text-brand">
-        ← My account
-      </Link>
-
-      <h1 className="mt-3 text-2xl font-extrabold sm:text-3xl">
+    <>
+      <h1 className="text-2xl font-extrabold sm:text-3xl">
         Supporters · <span className="font-bengali">সমর্থকরা</span>
       </h1>
       <p className="mt-2 leading-relaxed text-body">
@@ -123,6 +106,46 @@ export default async function SupportersPage() {
         due date, and you collect it yourself. Everything here keeps working
         unchanged once real recurring payments are connected.
       </p>
+
+      {/* Patreon puts a short pitch here until the first tier exists.
+          Most creators have never run a membership and don't know what
+          to offer, so the empty state has to argue the case. */}
+      {tiers.length === 0 ? (
+        <Card className="mt-6 p-6">
+          <p className="text-xl font-extrabold">Build your monthly support</p>
+          <ul className="mt-4 space-y-4">
+            <li className="flex gap-3">
+              <span aria-hidden="true" className="text-lg">৳</span>
+              <span>
+                <b className="block">Money you can count on</b>
+                <span className="mt-0.5 block text-sm text-muted">
+                  A campaign ends. Monthly supporters don&rsquo;t, so you can
+                  plan the next one instead of starting from zero.
+                </span>
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span aria-hidden="true" className="text-lg">✓</span>
+              <span>
+                <b className="block">Start with what you already do</b>
+                <span className="mt-0.5 block text-sm text-muted">
+                  Behind-the-scenes photos, early news of who you&rsquo;re
+                  helping next, their name on your page. That is enough.
+                </span>
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span aria-hidden="true" className="text-lg">♡</span>
+              <span>
+                <b className="block">Two or three tiers, no more</b>
+                <span className="mt-0.5 block text-sm text-muted">
+                  ৳100, ৳500, ৳1000 works. Most people pick the middle one.
+                </span>
+              </span>
+            </li>
+          </ul>
+        </Card>
+      ) : null}
 
       {/* Numbers */}
       <div className="mt-6 grid grid-cols-2 gap-3">
@@ -190,47 +213,6 @@ export default async function SupportersPage() {
         </div>
       </Card>
 
-      {/* Posts */}
-      <h2 className="mt-10 text-xl font-bold">Posts</h2>
-      <p className="mt-1 text-sm text-muted">
-        Public posts show on your creator page. Supporters-only posts are
-        visible to people paying you monthly.
-      </p>
-
-      {posts.length > 0 ? (
-        <ul className="mt-3 space-y-2">
-          {posts.map((p) => (
-            <li key={p.id}>
-              <Card className="flex items-center justify-between gap-3 p-4">
-                <span className="min-w-0">
-                  <span className="block truncate font-semibold">{p.title}</span>
-                  <span className="text-xs text-muted">
-                    {date(p.created_at)} ·{" "}
-                    {p.members_only ? "Supporters only" : "Public"}
-                  </span>
-                </span>
-                <form action={removePost} className="shrink-0">
-                  <input type="hidden" name="id" value={p.id} />
-                  <button
-                    type="submit"
-                    className="press rounded-full border border-foreground/15 px-3 py-2 text-xs font-bold hover:border-accent hover:text-accent"
-                  >
-                    Delete
-                  </button>
-                </form>
-              </Card>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-
-      <Card className="mt-4 p-5">
-        <p className="font-bold">Write a post</p>
-        <div className="mt-3">
-          <PostForm />
-        </div>
-      </Card>
-
       {/* Supporter list */}
       <h2 className="mt-10 text-xl font-bold">
         Who&rsquo;s supporting you ({active.length})
@@ -278,6 +260,6 @@ export default async function SupportersPage() {
           ))}
         </ul>
       )}
-    </main>
+    </>
   );
 }
