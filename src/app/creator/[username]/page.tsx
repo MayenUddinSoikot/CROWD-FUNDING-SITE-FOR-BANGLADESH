@@ -10,6 +10,7 @@ import { CreatorSupportBox } from "@/components/CreatorSupportBox";
 import { CreatorTabs } from "@/components/CreatorTabs";
 import { PostCard } from "@/components/PostCard";
 import { EmptyState, ButtonLink } from "@/components/ui";
+import { SafeImage } from "@/components/SafeImage";
 import {
   getTiers,
   getSupporters,
@@ -169,33 +170,33 @@ export default async function CreatorProfilePage({
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-5 pb-20 sm:px-6">
       {/* ===== Cover ===== */}
-      <div className="relative -mx-5 sm:mx-0 sm:mt-6 sm:rounded-3xl sm:overflow-hidden">
-        <div className="aspect-[3/1] w-full bg-gradient-to-br from-brand-dark via-brand to-brand-light sm:aspect-[4/1]">
-          {creator.cover_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={creator.cover_url}
-              alt=""
-              className="h-full w-full object-cover"
-            />
-          ) : null}
+      <div className="-mx-5 overflow-hidden sm:mx-0 sm:mt-6 sm:rounded-3xl">
+        <div className="aspect-[3/1] w-full sm:aspect-[4/1]">
+          <SafeImage
+            src={creator.cover_url}
+            alt=""
+            className="h-full w-full object-cover"
+            fallback={
+              <div className="h-full w-full bg-gradient-to-br from-brand-dark via-brand to-brand-light" />
+            }
+          />
         </div>
       </div>
 
       {/* ===== Identity ===== */}
       <div className="relative -mt-12 px-1 sm:-mt-14">
-        {creator.avatar_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+        <div className="h-24 w-24 overflow-hidden rounded-full ring-4 ring-background sm:h-28 sm:w-28">
+          <SafeImage
             src={creator.avatar_url}
             alt=""
-            className="h-24 w-24 rounded-full object-cover ring-4 ring-background sm:h-28 sm:w-28"
+            className="h-full w-full object-cover"
+            fallback={
+              <div className="flex h-full w-full items-center justify-center bg-brand-tint text-3xl font-bold text-brand-dark">
+                {name.charAt(0).toUpperCase()}
+              </div>
+            }
           />
-        ) : (
-          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-brand-tint text-3xl font-bold text-brand-dark ring-4 ring-background sm:h-28 sm:w-28">
-            {name.charAt(0).toUpperCase()}
-          </div>
-        )}
+        </div>
 
         <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
@@ -204,21 +205,21 @@ export default async function CreatorProfilePage({
             </h1>
             <p className="mt-1 text-sm text-muted">@{creator.username}</p>
           </div>
-          {joinButton ? (
-            <div className="shrink-0">
-              {tiers.length > 0 ? (
-                <ButtonLink href={joinHref} size="lg" className="shadow-brand">
-                  Become a supporter
-                </ButtonLink>
-              ) : (
-                joinButton
-              )}
+          {/* On a phone the button goes below the bio instead, where it
+              reads as the next step rather than interrupting the name. */}
+          {tiers.length > 0 ? (
+            <div className="hidden shrink-0 sm:block">
+              <ButtonLink href={joinHref} size="lg" className="shadow-brand">
+                Become a supporter
+              </ButtonLink>
             </div>
+          ) : joinButton ? (
+            <div className="hidden shrink-0 sm:block">{joinButton}</div>
           ) : null}
         </div>
 
         {creator.bio ? (
-          <p className="mt-4 max-w-2xl whitespace-pre-line leading-relaxed text-body">
+          <p className="mt-3 max-w-2xl whitespace-pre-line leading-relaxed text-body">
             {creator.bio}
           </p>
         ) : null}
@@ -258,6 +259,14 @@ export default async function CreatorProfilePage({
             </span>
           ) : null}
         </div>
+
+        {tiers.length > 0 ? (
+          <div className="mt-5 sm:hidden">
+            <ButtonLink href={joinHref} size="lg" full className="shadow-brand">
+              Become a supporter
+            </ButtonLink>
+          </div>
+        ) : null}
       </div>
 
       {/* ===== Sections ===== */}
@@ -385,7 +394,11 @@ function HomePanel({
           <h2 className="text-sm font-bold uppercase tracking-wider text-muted">
             Latest post
           </h2>
-          <div className="mt-4 grid gap-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+          <div
+            className={`mt-4 grid gap-5 ${
+              target ? "lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]" : ""
+            }`}
+          >
             <PostCard post={featured} joinHref={joinHref} featured />
             {target ? (
               <CreatorSupportBox

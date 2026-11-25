@@ -1,4 +1,5 @@
 import { youtubeEmbedUrl } from "@/lib/types";
+import { SafeImage } from "@/components/SafeImage";
 
 /* One photo or video attached to a creator's post.
 
@@ -42,11 +43,11 @@ export function PostMedia({
 
   if (imageUrl) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <SafeImage
         src={imageUrl}
         alt={alt}
         className="max-h-[520px] w-full bg-track object-cover"
+        fallback={null}
       />
     );
   }
