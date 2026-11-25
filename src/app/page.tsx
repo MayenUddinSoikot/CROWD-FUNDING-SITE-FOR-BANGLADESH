@@ -87,9 +87,20 @@ export default async function Home({
   const hero = siteMedia.find((m) => m.slot === "hero") ?? null;
   const featured = siteMedia.filter((m) => m.slot === "featured");
 
-  // The campaign shown in the hero card when no hero media is set.
+  /* The campaign shown in the hero card when no hero media is set.
+
+     Pick the one with the most money behind it. The old rule took the
+     first approved campaign that had a cover_image_url, which handed
+     the top of the homepage to a placeholder sitting at ৳0 — and one
+     whose "photo" was a broken link at that. A page that leads with a
+     campaign strangers have already backed is the one that argues for
+     itself; we cannot tell a good photo from a bad one on the server,
+     but we can tell which story is working. */
+  const approved = (campaigns ?? []).filter((c) => c.status === "approved");
   const spotlight =
-    campaigns?.find((c) => c.status === "approved" && c.cover_image_url) ??
+    [...approved].sort(
+      (a, b) => Number(b.raised_amount ?? 0) - Number(a.raised_amount ?? 0)
+    )[0] ??
     campaigns?.[0] ??
     null;
 
