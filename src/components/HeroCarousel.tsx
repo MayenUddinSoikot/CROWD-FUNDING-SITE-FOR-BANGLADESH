@@ -27,6 +27,26 @@ export type HeroSlide = {
 
 const INTERVAL = 7000;
 
+/* The headline animates a word at a time. Splitting on spaces keeps
+   each word whole so nothing breaks mid-word as it rises. */
+function Words({ text, reduced }: { text: string; reduced: boolean }) {
+  if (reduced) return <>{text}</>;
+  return (
+    <>
+      {text.split(" ").map((word, i) => (
+        <span
+          key={`${word}-${i}`}
+          className="word-up"
+          style={{ animationDelay: `${i * 70}ms` }}
+        >
+          {word}
+          {"\u00A0"}
+        </span>
+      ))}
+    </>
+  );
+}
+
 export function HeroCarousel({
   slides,
   fallbackTitle,
@@ -106,6 +126,12 @@ export function HeroCarousel({
             <img
               src={slide.url}
               alt=""
+              onError={(e) => {
+                // Same rule as everywhere else on the site: never leave a
+                // broken image on a page asking strangers for money. The
+                // wash below carries the headline on its own.
+                e.currentTarget.style.display = "none";
+              }}
               className={`h-full w-full object-cover ${
                 reduced ? "" : "hero-drift"
               }`}
@@ -121,19 +147,30 @@ export function HeroCarousel({
       <div className="absolute inset-0 bg-gradient-to-t from-[#0b1a14] via-[#0b1a14]/60 to-[#0b1a14]/15" />
 
       <div className="relative mx-auto flex min-h-[78vh] max-w-6xl flex-col justify-end px-5 pb-12 pt-24 sm:px-6 sm:pb-16">
-        <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/25 px-4 py-1.5 text-xs font-bold sm:text-sm">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#35c08a]" />
-          0% platform fee — always
-        </span>
-
-        <h1 className="mt-6 max-w-5xl text-[2.9rem] font-normal leading-[0.93] tracking-tight sm:text-7xl lg:text-[5.5rem]">
-          {active?.title || fallbackTitle}
+        {/* Keyed on the slide so the words replay each time it changes */}
+        <h1
+          key={`h-${index}`}
+          className="max-w-5xl text-[2.9rem] font-normal leading-[0.93] tracking-tight sm:text-7xl lg:text-[5.5rem]"
+        >
+          <Words text={active?.title || fallbackTitle} reduced={reduced} />
         </h1>
-        <p className="font-bengali mt-5 max-w-2xl text-xl font-semibold text-white/85 sm:text-2xl">
+        <p
+          key={`b-${index}`}
+          className={`font-bengali mt-4 max-w-2xl text-lg font-semibold text-white/80 sm:text-xl ${
+            reduced ? "" : "fade-up-soft"
+          }`}
+          style={reduced ? undefined : { animationDelay: "320ms" }}
+        >
           {active?.titleBn || fallbackTitleBn}
         </p>
 
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+        <div
+          key={`c-${index}`}
+          className={`mt-8 flex flex-col gap-3 sm:flex-row ${
+            reduced ? "" : "fade-up-soft"
+          }`}
+          style={reduced ? undefined : { animationDelay: "440ms" }}
+        >
           <Link
             href="/setup"
             className="press inline-flex min-h-[52px] items-center justify-center rounded-full bg-white px-8 text-lg font-bold text-[#0b1a14] no-underline"

@@ -145,7 +145,7 @@ export default async function Home({
             : s
         )}
         fallbackTitle="The people who follow you can change a life."
-        fallbackTitleBn="আপনার সঙ্গে যাঁরা আছেন, তাঁরাই পারেন"
+        fallbackTitleBn="০% ফি — প্রতিটি টাকা পৌঁছে যায়"
       />
 
       {/* ===== Creators ===== */}

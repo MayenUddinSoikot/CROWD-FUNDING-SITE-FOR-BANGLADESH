@@ -259,3 +259,47 @@ textarea {
     animation: none;
   }
 }
+
+/* Headline words rise in one after another when a hero slide changes.
+   Each word carries its own delay, set inline by the component. */
+@keyframes word-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.55em, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.word-up {
+  display: inline-block;
+  opacity: 0;
+  animation: word-up 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes fade-up-soft {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.fade-up-soft {
+  opacity: 0;
+  animation: fade-up-soft 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .word-up,
+  .fade-up-soft {
+    opacity: 1;
+    animation: none;
+    transform: none;
+  }
+}
