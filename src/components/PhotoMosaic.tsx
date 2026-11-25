@@ -64,7 +64,10 @@ export function PhotoMosaic({
                 src={tile.url}
                 alt=""
                 loading="lazy"
-                sizes="(min-width: 640px) 25vw, 50vw"
+                /* Measured, not guessed: a tile is ~18vw of the page on a
+                   laptop and ~45vw on a phone. Overstating this wastes
+                   someone's data; understating it makes the photo soft. */
+                sizes="(min-width: 640px) 18vw, 45vw"
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                 fallback={<span className="block h-full w-full" />}
               />
