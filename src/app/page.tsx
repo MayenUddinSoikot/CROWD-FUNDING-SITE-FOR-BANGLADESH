@@ -2,11 +2,10 @@ import Link from "next/link";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/anon";
 import type { Campaign, CampaignCategory, SiteMedia } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
-import { formatTaka, percentRaised, formatCampaignId } from "@/lib/format";
 import { MediaFrame } from "@/components/MediaTile";
-import { ButtonLink, Card, EmptyState, ProgressBar, SectionHeading } from "@/components/ui";
+import { ButtonLink, Card, EmptyState, SectionHeading } from "@/components/ui";
 import { CreatorCard } from "@/components/CreatorCard";
-import { CoverImage } from "@/components/CoverImage";
+import { SafeImage } from "@/components/SafeImage";
 import { DashboardPreview } from "@/components/DashboardPreview";
 import { getCreators } from "@/lib/creators";
 
@@ -106,203 +105,112 @@ export default async function Home({
 
   return (
     <main className="flex-1 pb-20">
-      {/* ===== Hero ===== */}
-      <section className="w-full bg-gradient-to-b from-brand-tint/70 to-transparent">
-        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-6 sm:py-20">
-          <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-14">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-brand-tint px-4 py-2 text-xs font-bold text-brand-dark sm:text-sm">
-                <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-                0% platform fee — always
-              </span>
+      {/* ===== Hero =====
+          Patreon's hero is one photograph filling the screen with the
+          headline over it and a credit line for whoever is in the shot.
+          Ours is built the same way: the image is the background, not a
+          card beside the text. Until a photo is set in /admin/homepage it
+          falls back to a deep field of brand colour, which still reads as
+          a hero rather than as a broken image. */}
+      <section className="relative w-full overflow-hidden bg-[#0b1a14] text-white">
+        {hero?.media_type === "image" && hero.url ? (
+          <SafeImage
+            src={hero.url}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+            fallback={null}
+          />
+        ) : spotlight?.cover_image_url ? (
+          <SafeImage
+            src={spotlight.cover_image_url}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+            fallback={null}
+          />
+        ) : null}
 
-              <h1 className="mt-5 text-[2.6rem] font-extrabold leading-[1.03] tracking-tight sm:text-6xl lg:text-7xl">
-                The people who
-                <br className="hidden sm:block" /> follow you can
-                <br className="hidden sm:block" />{" "}
-                <span className="text-brand">change a life.</span>
-              </h1>
-              <p className="font-bengali mt-4 text-2xl font-semibold text-brand-dark sm:text-3xl">
-                আপনার সঙ্গে যাঁরা আছেন, তাঁরাই পারেন
-              </p>
+        {/* Dark wash so the type stays readable over any photograph */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0b1a14] via-[#0b1a14]/85 to-[#11694a]/70" />
 
-              <p className="mt-6 max-w-xl text-lg leading-relaxed text-body">
-                Build a page, bring your audience, and raise for the people who
-                need it. Shohay takes <b className="text-foreground">0%</b> —
-                every taka reaches the person you sent it to.
-              </p>
+        <div className="relative mx-auto flex min-h-[72vh] max-w-6xl flex-col justify-end px-5 pb-12 pt-20 sm:px-6 sm:pb-16 sm:pt-28">
+          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/25 px-4 py-1.5 text-xs font-bold sm:text-sm">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#35c08a]" />
+            0% platform fee — always
+          </span>
 
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <ButtonLink href="/setup" size="lg">
-                  Create your page
-                </ButtonLink>
-                <ButtonLink href="#campaigns" variant="secondary" size="lg">
-                  Browse campaigns
-                </ButtonLink>
-              </div>
+          <h1 className="mt-6 max-w-4xl text-[2.9rem] font-normal leading-[0.95] tracking-tight sm:text-7xl lg:text-[5.5rem]">
+            The people who follow you can change a life.
+          </h1>
+          <p className="font-bengali mt-5 max-w-2xl text-xl font-semibold text-white/85 sm:text-2xl">
+            আপনার সঙ্গে যাঁরা আছেন, তাঁরাই পারেন
+          </p>
 
-              {/* Patreon puts "Find a Creator" in the hero itself, not
-                  only in the header. The hero speaks to campaigners;
-                  this is the one line in it for everyone who arrived
-                  wanting to give. */}
-              <form action="/campaigns" className="mt-6 max-w-xl">
-                <label htmlFor="hero-search" className="sr-only">
-                  Find a creator or a campaign
-                </label>
-                <div className="flex items-center gap-2 rounded-full border border-foreground/15 bg-card px-4 py-2 focus-within:border-brand focus-within:shadow-[0_0_0_4px_rgba(17,105,74,0.12)]">
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    className="shrink-0 text-muted"
-                    aria-hidden="true"
-                  >
-                    <circle cx="11" cy="11" r="7" />
-                    <path d="M20 20l-3.5-3.5" />
-                  </svg>
-                  <input
-                    id="hero-search"
-                    name="q"
-                    type="search"
-                    placeholder="Find a creator or a campaign"
-                    className="w-full bg-transparent py-1.5 outline-none"
-                  />
-                  <button
-                    type="submit"
-                    className="press min-h-[40px] shrink-0 rounded-full bg-brand px-5 text-sm font-bold text-white hover:bg-brand-dark"
-                  >
-                    Search
-                  </button>
-                </div>
-              </form>
+          <p className="mt-5 max-w-xl leading-relaxed text-white/75">
+            Build a page, bring your audience, and raise for the people who
+            need it. Shohay takes 0% — every taka reaches the person you
+            sent it to.
+          </p>
 
-              <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2.5">
-                {[
-                  "Every campaign verified",
-                  "0% platform fee",
-                  "Paid straight to bKash or bank",
-                ].map((item) => (
-                  <li
-                    key={item}
-                    className="flex items-center gap-2 text-sm font-semibold text-body"
-                  >
-                    <svg
-                      width="17"
-                      height="17"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="text-brand"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Hero media — Shohay's own photo/video, else a live campaign */}
-            <div>
-              {hero ? (
-                <figure className="m-0 overflow-hidden rounded-3xl shadow-lift">
-                  <div className="aspect-[4/3] w-full bg-brand-tint">
-                    <MediaFrame item={hero} />
-                  </div>
-                  {hero.title || hero.subtitle ? (
-                    <figcaption className="bg-card px-6 py-5">
-                      {hero.title ? (
-                        <p className="text-lg font-bold">{hero.title}</p>
-                      ) : null}
-                      {hero.subtitle ? (
-                        <p className="mt-1 text-sm leading-relaxed text-muted">
-                          {hero.subtitle}
-                        </p>
-                      ) : null}
-                      {hero.link_url ? (
-                        <Link
-                          href={hero.link_url}
-                          className="press mt-3 inline-flex min-h-[44px] items-center text-sm font-bold text-brand hover:text-brand-dark"
-                        >
-                          Read the story →
-                        </Link>
-                      ) : null}
-                    </figcaption>
-                  ) : null}
-                </figure>
-              ) : spotlight ? (
-                <Card className="overflow-hidden shadow-lift">
-                  <div className="relative aspect-[4/3] w-full bg-brand-tint">
-                    <CoverImage
-                      src={spotlight.cover_image_url}
-                      emoji={
-                        (
-                          CATEGORY_LABELS[spotlight.category] ??
-                          CATEGORY_LABELS.other
-                        ).emoji
-                      }
-                    />
-                    <span className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-brand-dark">
-                      {(CATEGORY_LABELS[spotlight.category] ?? CATEGORY_LABELS.other).en}
-                    </span>
-                    {formatCampaignId(spotlight.campaign_no) ? (
-                      <span className="absolute right-4 top-4 rounded-full bg-black/45 px-3 py-1.5 text-xs font-bold text-white backdrop-blur">
-                        {formatCampaignId(spotlight.campaign_no)}
-                      </span>
-                    ) : null}
-                  </div>
-
-                  <div className="p-6">
-                    <h2 className="text-xl font-bold leading-snug">
-                      {spotlight.title}
-                    </h2>
-                    {spotlight.title_bn ? (
-                      <p className="font-bengali mt-1.5 text-sm text-muted">
-                        {spotlight.title_bn}
-                      </p>
-                    ) : null}
-
-                    <div className="mt-5">
-                      <ProgressBar
-                        percent={percentRaised(
-                          spotlight.raised_amount,
-                          spotlight.goal_amount
-                        )}
-                      />
-                      <div className="mt-3 flex items-baseline justify-between gap-3">
-                        <span className="text-2xl font-extrabold tracking-tight">
-                          {formatTaka(spotlight.raised_amount)}
-                        </span>
-                        <span className="text-sm text-muted">
-                          of {formatTaka(spotlight.goal_amount)}
-                        </span>
-                      </div>
-                    </div>
-
-                    <ButtonLink
-                      href={`/campaigns/${spotlight.slug}`}
-                      full
-                      className="mt-5 !rounded-2xl"
-                    >
-                      Donate now
-                    </ButtonLink>
-                  </div>
-                </Card>
-              ) : (
-                <div className="flex aspect-[4/3] items-center justify-center rounded-3xl bg-gradient-to-br from-brand-tint to-brand/10 text-6xl shadow-soft">
-                  🇧🇩
-                </div>
-              )}
-            </div>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/setup"
+              className="press inline-flex min-h-[52px] items-center justify-center rounded-full bg-white px-8 text-lg font-bold text-[#0b1a14] no-underline"
+            >
+              Create your page
+            </Link>
+            <Link
+              href="/creators"
+              className="press inline-flex min-h-[52px] items-center justify-center rounded-full border border-white/40 px-8 text-lg font-bold text-white no-underline hover:bg-white/10"
+            >
+              Find a creator
+            </Link>
           </div>
+
+          <form action="/campaigns" className="mt-7 max-w-lg">
+            <label htmlFor="hero-search" className="sr-only">
+              Find a creator or a campaign
+            </label>
+            <div className="flex items-center gap-2 rounded-full border border-white/30 px-4 py-2 focus-within:border-white">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                className="shrink-0 text-white/60"
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path d="M20 20l-3.5-3.5" />
+              </svg>
+              <input
+                id="hero-search"
+                name="q"
+                type="search"
+                placeholder="Find a creator or a campaign"
+                className="w-full bg-transparent py-1.5 text-white outline-none placeholder:text-white/50"
+              />
+              <button
+                type="submit"
+                className="press min-h-[40px] shrink-0 rounded-full bg-white px-5 text-sm font-bold text-[#0b1a14]"
+              >
+                Search
+              </button>
+            </div>
+          </form>
+
+          {/* The credit line Patreon runs under its hero photograph */}
+          {spotlight ? (
+            <Link
+              href={`/campaigns/${spotlight.slug}`}
+              className="press mt-10 flex w-fit items-center gap-2 text-sm font-semibold text-white/80 no-underline hover:text-white"
+            >
+              Raising now: {spotlight.title}
+              <span aria-hidden="true">→</span>
+            </Link>
+          ) : null}
         </div>
       </section>
 
