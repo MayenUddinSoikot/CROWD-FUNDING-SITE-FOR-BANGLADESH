@@ -8,6 +8,7 @@ import { MediaFrame } from "@/components/MediaTile";
 import { ButtonLink, Card, EmptyState, ProgressBar, SectionHeading } from "@/components/ui";
 import { CreatorCard } from "@/components/CreatorCard";
 import { CoverImage } from "@/components/CoverImage";
+import { DashboardPreview } from "@/components/DashboardPreview";
 import { getCreators } from "@/lib/creators";
 
 // Always show fresh donation totals — never a stale build-time snapshot.
@@ -145,6 +146,45 @@ export default async function Home({
                   Browse campaigns
                 </ButtonLink>
               </div>
+
+              {/* Patreon puts "Find a Creator" in the hero itself, not
+                  only in the header. The hero speaks to campaigners;
+                  this is the one line in it for everyone who arrived
+                  wanting to give. */}
+              <form action="/campaigns" className="mt-6 max-w-xl">
+                <label htmlFor="hero-search" className="sr-only">
+                  Find a creator or a campaign
+                </label>
+                <div className="flex items-center gap-2 rounded-full border border-foreground/15 bg-card px-4 py-2 focus-within:border-brand focus-within:shadow-[0_0_0_4px_rgba(17,105,74,0.12)]">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    className="shrink-0 text-muted"
+                    aria-hidden="true"
+                  >
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="M20 20l-3.5-3.5" />
+                  </svg>
+                  <input
+                    id="hero-search"
+                    name="q"
+                    type="search"
+                    placeholder="Find a creator or a campaign"
+                    className="w-full bg-transparent py-1.5 outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="press min-h-[40px] shrink-0 rounded-full bg-brand px-5 text-sm font-bold text-white hover:bg-brand-dark"
+                  >
+                    Search
+                  </button>
+                </div>
+              </form>
 
               <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2.5">
                 {[
@@ -420,6 +460,114 @@ export default async function Home({
           </div>
         </section>
       ) : null}
+
+      {/* ===== More ways to raise =====
+          Patreon's "More ways to earn": the argument that the platform
+          is not one fundraiser but a living income. Ours is the same
+          argument in taka. */}
+      <section className="mx-auto mt-20 max-w-6xl px-5 sm:px-6">
+        <h2 className="max-w-3xl text-[2.2rem] font-extrabold leading-[1.05] tracking-tight sm:text-5xl">
+          More ways to raise
+        </h2>
+        <p className="font-bengali mt-3 text-xl font-semibold text-brand-dark">
+          সাহায্য তোলার আরও উপায়
+        </p>
+        <p className="mt-5 max-w-2xl text-lg leading-relaxed text-body">
+          A campaign ends. Your page does not. On Shohay you can run a
+          one-off appeal, take monthly support from the people who follow
+          you, and let friends raise for you on their birthday — all from
+          the same page.
+        </p>
+
+        <div className="mt-10 grid gap-5 sm:grid-cols-3">
+          {[
+            {
+              icon: "৳",
+              en: "One-off campaigns",
+              bn: "একক ক্যাম্পেইন",
+              desc: "A goal, a deadline and a story. Verified by our team before anyone can give.",
+            },
+            {
+              icon: "♡",
+              en: "Monthly supporters",
+              bn: "মাসিক সমর্থক",
+              desc: "Tiers from ৳100. Steady money you can plan around instead of starting from zero.",
+            },
+            {
+              icon: "🎂",
+              en: "Occasion fundraisers",
+              bn: "বিশেষ দিনের আবেদন",
+              desc: "Ask for donations instead of presents. Your friends give, you choose who it reaches.",
+            },
+          ].map((way) => (
+            <Card key={way.en} className="p-6">
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-tint text-xl font-extrabold text-brand-dark">
+                {way.icon}
+              </span>
+              <h3 className="mt-4 text-lg font-bold">{way.en}</h3>
+              <p className="font-bengali mt-1 text-sm font-semibold text-brand">
+                {way.bn}
+              </p>
+              <p className="mt-2.5 text-sm leading-relaxed text-body">
+                {way.desc}
+              </p>
+            </Card>
+          ))}
+        </div>
+
+        <div className="mt-8">
+          <ButtonLink href="/setup" size="lg">
+            Set up your page
+          </ButtonLink>
+        </div>
+      </section>
+
+      {/* ===== See what is working =====
+          Patreon's "Unlock growth", which sells the back office with a
+          picture of it. We built that dashboard, so show it. */}
+      <section className="mx-auto mt-20 max-w-6xl px-5 sm:px-6">
+        <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_380px] lg:gap-16">
+          <div>
+            <h2 className="text-[2.2rem] font-extrabold leading-[1.05] tracking-tight sm:text-5xl">
+              See what is working
+            </h2>
+            <p className="font-bengali mt-3 text-xl font-semibold text-brand-dark">
+              কোনটা কাজ করছে দেখুন
+            </p>
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-body">
+              Your dashboard shows who opened your campaign, how many of
+              them gave, what your supporters pledge each month, and what
+              lands in your bKash after the bank&rsquo;s charge. Share a
+              link and watch what it brings back.
+            </p>
+
+            <ul className="mt-7 space-y-3">
+              {[
+                "Views, donors and the share who gave after viewing",
+                "Monthly pledges, separately from one-off gifts",
+                "What you raised for other people's campaigns",
+              ].map((line) => (
+                <li key={line} className="flex gap-3 text-body">
+                  <span aria-hidden="true" className="font-bold text-brand">
+                    ✓
+                  </span>
+                  <span className="leading-relaxed">{line}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-8">
+              <ButtonLink href="/account" variant="secondary" size="lg">
+                Open your dashboard
+              </ButtonLink>
+            </div>
+          </div>
+
+          <div className="mx-auto w-full max-w-[340px]">
+            <DashboardPreview />
+          </div>
+        </div>
+      </section>
 
       {/* ===== Trust band ===== */}
       <section className="mt-20 w-full bg-gradient-to-br from-brand to-brand-dark px-5 py-16 text-white sm:px-6 sm:py-20">
