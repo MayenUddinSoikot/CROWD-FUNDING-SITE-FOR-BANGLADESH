@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
 /* The header bar, which floats over the hero on the homepage.
@@ -13,6 +13,25 @@ export function HeaderShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const onHome = pathname === "/";
   const [scrolled, setScrolled] = useState(false);
+  const ref = useRef<HTMLElement | null>(null);
+
+  /* Publish the bar's real height so the hero can sit exactly under it.
+     It is 75px on a laptop and 61px on a phone, and changes again with
+     the reader's font size, so a hard-coded number leaves a strip of
+     background showing above the photograph. Measure it instead. */
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const publish = () =>
+      document.documentElement.style.setProperty(
+        "--header-h",
+        `${el.offsetHeight}px`
+      );
+    publish();
+    const ro = new ResizeObserver(publish);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!onHome) return;
@@ -26,6 +45,7 @@ export function HeaderShell({ children }: { children: ReactNode }) {
 
   return (
     <header
+      ref={ref}
       className={`sticky top-0 z-40 transition-colors duration-300 ${
         floating
           ? "over-hero border-b border-transparent bg-transparent"

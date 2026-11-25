@@ -143,7 +143,9 @@ export function HeroCarousel({
 
   return (
     <section
-      className="relative -mt-[57px] w-full overflow-hidden bg-[#0b1a14] text-white"
+      className="relative w-full overflow-hidden bg-[#0b1a14] text-white"
+      /* Rides up under the floating header by exactly its height. */
+      style={{ marginTop: "calc(-1 * var(--header-h, 61px))" }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       aria-roledescription={count > 1 ? "carousel" : undefined}
