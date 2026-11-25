@@ -6,6 +6,7 @@ import type { Campaign } from "@/lib/types";
 import { formatTaka, percentRaised } from "@/lib/format";
 import { ProgressBar } from "@/components/ProgressBar";
 import { DonationForm } from "@/components/DonationForm";
+import { SafeImage } from "@/components/SafeImage";
 
 export const dynamic = "force-dynamic";
 
@@ -86,14 +87,12 @@ export default async function DonatePage({
           {/* Summary sidebar */}
           <aside className="order-1 lg:order-2">
             <div className="rounded-2xl border border-foreground/10 bg-card p-5 shadow-sm lg:sticky lg:top-6">
-              {campaign.cover_image_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={campaign.cover_image_url}
-                  alt=""
-                  className="mb-4 h-32 w-full rounded-xl object-cover"
-                />
-              ) : null}
+              <SafeImage
+                src={campaign.cover_image_url}
+                alt=""
+                className="mb-4 h-32 w-full rounded-xl object-cover"
+                fallback={null}
+              />
               <p className="text-xl font-bold text-brand">
                 {formatTaka(campaign.raised_amount)}
               </p>

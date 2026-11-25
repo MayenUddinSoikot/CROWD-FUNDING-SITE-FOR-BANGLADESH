@@ -7,6 +7,7 @@ import { RealtimeCampaignGrid } from "@/components/RealtimeCampaignGrid";
 import { MediaFrame } from "@/components/MediaTile";
 import { ButtonLink, Card, EmptyState, ProgressBar, SectionHeading } from "@/components/ui";
 import { CreatorCard } from "@/components/CreatorCard";
+import { SafeImage } from "@/components/SafeImage";
 import { getCreators } from "@/lib/creators";
 
 // Always show fresh donation totals — never a stale build-time snapshot.
@@ -195,14 +196,12 @@ export default async function Home({
               ) : spotlight ? (
                 <Card className="overflow-hidden shadow-lift">
                   <div className="relative aspect-[4/3] w-full bg-gradient-to-br from-brand to-brand-dark">
-                    {spotlight.cover_image_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={spotlight.cover_image_url}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
-                    ) : null}
+                    <SafeImage
+                      src={spotlight.cover_image_url}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      fallback={null}
+                    />
                     <span className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-brand-dark">
                       {(CATEGORY_LABELS[spotlight.category] ?? CATEGORY_LABELS.other).en}
                     </span>

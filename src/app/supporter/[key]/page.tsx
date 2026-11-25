@@ -7,6 +7,7 @@ import { Card, ButtonLink } from "@/components/ui";
 import { CancelMembership } from "./CancelMembership";
 import { PostMedia } from "@/components/PostMedia";
 import type { CreatorPost } from "@/lib/memberships";
+import { SafeImage } from "@/components/SafeImage";
 
 /* A supporter's own page, reached only by the secret link they were
    given when they joined. No account, no password — the link is the
@@ -61,18 +62,16 @@ export default async function SupporterPage({
     <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-10 sm:px-6 sm:py-14">
       <Card className="p-6 sm:p-8">
         <div className="flex items-center gap-4">
-          {view.creator_avatar ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={view.creator_avatar}
-              alt=""
-              className="h-16 w-16 rounded-full object-cover"
-            />
-          ) : (
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-tint text-2xl font-bold text-brand-dark">
-              {view.creator_name.charAt(0).toUpperCase()}
-            </span>
-          )}
+          <SafeImage
+            src={view.creator_avatar}
+            alt=""
+            className="h-16 w-16 rounded-full object-cover"
+            fallback={
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-tint text-2xl font-bold text-brand-dark">
+                {view.creator_name.charAt(0).toUpperCase()}
+              </span>
+            }
+          />
           <div className="min-w-0">
             <p className="text-sm text-muted">You support</p>
             <Link

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/anon";
 import { formatTaka } from "@/lib/format";
 import { Card, EmptyState, ButtonLink } from "@/components/ui";
+import { SafeImage } from "@/components/SafeImage";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -139,18 +140,18 @@ export default async function LeaderboardPage({
                     {MEDALS[i] ?? i + 1}
                   </span>
 
-                  {row.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={row.avatar_url}
-                      alt=""
-                      className="h-12 w-12 shrink-0 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-tint text-lg font-bold text-brand-dark">
-                      {(row.display_name ?? row.username).charAt(0).toUpperCase()}
-                    </span>
-                  )}
+                  <SafeImage
+                    src={row.avatar_url}
+                    alt=""
+                    className="h-12 w-12 shrink-0 rounded-full object-cover"
+                    fallback={
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-tint text-lg font-bold text-brand-dark">
+                        {(row.display_name ?? row.username)
+                          .charAt(0)
+                          .toUpperCase()}
+                      </span>
+                    }
+                  />
 
                   <span className="min-w-0 flex-1">
                     <Link

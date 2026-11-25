@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/anon";
 import type { Post } from "@/lib/types";
 import { timeAgo } from "@/lib/format";
+import { SafeImage } from "@/components/SafeImage";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -49,14 +50,12 @@ export default async function NewsPage() {
                 href={`/news/${post.slug}`}
                 className="group flex flex-col overflow-hidden rounded-2xl border border-foreground/10 bg-card transition hover:border-brand/50 sm:flex-row"
               >
-                {post.cover_image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={post.cover_image_url}
-                    alt=""
-                    className="h-40 w-full object-cover sm:h-auto sm:w-48"
-                  />
-                ) : null}
+                <SafeImage
+                  src={post.cover_image_url}
+                  alt=""
+                  className="h-40 w-full object-cover sm:h-auto sm:w-48"
+                  fallback={null}
+                />
                 <div className="flex-1 p-5">
                   <h2 className="font-serif text-lg font-semibold group-hover:text-brand">
                     {post.title}

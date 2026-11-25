@@ -24,6 +24,7 @@ import { TrackView } from "@/components/TrackView";
 import { MediaCarousel } from "@/components/MediaCarousel";
 import { CampaignUpdateForm } from "@/components/CampaignUpdateForm";
 import { ButtonLink, StatusBadge } from "@/components/ui";
+import { SafeImage } from "@/components/SafeImage";
 
 function daysLeft(endsAt: string | null): number | null {
   if (!endsAt) return null;
@@ -652,15 +653,13 @@ export default async function CampaignPage({
                       <p className="whitespace-pre-line text-sm leading-relaxed">
                         {update.body}
                       </p>
-                      {update.image_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={update.image_url}
-                          alt=""
-                          loading="lazy"
-                          className="mt-3 max-h-96 w-full rounded-xl object-cover"
-                        />
-                      ) : null}
+                      <SafeImage
+                        src={update.image_url}
+                        alt=""
+                        loading="lazy"
+                        className="mt-3 max-h-96 w-full rounded-xl object-cover"
+                        fallback={null}
+                      />
                       {embed ? (
                         <div className="mt-3 aspect-video overflow-hidden rounded-xl">
                           <iframe

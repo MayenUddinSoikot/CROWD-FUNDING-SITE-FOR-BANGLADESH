@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/anon";
 import type { Post } from "@/lib/types";
 import { timeAgo } from "@/lib/format";
+import { SafeImage } from "@/components/SafeImage";
 
 export const dynamic = "force-dynamic";
 
@@ -61,14 +62,12 @@ export default async function NewsPostPage({
       ) : null}
       <p className="mt-2 text-xs opacity-50">{timeAgo(post.created_at)}</p>
 
-      {post.cover_image_url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={post.cover_image_url}
-          alt=""
-          className="mt-6 w-full rounded-2xl object-cover"
-        />
-      ) : null}
+      <SafeImage
+        src={post.cover_image_url}
+        alt=""
+        className="mt-6 w-full rounded-2xl object-cover"
+        fallback={null}
+      />
 
       {post.body ? (
         <div className="mt-6 whitespace-pre-line leading-relaxed opacity-90">
