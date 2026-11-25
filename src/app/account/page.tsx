@@ -11,6 +11,7 @@ import type {
   ReferralStats,
   ReferredCampaign,
 } from "@/components/ReferralPanel";
+import { OverlayPanel } from "@/components/OverlayPanel";
 import { siteUrl } from "@/app/layout";
 
 export const dynamic = "force-dynamic";
@@ -87,10 +88,12 @@ export default async function AccountPage({
 
   // What this creator has brought in through their own link. Silently
   // zero until referrals.sql has been run.
-  const [statsResult, referredResult] = await Promise.all([
+  const [statsResult, referredResult, overlayResult] = await Promise.all([
     supabase.rpc("my_referral_stats", { since: null }),
     supabase.rpc("my_referral_campaigns", { max_rows: 5 }),
+    supabase.rpc("my_overlay_key"),
   ]);
+  const overlayKey = (overlayResult.data as string | null) ?? null;
   const referralStats: ReferralStats = (statsResult.data?.[0] as
     | ReferralStats
     | undefined) ?? {
@@ -115,6 +118,10 @@ export default async function AccountPage({
             stats={referralStats}
             campaigns={referredCampaigns}
           />
+        </div>
+
+        <div className="mt-6">
+          <OverlayPanel overlayKey={overlayKey} siteUrl={siteUrl} />
         </div>
 
         <div className="mt-6">
