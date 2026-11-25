@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { login, sendLoginCode, verifyLoginCode } from "./actions";
 import { Button, inputClass } from "@/components/ui";
-import { CodeField } from "@/components/CodeField";
+import { CodeField, CODE_MIN } from "@/components/CodeField";
 
 export function LoginForm() {
   // Code by email is the default; password is there for accounts that
@@ -84,7 +84,7 @@ function CodeLogin() {
             📬
           </p>
           <p className="mt-1 font-bold text-brand-dark">
-            We emailed you a 6-digit code
+            We emailed you a login code
           </p>
           <p className="mt-1 text-sm text-body">
             Sent to <span className="font-semibold">{sentTo}</span>
@@ -112,7 +112,7 @@ function CodeLogin() {
             type="submit"
             size="lg"
             full
-            disabled={verifying || token.length !== 6}
+            disabled={verifying || token.length < CODE_MIN}
             className="mt-5"
           >
             {verifying ? "Checking…" : "Log in"}
@@ -155,8 +155,8 @@ function CodeLogin() {
         className={inputClass}
       />
       <p className="mt-1 text-xs text-muted">
-        We&rsquo;ll send a 6-digit code — no password needed. · ইমেইলে ৬
-        সংখ্যার কোড পাঠানো হবে।
+        We&rsquo;ll send a code — no password needed. · ইমেইলে লগইন কোড
+        পাঠানো হবে।
       </p>
 
       {sendState?.error ? (

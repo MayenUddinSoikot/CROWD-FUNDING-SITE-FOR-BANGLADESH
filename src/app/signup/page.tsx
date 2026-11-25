@@ -55,7 +55,7 @@ export default async function SignupPage() {
             signing up.
           </p>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-muted">
-            There is no password. We email you a 6-digit code each time you
+            There is no password. We email you a short code each time you
             log in, so there is nothing to invent and nothing to forget.
           </p>
 

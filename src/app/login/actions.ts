@@ -84,8 +84,9 @@ export async function verifyLoginCode(
     .toLowerCase();
   const token = String(formData.get("token") ?? "").replace(/\D/g, "");
 
-  if (token.length !== 6) {
-    return { error: "Please type the 6-digit code from the email." };
+  // Supabase's Email OTP Length is a project setting (6-10).
+  if (token.length < 6 || token.length > 10) {
+    return { error: "Please type the code from the email." };
   }
 
   const supabase = await createServerSupabaseClient();

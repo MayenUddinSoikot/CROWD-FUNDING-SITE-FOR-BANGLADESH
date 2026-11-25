@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { sendSignupCode, verifySignupCode } from "./actions";
 import { Button, inputClass } from "@/components/ui";
-import { CodeField } from "@/components/CodeField";
+import { CodeField, CODE_MIN } from "@/components/CodeField";
 
 export function SignupForm() {
   const [sendState, sendAction, sending] = useActionState(
@@ -43,7 +43,7 @@ export function SignupForm() {
             📬
           </p>
           <p className="mt-1 font-bold text-brand-dark">
-            We emailed you a 6-digit code
+            We emailed you a login code
           </p>
           <p className="mt-1 text-sm text-body">
             Sent to <span className="font-semibold">{sent.email}</span>
@@ -75,7 +75,7 @@ export function SignupForm() {
             type="submit"
             size="lg"
             full
-            disabled={verifying || token.length !== 6}
+            disabled={verifying || token.length < CODE_MIN}
             className="mt-5"
           >
             {verifying ? "Checking…" : "Create my account"}

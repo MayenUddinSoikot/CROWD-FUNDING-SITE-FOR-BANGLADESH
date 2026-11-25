@@ -6,7 +6,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 /* ============================================================
    Sign-up by one-time code.
 
-   No password at all: we email a 6-digit code, and typing it back
+   No password at all: we email a short code, and typing it back
    proves the address and creates the account in one step. That suits
    people who fundraise from a phone — nothing to invent, nothing to
    forget, and no separate "confirm your email" round trip.
@@ -115,8 +115,10 @@ export async function verifySignupCode(
     .toLowerCase();
   const token = String(formData.get("token") ?? "").replace(/\D/g, "");
 
-  if (token.length !== 6) {
-    return { error: "Please type the 6-digit code from the email." };
+  // Supabase's Email OTP Length is a project setting (6-10), so the
+  // length is never hard-coded here.
+  if (token.length < 6 || token.length > 10) {
+    return { error: "Please type the code from the email." };
   }
 
   const supabase = await createServerSupabaseClient();

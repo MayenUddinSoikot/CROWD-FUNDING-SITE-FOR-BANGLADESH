@@ -4,7 +4,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 /* The "or tap here instead" link in the login email lands here.
 
-   The email gives people two ways in: type the 6-digit code, or tap the
+   The email gives people two ways in: type the code, or tap the
    link. The link carries a hashed version of the same code, which this
    route exchanges for a session before sending them on.
 
