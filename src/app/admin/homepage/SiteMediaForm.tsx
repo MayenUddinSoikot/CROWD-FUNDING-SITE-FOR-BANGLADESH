@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { addSiteMedia } from "./actions";
 import { Button, Card, inputClass } from "@/components/ui";
+import { SiteMediaUpload } from "@/components/SiteMediaUpload";
 
 export function SiteMediaForm() {
   const [state, action, pending] = useActionState(addSiteMedia, undefined);
@@ -32,9 +33,9 @@ export function SiteMediaForm() {
       <form action={action}>
         <h2 className="text-sm font-bold text-brand">Add a photo or video</h2>
         <p className="mt-1 text-xs leading-relaxed text-muted">
-          Paste a link to an image or video. Upload the file to Supabase
-          Storage (campaign-media bucket) or any public host, then copy its
-          address here.
+          Choose a file from this computer and it is uploaded to Shohay&rsquo;s
+          own storage. Pasting a link to someone else&rsquo;s host still
+          works, but if that host removes the file the homepage loses it.
         </p>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -72,8 +73,26 @@ export function SiteMediaForm() {
           </div>
         </div>
 
-        <label className="mt-4 block text-sm font-medium" htmlFor="url">
-          Media link (https://…)
+        {/* Upload first, link second: the file you own is the safer one */}
+        {mediaType === "youtube" ? null : (
+          <div className="mt-5">
+            <span className="block text-sm font-medium">
+              Upload a photo or video
+            </span>
+            <div className="mt-2">
+              <SiteMediaUpload
+                value={url}
+                onChange={setUrl}
+                onKindChange={setMediaType}
+              />
+            </div>
+          </div>
+        )}
+
+        <label className="mt-5 block text-sm font-medium" htmlFor="url">
+          {mediaType === "youtube"
+            ? "YouTube link"
+            : "…or paste a link instead"}
         </label>
         <input
           id="url"

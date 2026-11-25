@@ -6,6 +6,9 @@ import type { SiteMedia } from "@/lib/types";
 import { Button, Card, EmptyState, StatusBadge } from "@/components/ui";
 import { MediaFrame } from "@/components/MediaTile";
 import { SiteMediaForm } from "./SiteMediaForm";
+import { SectionCard } from "./ContentEditor";
+import { toggleSection } from "./content-actions";
+import { HOMEPAGE_GROUPS } from "@/lib/homepage-fields";
 import { removeSiteMedia, toggleSiteMedia } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +26,23 @@ export default async function HomepageMediaPage() {
 
   const items = (data ?? []) as SiteMedia[];
   const missingTable = error?.code === "42P01";
+
+  // Words and on/off switches for every block of the homepage.
+  const [contentResult, sectionResult] = await Promise.all([
+    supabase.from("site_content").select("key, value"),
+    supabase.from("site_sections").select("key, visible"),
+  ]);
+  const savedText: Record<string, string> = {};
+  for (const row of contentResult.data ?? []) {
+    const r = row as { key: string; value: string | null };
+    if (r.value) savedText[r.key] = r.value;
+  }
+  const hiddenSections = new Set(
+    (sectionResult.data ?? [])
+      .filter((r) => (r as { visible: boolean }).visible === false)
+      .map((r) => (r as { key: string }).key)
+  );
+  const themeTableMissing = contentResult.error?.code === "42P01";
 
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-5 pb-20 sm:px-6">
@@ -53,6 +73,55 @@ export default async function HomepageMediaPage() {
       <div className="mt-6">
         <SiteMediaForm />
       </div>
+
+      {/* ===== Words, and which blocks show at all ===== */}
+      <h2 className="mt-12 text-lg font-bold">
+        Words on the homepage ·{" "}
+        <span className="font-bengali">হোমপেজের লেখা</span>
+      </h2>
+      <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">
+        Every heading, paragraph and button on the homepage. Change one
+        and the page updates straight away. Empty a box and save to put
+        the original wording back.
+      </p>
+
+      {themeTableMissing ? (
+        <div className="mt-4 rounded-xl bg-warn-tint px-4 py-3 text-sm font-medium text-warn-ink">
+          ⚠️ Run <code>supabase/site-theme.sql</code> in the Supabase SQL
+          Editor to turn this on.
+        </div>
+      ) : (
+        <ul className="mt-4 space-y-3">
+          {HOMEPAGE_GROUPS.map((group) => {
+            const visible = !hiddenSections.has(group.section);
+            return (
+              <li key={group.section}>
+                <SectionCard
+                  group={group}
+                  saved={savedText}
+                  visible={visible}
+                  toggle={
+                    <form action={toggleSection}>
+                      <input type="hidden" name="key" value={group.section} />
+                      <input
+                        type="hidden"
+                        name="visible"
+                        value={visible ? "false" : "true"}
+                      />
+                      <button
+                        type="submit"
+                        className="press rounded-full border border-foreground/15 px-4 py-2 text-xs font-bold hover:border-brand hover:text-brand"
+                      >
+                        {visible ? "Hide section" : "Show section"}
+                      </button>
+                    </form>
+                  }
+                />
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
       <h2 className="mt-10 text-lg font-bold">On the homepage now</h2>
 

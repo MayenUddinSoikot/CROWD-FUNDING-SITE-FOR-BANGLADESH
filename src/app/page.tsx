@@ -8,6 +8,7 @@ import { CreatorCard } from "@/components/CreatorCard";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import type { HeroSlide } from "@/components/HeroCarousel";
 import { Reveal } from "@/components/Reveal";
+import { getSiteContent, getHiddenSections, text } from "@/lib/site-content";
 import { DashboardPreview } from "@/components/DashboardPreview";
 import { getCreators } from "@/lib/creators";
 
@@ -79,11 +80,15 @@ export default async function Home({
       ? (category as CampaignCategory)
       : null;
 
-  const [campaigns, siteMedia, creators] = await Promise.all([
+  const [campaigns, siteMedia, creators, content, hidden] = await Promise.all([
     getCampaigns(activeCategory),
     getSiteMedia(),
     getCreators(8),
+    getSiteContent(),
+    getHiddenSections(),
   ]);
+  const t = (key: string) => text(content, key);
+  const shows = (section: string) => !hidden.has(section);
 
   /* Every published hero row is a slide, in position order, so Shohay
      can rotate several photos or videos from /admin/homepage without a
@@ -144,19 +149,22 @@ export default async function Home({
               }
             : s
         )}
-        fallbackTitle="The people who follow you can change a life."
-        fallbackTitleBn="০% ফি — প্রতিটি টাকা পৌঁছে যায়"
+        fallbackTitle={t("hero.title")}
+        fallbackTitleBn={t("hero.title_bn")}
+        ctaPrimary={t("hero.cta_primary")}
+        ctaSecondary={t("hero.cta_secondary")}
       />
 
       {/* ===== Creators ===== */}
       {/* Faces before listings. A creator platform that opens on a grid
           of causes reads as a charity directory; opening on the people
           doing the raising is what makes Patreon feel like Patreon. */}
+      {shows("creators") ? (
       <Reveal>
       <section className="mx-auto mt-16 max-w-6xl px-5 sm:px-6">
         <SectionHeading
-          title="Creators raising for Bangladesh"
-          bn="যাঁরা সাহায্য তুলছেন"
+          title={t("creators.title")}
+          bn={t("creators.title_bn")}
         >
           {creators.length > 0 ? (
             <ButtonLink href="/creators" variant="secondary" size="sm">
@@ -168,9 +176,9 @@ export default async function Home({
         {creators.length === 0 ? (
           <div className="mt-6">
             <EmptyState
-              title="Be the first creator on Shohay"
+              title={t("creators.empty_title")}
               bn="প্রথম ক্রিয়েটর হোন"
-              hint="Build a page, bring the people who already follow you, and raise for someone who needs it."
+              hint={t("creators.empty_body")}
               action={<ButtonLink href="/setup">Create your page</ButtonLink>}
             />
           </div>
@@ -183,6 +191,7 @@ export default async function Home({
         )}
       </section>
       </Reveal>
+      ) : null}
 
 
       {/* ===== Stories from Shohay — your own photos and videos ===== */}
@@ -230,40 +239,38 @@ export default async function Home({
           Patreon's "More ways to earn": the argument that the platform
           is not one fundraiser but a living income. Ours is the same
           argument in taka. */}
+      {shows("ways") ? (
       <Reveal>
       <section className="mx-auto mt-20 max-w-6xl px-5 sm:px-6">
         <h2 className="max-w-3xl text-[2.2rem] font-extrabold leading-[1.05] tracking-tight sm:text-5xl">
-          More ways to raise
+          {t("ways.title")}
         </h2>
         <p className="font-bengali mt-3 text-xl font-semibold text-brand-dark">
-          সাহায্য তোলার আরও উপায়
+          {t("ways.title_bn")}
         </p>
         <p className="mt-5 max-w-2xl text-lg leading-relaxed text-body">
-          A campaign ends. Your page does not. On Shohay you can run a
-          one-off appeal, take monthly support from the people who follow
-          you, and let friends raise for you on their birthday — all from
-          the same page.
+          {t("ways.body")}
         </p>
 
         <div className="mt-10 grid gap-5 sm:grid-cols-3">
           {[
             {
               icon: "৳",
-              en: "One-off campaigns",
-              bn: "একক ক্যাম্পেইন",
-              desc: "A goal, a deadline and a story. Verified by our team before anyone can give.",
+              en: t("ways.one_title"),
+              bn: t("ways.one_title_bn"),
+              desc: t("ways.one_body"),
             },
             {
               icon: "♡",
-              en: "Monthly supporters",
-              bn: "মাসিক সমর্থক",
-              desc: "Tiers from ৳100. Steady money you can plan around instead of starting from zero.",
+              en: t("ways.two_title"),
+              bn: t("ways.two_title_bn"),
+              desc: t("ways.two_body"),
             },
             {
               icon: "🎂",
-              en: "Occasion fundraisers",
-              bn: "বিশেষ দিনের আবেদন",
-              desc: "Ask for donations instead of presents. Your friends give, you choose who it reaches.",
+              en: t("ways.three_title"),
+              bn: t("ways.three_title_bn"),
+              desc: t("ways.three_body"),
             },
           ].map((way) => (
             <Card key={way.en} className="p-6">
@@ -283,37 +290,36 @@ export default async function Home({
 
         <div className="mt-8">
           <ButtonLink href="/setup" size="lg">
-            Set up your page
+            {t("ways.cta")}
           </ButtonLink>
         </div>
       </section>
       </Reveal>
+      ) : null}
 
       {/* ===== See what is working =====
           Patreon's "Unlock growth", which sells the back office with a
           picture of it. We built that dashboard, so show it. */}
+      {shows("dashboard") ? (
       <Reveal>
       <section className="mx-auto mt-20 max-w-6xl px-5 sm:px-6">
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_380px] lg:gap-16">
           <div>
             <h2 className="text-[2.2rem] font-extrabold leading-[1.05] tracking-tight sm:text-5xl">
-              See what is working
+              {t("dash.title")}
             </h2>
             <p className="font-bengali mt-3 text-xl font-semibold text-brand-dark">
-              কোনটা কাজ করছে দেখুন
+              {t("dash.title_bn")}
             </p>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-body">
-              Your dashboard shows who opened your campaign, how many of
-              them gave, what your supporters pledge each month, and what
-              lands in your bKash after the bank&rsquo;s charge. Share a
-              link and watch what it brings back.
+              {t("dash.body")}
             </p>
 
             <ul className="mt-7 space-y-3">
               {[
-                "Views, donors and the share who gave after viewing",
-                "Monthly pledges, separately from one-off gifts",
-                "What you raised for other people's campaigns",
+                t("dash.point_one"),
+                t("dash.point_two"),
+                t("dash.point_three"),
               ].map((line) => (
                 <li key={line} className="flex gap-3 text-body">
                   <span aria-hidden="true" className="font-bold text-brand">
@@ -326,7 +332,7 @@ export default async function Home({
 
             <div className="mt-8">
               <ButtonLink href="/account" variant="secondary" size="lg">
-                Open your dashboard
+                {t("dash.cta")}
               </ButtonLink>
             </div>
           </div>
@@ -337,25 +343,55 @@ export default async function Home({
         </div>
       </section>
       </Reveal>
+      ) : null}
+
+      {/* ===== A campaigner's own words =====
+          Patreon runs a creator quote across a photograph here. Ours
+          stays off the page until Shohay writes one in, because a
+          testimonial nobody actually said is worth less than nothing on
+          a site asking strangers for money. */}
+      {shows("quote") && t("quote.text").trim() ? (
+        <Reveal>
+          <section className="mx-auto mt-20 max-w-4xl px-5 sm:px-6">
+            <figure className="m-0 rounded-3xl bg-brand-tint px-6 py-12 text-center sm:px-12">
+              <blockquote className="text-2xl font-normal leading-snug text-brand-dark sm:text-4xl">
+                &ldquo;{t("quote.text")}&rdquo;
+              </blockquote>
+              {t("quote.name") ? (
+                <figcaption className="mt-6 text-sm font-bold text-brand-dark">
+                  {t("quote.name")}
+                  {t("quote.role") ? (
+                    <span className="block font-semibold text-muted">
+                      {t("quote.role")}
+                    </span>
+                  ) : null}
+                </figcaption>
+              ) : null}
+            </figure>
+          </section>
+        </Reveal>
+      ) : null}
 
       {/* ===== Trust band ===== */}
+      {shows("trust") ? (
       <Reveal>
       <section className="mt-20 w-full bg-gradient-to-br from-brand to-brand-dark px-5 py-16 text-white sm:px-6 sm:py-20">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-extrabold leading-tight sm:text-4xl">
-            Bangladesh&rsquo;s trusted place to give
+            {t("trust.title")}
           </h2>
           <p className="mx-auto mt-4 max-w-xl leading-relaxed text-white/85">
-            Every campaign is checked with a government ID and documents before
-            it goes live. 0% platform fee, secure bKash, Nagad and card
-            payments, and an independent audit every year.
+            {t("trust.body")}
           </p>
 
           <div className="mx-auto mt-10 grid max-w-lg grid-cols-3 gap-4">
             {[
-              { big: "0%", small: "platform fee" },
-              { big: "100%", small: "verified campaigns" },
-              { big: "3 days", small: "to payout" },
+              { big: t("trust.stat_one"), small: t("trust.stat_one_label") },
+              { big: t("trust.stat_two"), small: t("trust.stat_two_label") },
+              {
+                big: t("trust.stat_three"),
+                small: t("trust.stat_three_label"),
+              },
             ].map((s) => (
               <div key={s.small}>
                 <p className="text-2xl font-extrabold sm:text-3xl">{s.big}</p>
@@ -370,7 +406,7 @@ export default async function Home({
               size="lg"
               className="!bg-white !text-brand-dark !shadow-none hover:!bg-white/90"
             >
-              Start a campaign
+              {t("trust.cta_primary")}
             </ButtonLink>
             <ButtonLink
               href="/about"
@@ -378,43 +414,44 @@ export default async function Home({
               className="!border-white/40 !bg-transparent !text-white hover:!bg-white/10"
               variant="secondary"
             >
-              How it works
+              {t("trust.cta_secondary")}
             </ButtonLink>
           </div>
         </div>
       </section>
       </Reveal>
+      ) : null}
 
 
       {/* ===== Closing call to action =====
           Patreon ends every scroll on the same ask, and the page used to
           finish on "How it works" — a reader who went all the way down
           had nowhere to go. */}
+      {shows("closing") ? (
       <Reveal>
       <section className="mt-20 w-full bg-brand-tint px-5 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-extrabold leading-tight text-brand-dark sm:text-5xl">
-            Your page takes ten minutes.
+            {t("closing.title")}
           </h2>
           <p className="font-bengali mt-3 text-lg font-semibold text-brand">
-            আপনার পেজ বানাতে দশ মিনিট লাগে
+            {t("closing.title_bn")}
           </p>
           <p className="mx-auto mt-5 max-w-xl leading-relaxed text-body">
-            Free to start, 0% from Shohay, and our team checks every campaign
-            before it goes live. The people who already follow you are the
-            ones who give first.
+            {t("closing.body")}
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <ButtonLink href="/setup" size="lg">
-              Create your page
+              {t("closing.cta_primary")}
             </ButtonLink>
             <ButtonLink href="/campaigns" size="lg" variant="secondary">
-              See who needs help
+              {t("closing.cta_secondary")}
             </ButtonLink>
           </div>
         </div>
       </section>
       </Reveal>
+      ) : null}
     </main>
   );
 }

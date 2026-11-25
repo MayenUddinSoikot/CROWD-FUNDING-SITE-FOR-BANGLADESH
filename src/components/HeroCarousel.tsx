@@ -51,10 +51,14 @@ export function HeroCarousel({
   slides,
   fallbackTitle,
   fallbackTitleBn,
+  ctaPrimary,
+  ctaSecondary,
 }: {
   slides: HeroSlide[];
   fallbackTitle: string;
   fallbackTitleBn: string;
+  ctaPrimary: string;
+  ctaSecondary: string;
 }) {
   const [index, setIndex] = useState(0);
   const [reduced, setReduced] = useState(false);
@@ -175,13 +179,13 @@ export function HeroCarousel({
             href="/setup"
             className="press inline-flex min-h-[52px] items-center justify-center rounded-full bg-white px-8 text-lg font-bold text-[#0b1a14] no-underline"
           >
-            Create your page
+            {ctaPrimary}
           </Link>
           <Link
             href="/creators"
             className="press inline-flex min-h-[52px] items-center justify-center rounded-full border border-white/40 px-8 text-lg font-bold text-white no-underline hover:bg-white/10"
           >
-            Find a creator
+            {ctaSecondary}
           </Link>
         </div>
 
