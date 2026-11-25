@@ -7,6 +7,8 @@ import { SOCIAL_PLATFORMS } from "@/lib/types";
 import { formatTaka } from "@/lib/format";
 import { CampaignCard } from "@/components/CampaignCard";
 import { CreatorSupportBox } from "@/components/CreatorSupportBox";
+import { PostMedia } from "@/components/PostMedia";
+import { getTiers, getSupporters, getPublicPosts } from "@/lib/memberships";
 
 // Always show the creator's live campaigns and totals.
 export const dynamic = "force-dynamic";
@@ -111,7 +113,12 @@ export default async function CreatorProfilePage({
   const creator = await getCreator(username);
   if (!creator) notFound();
 
-  const campaigns = await getCreatorCampaigns(creator.id);
+  const [campaigns, tiers, supporters, posts] = await Promise.all([
+    getCreatorCampaigns(creator.id),
+    getTiers(creator.id),
+    getSupporters(creator.id),
+    getPublicPosts(creator.id, 6),
+  ]);
   const name = creator.display_name ?? creator.username;
   const totalRaised = campaigns.reduce((sum, c) => sum + (c.raised_amount ?? 0), 0);
   const target = supportTarget(campaigns);
@@ -203,6 +210,112 @@ export default async function CreatorProfilePage({
             )}
           </section>
 
+          {/* Monthly membership */}
+          {tiers.length > 0 ? (
+            <section className="mt-8">
+              <h2 className="text-xl font-bold">
+                Support {name} monthly ·{" "}
+                <span className="font-bengali">মাসিক সহায়</span>
+              </h2>
+              <p className="mt-1 text-sm text-muted">
+                Steady support is what lets a creator plan ahead.
+              </p>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {tiers.map((tier) => (
+                  <Link
+                    key={tier.id}
+                    href={`/creator/${creator.username}/join?tier=${tier.id}`}
+                    className="lift block rounded-2xl bg-card p-5 shadow-soft no-underline"
+                  >
+                    <span className="flex items-baseline justify-between gap-3">
+                      <span className="font-bold">{tier.name}</span>
+                      <span className="shrink-0 font-extrabold text-brand">
+                        {formatTaka(Number(tier.amount))}
+                        <span className="text-xs font-semibold text-muted">
+                          /mo
+                        </span>
+                      </span>
+                    </span>
+                    {tier.name_bn ? (
+                      <span className="font-bengali mt-0.5 block text-sm text-muted">
+                        {tier.name_bn}
+                      </span>
+                    ) : null}
+                    {tier.perks ? (
+                      <span className="mt-2 block whitespace-pre-line text-sm leading-relaxed text-body">
+                        {tier.perks}
+                      </span>
+                    ) : null}
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {/* Posts */}
+          {posts.length > 0 ? (
+            <section className="mt-8">
+              <h2 className="text-xl font-bold">
+                Updates · <span className="font-bengali">আপডেট</span>
+              </h2>
+              <ul className="mt-4 space-y-4">
+                {posts.map((post) => (
+                  <li
+                    key={post.id}
+                    className="overflow-hidden rounded-2xl bg-card shadow-soft"
+                  >
+                    <PostMedia
+                      imageUrl={post.image_url}
+                      videoUrl={post.video_url}
+                      alt={post.title}
+                    />
+                    <div className="p-5">
+                      <p className="text-xs text-muted">
+                        {new Date(post.created_at).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+                      <p className="mt-1 text-lg font-bold">{post.title}</p>
+                      {post.body ? (
+                        <p className="mt-2 whitespace-pre-line leading-relaxed text-body">
+                          {post.body}
+                        </p>
+                      ) : null}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          {/* Supporter wall */}
+          {supporters.length > 0 ? (
+            <section className="mt-8">
+              <h2 className="text-xl font-bold">
+                Supporters · <span className="font-bengali">সমর্থকরা</span>
+              </h2>
+              <ul className="mt-4 flex flex-wrap gap-2">
+                {supporters.map((s, i) => (
+                  <li
+                    key={`${s.supporter_name}-${s.started_at}-${i}`}
+                    title={s.message ?? undefined}
+                    className="rounded-full bg-card px-4 py-2 text-sm font-semibold shadow-soft"
+                  >
+                    {s.supporter_name}
+                    {s.tier_name ? (
+                      <span className="ml-2 text-xs font-bold text-brand">
+                        {s.tier_name}
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
           {/* Campaigns */}
           <section className="mt-8">
             <h2 className="text-xl font-bold">
@@ -228,11 +341,24 @@ export default async function CreatorProfilePage({
         <aside className="lg:pt-6">
           <div className="lg:sticky lg:top-24">
             {target ? (
-              <CreatorSupportBox
-                campaignId={target.id}
-                slug={target.slug}
-                creatorName={name}
-              />
+              <>
+                <CreatorSupportBox
+                  campaignId={target.id}
+                  slug={target.slug}
+                  creatorName={name}
+                />
+                {tiers.length > 0 ? (
+                  <Link
+                    href={`/creator/${creator.username}/join`}
+                    className="press mt-3 flex min-h-[52px] items-center justify-center rounded-2xl border-2 border-brand/30 bg-card px-5 text-base font-bold text-brand no-underline hover:border-brand"
+                  >
+                    Support monthly from{" "}
+                    {formatTaka(
+                      Math.min(...tiers.map((t) => Number(t.amount)))
+                    )}
+                  </Link>
+                ) : null}
+              </>
             ) : (
               <div className="rounded-2xl border border-foreground/10 bg-card p-6 text-center">
                 <p className="text-3xl">☕</p>

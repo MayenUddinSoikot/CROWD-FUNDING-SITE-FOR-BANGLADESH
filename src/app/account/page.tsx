@@ -121,6 +121,21 @@ export default async function AccountPage({
         </div>
 
         <div className="mt-6">
+          <Link
+            href="/account/supporters"
+            className="lift flex items-center justify-between gap-4 rounded-2xl bg-card p-5 shadow-soft no-underline"
+          >
+            <span>
+              <span className="block font-bold">Monthly supporters</span>
+              <span className="mt-0.5 block text-sm text-muted">
+                Tiers, supporters-only posts and who&rsquo;s supporting you
+              </span>
+            </span>
+            <span className="shrink-0 text-xl opacity-40">›</span>
+          </Link>
+        </div>
+
+        <div className="mt-6">
           <OverlayPanel overlayKey={overlayKey} siteUrl={siteUrl} />
         </div>
 
