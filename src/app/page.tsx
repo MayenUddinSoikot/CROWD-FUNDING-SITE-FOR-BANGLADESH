@@ -491,6 +491,34 @@ export default async function Home({
           ))}
         </div>
       </section>
+
+      {/* ===== Closing call to action =====
+          Patreon ends every scroll on the same ask, and the page used to
+          finish on "How it works" — a reader who went all the way down
+          had nowhere to go. */}
+      <section className="mt-20 w-full bg-brand-tint px-5 py-16 sm:px-6 sm:py-20">
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="text-3xl font-extrabold leading-tight text-brand-dark sm:text-5xl">
+            Your page takes ten minutes.
+          </h2>
+          <p className="font-bengali mt-3 text-lg font-semibold text-brand">
+            আপনার পেজ বানাতে দশ মিনিট লাগে
+          </p>
+          <p className="mx-auto mt-5 max-w-xl leading-relaxed text-body">
+            Free to start, 0% from Shohay, and our team checks every campaign
+            before it goes live. The people who already follow you are the
+            ones who give first.
+          </p>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <ButtonLink href="/setup" size="lg">
+              Create your page
+            </ButtonLink>
+            <ButtonLink href="/campaigns" size="lg" variant="secondary">
+              See who needs help
+            </ButtonLink>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
