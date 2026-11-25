@@ -8,6 +8,8 @@ import { CreatorCard } from "@/components/CreatorCard";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import type { HeroSlide } from "@/components/HeroCarousel";
 import { Reveal } from "@/components/Reveal";
+import { PhotoMosaic } from "@/components/PhotoMosaic";
+import type { MosaicTile } from "@/components/PhotoMosaic";
 import { getSiteContent, getHiddenSections, text } from "@/lib/site-content";
 import { DashboardPreview } from "@/components/DashboardPreview";
 import { getCreators } from "@/lib/creators";
@@ -88,6 +90,43 @@ export default async function Home({
     getHiddenSections(),
   ]);
   const t = (key: string) => text(content, key);
+
+  /* Faces for the mosaic. Shohay's own creators the moment there are
+     any; until then, free photographs of Bangladesh carrying a credit
+     rather than an invented name. */
+  const STOCK_TILES: MosaicTile[] = [
+    {
+      id: "s1",
+      url: "https://images.unsplash.com/photo-1607710577593-5c806a0dc7b9?w=900&q=75&auto=format&fit=crop",
+      credit: "Photo: Ehteshamul Haque Adit",
+    },
+    {
+      id: "s2",
+      url: "https://images.unsplash.com/photo-1634019062601-49e0b65c669e?w=900&q=75&auto=format&fit=crop",
+      credit: "Photo: Mashiur Rahman, Barishal",
+    },
+    {
+      id: "s3",
+      url: "https://images.unsplash.com/photo-1615560480284-64ad1051fc4e?w=900&q=75&auto=format&fit=crop",
+      credit: "Photo: Mohammad Samir",
+    },
+    {
+      id: "s4",
+      url: "https://images.unsplash.com/photo-1722285789347-d780539ddfa0?w=900&q=75&auto=format&fit=crop",
+      credit: "Photo: Shariar Kabir",
+    },
+  ];
+  const creatorTiles: MosaicTile[] = creators
+    .filter((c) => c.avatar_url || c.cover_url)
+    .slice(0, 4)
+    .map((c) => ({
+      id: c.id,
+      url: (c.cover_url || c.avatar_url) as string,
+      name: c.display_name ?? c.username,
+      href: `/creator/${c.username}`,
+    }));
+  const mosaicTiles =
+    creatorTiles.length >= 4 ? creatorTiles : STOCK_TILES;
   const shows = (section: string) => !hidden.has(section);
 
   /* Every published hero row is a slide, in position order, so Shohay
@@ -235,6 +274,21 @@ export default async function Home({
         </section>
       ) : null}
 
+      {shows("mosaic") ? (
+        <Reveal>
+          <div className="mt-16">
+            <PhotoMosaic
+              title={t("mosaic.title")}
+              titleBn={t("mosaic.title_bn")}
+              body={t("mosaic.body")}
+              tiles={mosaicTiles}
+              cta={t("mosaic.cta")}
+              ctaHref="/creators"
+            />
+          </div>
+        </Reveal>
+      ) : null}
+
       {/* ===== More ways to raise =====
           Patreon's "More ways to earn": the argument that the platform
           is not one fundraiser but a living income. Ours is the same
@@ -292,6 +346,60 @@ export default async function Home({
           <ButtonLink href="/setup" size="lg">
             {t("ways.cta")}
           </ButtonLink>
+        </div>
+      </section>
+      </Reveal>
+      ) : null}
+
+      {shows("control") ? (
+      <Reveal>
+      <section className="mx-auto mt-20 max-w-6xl px-5 sm:px-6">
+        <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
+          <div>
+            <h2 className="text-[2.2rem] font-extrabold leading-[1.05] tracking-tight sm:text-5xl">
+              {t("control.title")}
+            </h2>
+            <p className="font-bengali mt-3 text-xl font-semibold text-brand-dark">
+              {t("control.title_bn")}
+            </p>
+          </div>
+          <div>
+            <p className="text-lg leading-relaxed text-body">
+              {t("control.body")}
+            </p>
+            <div className="mt-7">
+              <ButtonLink href="/setup" size="lg" variant="secondary">
+                {t("control.cta")}
+              </ButtonLink>
+            </div>
+          </div>
+        </div>
+      </section>
+      </Reveal>
+      ) : null}
+
+      {shows("direct") ? (
+      <Reveal>
+      <section className="mt-20 w-full bg-foreground/[0.04] px-5 py-16 sm:px-6 sm:py-20">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
+            <h2 className="text-[2.2rem] font-extrabold leading-[1.02] tracking-tight sm:text-5xl">
+              {t("direct.title")}
+            </h2>
+            <div>
+              <p className="font-bengali text-xl font-semibold text-brand-dark">
+                {t("direct.title_bn")}
+              </p>
+              <p className="mt-3 text-lg leading-relaxed text-body">
+                {t("direct.body")}
+              </p>
+              <div className="mt-7">
+                <ButtonLink href="/about#fee" size="lg" variant="secondary">
+                  {t("direct.cta")}
+                </ButtonLink>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
       </Reveal>

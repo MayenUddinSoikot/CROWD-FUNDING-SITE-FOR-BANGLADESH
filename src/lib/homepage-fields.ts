@@ -87,6 +87,87 @@ export const HOMEPAGE_GROUPS: FieldGroup[] = [
     ],
   },
   {
+    section: "mosaic",
+    title: "Faces band",
+    blurb:
+      "The big headline with photographs through it. Shows Shohay's own creators once there are any; until then, credited stock photos of Bangladesh.",
+    canHide: true,
+    fields: [
+      {
+        key: "mosaic.title",
+        label: "Headline",
+        fallback: "Raised by the people around them.",
+        multiline: true,
+      },
+      {
+        key: "mosaic.title_bn",
+        label: "Bengali line",
+        fallback: "পাশে থাকা মানুষগুলোই তুলেছেন",
+      },
+      {
+        key: "mosaic.body",
+        label: "Paragraph",
+        fallback:
+          "Nobody here raised money from strangers first. They started with the people who already knew them — family, neighbours, the ones who follow them — and those people brought the rest.",
+        multiline: true,
+      },
+      { key: "mosaic.cta", label: "Button", fallback: "Find a creator" },
+    ],
+  },
+  {
+    section: "control",
+    title: "Your page, your way",
+    blurb: "What a campaigner controls on their own page.",
+    canHide: true,
+    fields: [
+      {
+        key: "control.title",
+        label: "Headline",
+        fallback: "Your page, your way.",
+      },
+      {
+        key: "control.title_bn",
+        label: "Bengali line",
+        fallback: "আপনার পেজ, আপনার নিয়মে",
+      },
+      {
+        key: "control.body",
+        label: "Paragraph",
+        fallback:
+          "Your photo, your story, your goal, in Bangla or English or both. Post updates only your supporters can read, or open them to everyone. Nothing goes on your page that you did not put there.",
+        multiline: true,
+      },
+      { key: "control.cta", label: "Button", fallback: "Build your page" },
+    ],
+  },
+  {
+    section: "direct",
+    title: "Nothing in between",
+    blurb: "The 0% fee argument, stated as directness rather than price.",
+    canHide: true,
+    fields: [
+      {
+        key: "direct.title",
+        label: "Headline",
+        fallback: "Donors. Campaigners. Nothing in between.",
+        multiline: true,
+      },
+      {
+        key: "direct.title_bn",
+        label: "Bengali line",
+        fallback: "মাঝখানে কেউ নেই",
+      },
+      {
+        key: "direct.body",
+        label: "Paragraph",
+        fallback:
+          "Shohay takes 0%. No commission, no listing fee, no cut of a donation. The only money that leaves is the bank's charge for moving it, and we show you that figure before you ever ask anyone to give.",
+        multiline: true,
+      },
+      { key: "direct.cta", label: "Button", fallback: "How the money moves" },
+    ],
+  },
+  {
     section: "ways",
     title: "More ways to raise",
     blurb: "The three ways to raise money on Shohay.",

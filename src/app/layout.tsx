@@ -55,6 +55,16 @@ export default function RootLayout({
       lang="en"
       className={`${display.variable} ${notoBengali.variable} h-full antialiased`}
     >
+      {/* Marks the page as having working JavaScript before anything
+          paints. The scroll-reveal animation hides sections until they
+          come into view, and that hiding is scoped to this class — so
+          if the script never arrives, on a bad connection or an old
+          phone, the page is fully readable instead of blank. */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: "document.documentElement.classList.add('js')",
+        }}
+      />
       <body className="min-h-full flex flex-col">
         <ScrollToTop />
         <ReferralCapture />

@@ -23,13 +23,28 @@ const COLUMNS: { heading: string; links: { label: string; href: string }[] }[] =
       ],
     },
     {
-      heading: "About Shohay",
+      heading: "Fees",
+      links: [
+        { label: "0% platform fee", href: "/about#fee" },
+        { label: "How the money moves", href: "/about#fee" },
+        { label: "Payouts to bKash & bank", href: "/about#how" },
+      ],
+    },
+    {
+      heading: "Help",
       links: [
         { label: "How Shohay works", href: "/about#how" },
-        { label: "0% platform fee", href: "/about#fee" },
         { label: "Verified & safe", href: "/about#safety" },
-        { label: "News & stories", href: "/news" },
         { label: "Help & FAQ", href: "/faq" },
+      ],
+    },
+    {
+      heading: "Shohay",
+      links: [
+        { label: "About us", href: "/about" },
+        { label: "News & stories", href: "/news" },
+        { label: "Terms of use", href: "/terms" },
+        { label: "Privacy policy", href: "/privacy" },
       ],
     },
   ];
@@ -47,7 +62,7 @@ export function SiteFooter() {
   return (
     <footer className="mt-auto border-t border-foreground/10 bg-card">
       <div className="mx-auto max-w-6xl px-6 py-12">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
           {COLUMNS.map((col) => (
             <div key={col.heading}>
               <h3 className="text-sm font-bold">{col.heading}</h3>

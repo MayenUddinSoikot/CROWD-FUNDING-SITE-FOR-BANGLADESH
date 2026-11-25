@@ -237,14 +237,17 @@ textarea {
   }
 }
 
-/* Hidden until observed, so nothing flashes before it animates. The
-   component adds .is-visible; if JavaScript never runs, the fallback
-   below keeps the content visible rather than blank. */
-.reveal {
+/* Hidden until observed, so nothing flashes before it animates.
+
+   Scoped to .js, which an inline script in the layout sets before
+   anything paints. Without working JavaScript the rule never applies
+   and every section is simply visible — a homepage that is plain is
+   infinitely better than a homepage that is blank. */
+.js .reveal {
   opacity: 0;
 }
 
-.reveal.is-visible {
+.js .reveal.is-visible {
   animation: rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
@@ -253,8 +256,8 @@ textarea {
     animation: none;
   }
 
-  .reveal,
-  .reveal.is-visible {
+  .js .reveal,
+  .js .reveal.is-visible {
     opacity: 1;
     animation: none;
   }
