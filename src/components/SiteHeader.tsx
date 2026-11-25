@@ -5,6 +5,7 @@ import { getSupabaseClient } from "@/lib/supabase/anon";
 import type { Announcement } from "@/lib/types";
 import { SiteNav } from "@/components/SiteNav";
 import { AnnouncementBar } from "@/components/AnnouncementBar";
+import { HeaderShell } from "@/components/HeaderShell";
 
 // Silently empty until announcements.sql has been run, or until an
 // admin publishes a line.
@@ -56,17 +57,17 @@ export async function SiteHeader() {
           the mobile menu's position:fixed panel inside the header — the menu
           then renders as loose buttons over the page with no background.
           Keep the background solid. */}
-      <header className="sticky top-0 z-40 border-b border-foreground/[0.07] bg-background">
+      <HeaderShell>
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-3 sm:px-6">
         <Link
           href="/"
           className="press flex shrink-0 items-baseline gap-2"
           aria-label="Shohay — home"
         >
-          <span className="font-bengali text-2xl font-bold text-brand">
+          <span className="logo-mark font-bengali text-2xl font-bold text-brand">
             সহায়
           </span>
-          <span className="hidden text-[11px] font-bold uppercase tracking-[0.22em] sm:inline">
+          <span className="logo-sub hidden text-[11px] font-bold uppercase tracking-[0.22em] sm:inline">
             Shohay
           </span>
         </Link>
@@ -76,7 +77,7 @@ export async function SiteHeader() {
           <label htmlFor="site-search" className="sr-only">
             Search campaigns
           </label>
-          <div className="flex items-center gap-2 rounded-full border border-foreground/10 bg-card px-4 py-1.5 focus-within:border-brand focus-within:shadow-[0_0_0_4px_rgba(17,105,74,0.12)]">
+          <div className="search-shell flex items-center gap-2 rounded-full border border-foreground/10 bg-card px-4 py-1.5 focus-within:border-brand focus-within:shadow-[0_0_0_4px_rgba(17,105,74,0.12)]">
             <svg
               width="17"
               height="17"
@@ -111,7 +112,7 @@ export async function SiteHeader() {
           <SiteNav isLoggedIn={isLoggedIn} isAdmin={isAdmin} />
         </div>
         </div>
-      </header>
+      </HeaderShell>
     </>
   );
 }

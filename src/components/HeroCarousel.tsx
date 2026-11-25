@@ -143,7 +143,7 @@ export function HeroCarousel({
 
   return (
     <section
-      className="relative w-full overflow-hidden bg-[#0b1a14] text-white"
+      className="relative -mt-[57px] w-full overflow-hidden bg-[#0b1a14] text-white"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       aria-roledescription={count > 1 ? "carousel" : undefined}
@@ -207,17 +207,19 @@ export function HeroCarousel({
           putting there. */}
       <div className="absolute inset-0 bg-gradient-to-t from-[#0b1a14] via-[#0b1a14]/60 to-[#0b1a14]/15" />
 
-      <div className="relative mx-auto flex min-h-[78vh] max-w-6xl flex-col justify-end px-5 pb-12 pt-24 sm:px-6 sm:pb-16">
+      {/* Full screen, as theirs is. A hero that stops short of the fold
+          reads as a banner; one that fills it reads as a front page. */}
+      <div className="relative mx-auto flex min-h-[100svh] max-w-[1600px] flex-col justify-end px-5 pb-14 pt-28 sm:px-10 sm:pb-20">
         {/* Keyed on the slide so the words replay each time it changes */}
         <h1
           key={`h-${index}`}
-          className="max-w-5xl text-[2.9rem] font-normal leading-[0.93] tracking-tight sm:text-7xl lg:text-[5.5rem]"
+          className="max-w-[16ch] text-[clamp(3rem,11vw,10.5rem)] font-light leading-[0.86] tracking-[-0.03em]"
         >
           <Words text={active?.title || fallbackTitle} reduced={reduced} />
         </h1>
         <p
           key={`b-${index}`}
-          className={`font-bengali mt-4 max-w-2xl text-lg font-semibold text-white/80 sm:text-xl ${
+          className={`font-bengali mt-5 max-w-2xl text-lg font-semibold text-white/75 sm:text-xl ${
             reduced ? "" : "fade-up-soft"
           }`}
           style={reduced ? undefined : { animationDelay: "320ms" }}
@@ -246,7 +248,13 @@ export function HeroCarousel({
           </Link>
         </div>
 
-        <div className="mt-10 flex flex-wrap items-end justify-between gap-4">
+        <div className="mt-12 flex flex-wrap items-end justify-between gap-4">
+          <span
+            aria-hidden="true"
+            className="hidden text-4xl font-light text-white/70 sm:block"
+          >
+            ↓
+          </span>
           {/* The credit line Patreon runs beside its hero photograph */}
           {active?.credit ? (
             active.creditHref ? (

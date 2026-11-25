@@ -60,18 +60,18 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto border-t border-foreground/10 bg-card">
-      <div className="mx-auto max-w-6xl px-6 py-12">
+    <footer className="mt-auto bg-[#0f1211] text-white">
+      <div className="mx-auto max-w-[1600px] px-6 py-16 sm:px-10">
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
           {COLUMNS.map((col) => (
             <div key={col.heading}>
-              <h3 className="text-sm font-bold">{col.heading}</h3>
+              <h3 className="text-sm font-bold text-white">{col.heading}</h3>
               <ul className="mt-3 space-y-2">
                 {col.links.map((link) => (
                   <li key={link.label + link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm opacity-70 hover:text-brand hover:opacity-100"
+                      className="text-sm text-white/60 no-underline hover:text-white"
                     >
                       {link.label}
                     </Link>
@@ -83,12 +83,12 @@ export function SiteFooter() {
         </div>
 
         {/* Social + brand */}
-        <div className="mt-10 flex flex-col gap-6 border-t border-foreground/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-14 flex flex-col gap-6 border-t border-white/15 pt-8 sm:flex-row sm:items-center sm:justify-between">
           <Link href="/" className="flex items-baseline gap-2">
-            <span className="font-bengali text-2xl font-bold text-brand">
+            <span className="font-bengali text-2xl font-bold text-white">
               সহায়
             </span>
-            <span className="text-xs font-semibold uppercase tracking-[0.25em] opacity-60">
+            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60">
               Shohay
             </span>
           </Link>
@@ -98,7 +98,7 @@ export function SiteFooter() {
                 key={s.label}
                 href={s.href}
                 aria-label={s.label}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-foreground/20 text-sm hover:border-brand hover:text-brand"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 text-base text-white no-underline hover:border-white hover:bg-white/10"
               >
                 {s.symbol}
               </a>
@@ -107,18 +107,18 @@ export function SiteFooter() {
         </div>
 
         {/* Legal */}
-        <div className="mt-8 flex flex-col gap-3 text-sm opacity-60 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-8 flex flex-col gap-3 text-sm text-white/55 sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {year} Shohay · 0% platform fee · Made in Bangladesh 🇧🇩
           </p>
           <div className="flex flex-wrap gap-4">
-            <Link href="/terms" className="hover:text-brand">
+            <Link href="/terms" className="no-underline hover:text-white">
               Terms
             </Link>
-            <Link href="/privacy" className="hover:text-brand">
+            <Link href="/privacy" className="no-underline hover:text-white">
               Privacy
             </Link>
-            <Link href="/faq" className="hover:text-brand">
+            <Link href="/faq" className="no-underline hover:text-white">
               Help
             </Link>
           </div>

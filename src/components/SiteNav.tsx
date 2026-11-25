@@ -148,7 +148,7 @@ export function SiteNav({
 
       {/* Mobile / tablet: search + hamburger */}
       <div className="flex items-center gap-3 lg:hidden">
-        <Link href="/search" aria-label="Search" className="text-lg">
+        <Link href="/search" aria-label="Search" className="bar-icon text-lg">
           🔍
         </Link>
         <button
@@ -156,7 +156,7 @@ export function SiteNav({
           aria-label="Menu"
           aria-expanded={open}
           onClick={() => setOpen(true)}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-foreground/20 text-lg"
+          className="bar-icon flex h-9 w-9 items-center justify-center rounded-lg border border-foreground/20 text-lg"
         >
           ☰
         </button>

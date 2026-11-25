@@ -23,10 +23,10 @@ export type MosaicTile = {
 /* Each tile gets its own height and vertical nudge, so the row reads as
    a scatter rather than a filmstrip. */
 const SHAPES = [
-  "aspect-[3/4] sm:translate-y-6",
-  "aspect-[4/5] sm:-translate-y-4",
-  "aspect-[3/4] sm:translate-y-10",
-  "aspect-[4/5] sm:-translate-y-2",
+  "aspect-[3/4] sm:translate-y-14",
+  "aspect-[4/5] sm:-translate-y-10",
+  "aspect-[3/4] sm:translate-y-24",
+  "aspect-[4/5] sm:translate-y-2",
 ];
 
 export function PhotoMosaic({
@@ -48,17 +48,18 @@ export function PhotoMosaic({
 
   return (
     <section className="w-full overflow-hidden bg-brand-tint/50 py-16 sm:py-24">
-      <div className="mx-auto max-w-6xl px-5 sm:px-6">
-        <h2 className="max-w-4xl text-[2.4rem] font-normal leading-[0.98] tracking-tight text-brand-dark sm:text-6xl lg:text-7xl">
+      <div className="mx-auto max-w-[1600px] px-5 sm:px-10">
+        <h2 className="relative z-0 max-w-[14ch] text-[clamp(2.6rem,8.5vw,8rem)] font-light leading-[0.88] tracking-[-0.03em] text-brand-dark">
           {title}
         </h2>
 
-        {/* The tiles ride up into the headline, as Patreon's do */}
-        <div className="-mt-2 grid grid-cols-2 gap-4 sm:-mt-6 sm:grid-cols-4 sm:gap-5">
+        {/* The tiles ride up over the headline, as Patreon's do: the
+            photographs sit on the type rather than politely beneath it. */}
+        <div className="relative z-10 -mt-[0.5em] grid grid-cols-2 gap-4 sm:-mt-[1.1em] sm:grid-cols-4 sm:gap-6">
           {tiles.slice(0, 4).map((tile, i) => (
             <figure
               key={tile.id}
-              className={`group relative m-0 mt-8 overflow-hidden rounded-2xl bg-brand-tint shadow-lift sm:mt-16 ${SHAPES[i % SHAPES.length]}`}
+              className={`group relative m-0 mt-10 overflow-hidden rounded-[20px] bg-brand-tint shadow-lift sm:mt-24 ${SHAPES[i % SHAPES.length]}`}
             >
               <SafeImage
                 src={tile.url}
@@ -67,7 +68,7 @@ export function PhotoMosaic({
                 /* Measured, not guessed: a tile is ~18vw of the page on a
                    laptop and ~45vw on a phone. Overstating this wastes
                    someone's data; understating it makes the photo soft. */
-                sizes="(min-width: 640px) 18vw, 45vw"
+                sizes="(min-width: 640px) 23vw, 45vw"
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                 fallback={<span className="block h-full w-full" />}
               />
@@ -96,7 +97,7 @@ export function PhotoMosaic({
           ))}
         </div>
 
-        <p className="font-bengali mt-10 text-xl font-semibold text-brand">
+        <p className="font-bengali mt-20 text-xl font-semibold text-brand sm:mt-32">
           {titleBn}
         </p>
         <p className="mt-3 max-w-2xl text-lg leading-relaxed text-body">
