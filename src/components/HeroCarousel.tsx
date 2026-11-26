@@ -32,7 +32,7 @@ export type HeroSlide = {
   creditHref: string | null;
 };
 
-const INTERVAL = 3000;
+const INTERVAL = 5000;
 
 /* Whether this connection should be asked to carry a hero video.
 
@@ -192,10 +192,13 @@ export function HeroCarousel({
               muted
               loop
               playsInline
-              /* Only the slide on screen is worth fetching. The rest
-                 stay at "none" until they come round, and the effect
-                 above starts them. */
-              preload={i === index ? "metadata" : "none"}
+              /* Always "none", never toggled. Flipping this attribute
+                 as a slide becomes active makes the browser throw away
+                 what it had and fetch the file again — which is why one
+                 9.2 MB clip was arriving as 18.5 MB. Nothing is fetched
+                 until the effect above calls play() on the slide that is
+                 actually showing. */
+              preload="none"
               className="h-full w-full object-cover"
             />
           ) : slide.kind === "image" && slide.url ? (
