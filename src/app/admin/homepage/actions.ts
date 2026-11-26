@@ -5,7 +5,7 @@ import { getAdminClient } from "@/lib/admin";
 
 export type MediaState = { error?: string; saved?: boolean } | undefined;
 
-const SLOTS = new Set(["hero", "featured"]);
+const SLOTS = new Set(["hero", "faces", "featured"]);
 const TYPES = new Set(["image", "video", "youtube"]);
 
 export async function addSiteMedia(

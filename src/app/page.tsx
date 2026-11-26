@@ -122,6 +122,19 @@ export default async function Home({
       credit: "Photo: Shariar Kabir",
     },
   ];
+  /* Photos Shohay put there itself, from /admin/homepage. These win
+     over everything else: if someone has chosen the pictures for this
+     band, show those. */
+  const chosenTiles: MosaicTile[] = siteMedia
+    .filter((m) => m.slot === "faces" && m.media_type === "image")
+    .map((m) => ({
+      id: m.id,
+      url: m.url,
+      name: m.title,
+      href: m.link_url,
+      credit: m.subtitle,
+    }));
+
   const creatorTiles: MosaicTile[] = creators
     .filter((c) => c.avatar_url || c.cover_url)
     .slice(0, 4)
@@ -131,8 +144,14 @@ export default async function Home({
       name: c.display_name ?? c.username,
       href: `/creator/${c.username}`,
     }));
+  /* Chosen photos first, then Shohay's own creators once four of them
+     have pictures, and only then the credited stock placeholders. */
   const mosaicTiles =
-    creatorTiles.length >= 4 ? creatorTiles : STOCK_TILES;
+    chosenTiles.length > 0
+      ? chosenTiles
+      : creatorTiles.length >= 4
+        ? creatorTiles
+        : STOCK_TILES;
   const shows = (section: string) => !hidden.has(section);
 
   /* Every published hero row is a slide, in position order, so Shohay

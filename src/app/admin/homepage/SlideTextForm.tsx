@@ -13,7 +13,7 @@ export function SlideTextForm({
   subtitle,
   linkUrl,
   position,
-  isHero,
+  kind,
 }: {
   id: string;
   title: string | null;
@@ -21,7 +21,7 @@ export function SlideTextForm({
   subtitle: string | null;
   linkUrl: string | null;
   position: number;
-  isHero: boolean;
+  kind: "hero" | "faces" | "featured";
 }) {
   const [state, action, pending] = useActionState(updateSiteMedia, undefined);
   const [open, setOpen] = useState(false);
@@ -50,17 +50,27 @@ export function SlideTextForm({
       <input type="hidden" name="id" value={id} />
 
       <label className="block text-xs font-semibold">
-        {isHero ? "Headline on this slide" : "Title"}
+        {kind === "hero"
+          ? "Headline on this slide"
+          : kind === "faces"
+            ? "Name shown on the photo"
+            : "Title"}
       </label>
       <input
         name="title"
         value={t}
         onChange={(e) => setT(e.target.value)}
-        placeholder={isHero ? "Leave empty to use the homepage headline" : ""}
+        placeholder={
+          kind === "hero"
+            ? "Leave empty to use the homepage headline"
+            : kind === "faces"
+              ? "Leave empty for no name on the photo"
+              : ""
+        }
         className={inputClass}
       />
 
-      {isHero ? (
+      {kind === "hero" ? (
         <>
           <label className="mt-3 block text-xs font-semibold">
             Bengali line on this slide
@@ -76,7 +86,11 @@ export function SlideTextForm({
       ) : null}
 
       <label className="mt-3 block text-xs font-semibold">
-        {isHero ? "Credit line under the headline" : "Caption"}
+        {kind === "hero"
+          ? "Credit line under the headline"
+          : kind === "faces"
+            ? "Photo credit (small text on the photo)"
+            : "Caption"}
       </label>
       <input
         name="subtitle"

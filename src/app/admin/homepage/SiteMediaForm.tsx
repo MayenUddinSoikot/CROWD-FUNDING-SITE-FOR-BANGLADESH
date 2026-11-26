@@ -50,8 +50,14 @@ export function SiteMediaForm() {
               onChange={(e) => setSlot(e.target.value)}
               className={inputClass}
             >
+              <option value="hero">
+                Hero banner — the big rotating one at the top
+              </option>
+              <option value="faces">
+                Faces band — the photos under &ldquo;Raised by the people
+                around them&rdquo;
+              </option>
               <option value="featured">Stories strip (several)</option>
-              <option value="hero">Hero — beside the headline (one)</option>
             </select>
           </div>
 

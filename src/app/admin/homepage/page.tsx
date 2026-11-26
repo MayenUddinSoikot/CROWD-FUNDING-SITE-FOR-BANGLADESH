@@ -154,8 +154,14 @@ export default async function HomepageMediaPage() {
                 </div>
                 <div className="p-5">
                   <div className="flex flex-wrap items-center gap-2">
-                    <StatusBadge tone={item.slot === "hero" ? "live" : "draft"}>
-                      {item.slot === "hero" ? "Hero" : "Stories strip"}
+                    <StatusBadge
+                      tone={item.slot === "featured" ? "draft" : "live"}
+                    >
+                      {item.slot === "hero"
+                        ? "Hero banner"
+                        : item.slot === "faces"
+                          ? "Faces band"
+                          : "Stories strip"}
                     </StatusBadge>
                     <StatusBadge tone={item.published ? "approved" : "pending"}>
                       {item.published ? "Visible" : "Hidden"}
@@ -202,7 +208,13 @@ export default async function HomepageMediaPage() {
                       subtitle={item.subtitle}
                       linkUrl={item.link_url}
                       position={item.position}
-                      isHero={item.slot === "hero"}
+                      kind={
+                        item.slot === "hero"
+                          ? "hero"
+                          : item.slot === "faces"
+                            ? "faces"
+                            : "featured"
+                      }
                     />
                   </div>
                 </div>
