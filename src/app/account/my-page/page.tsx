@@ -23,7 +23,9 @@ export default async function MyPage() {
   const fields = "username, display_name, bio, avatar_url";
   const first = await supabase
     .from("profiles")
-    .select(`${fields}, social_links, full_name, phone, cover_url, page_published`)
+    .select(
+      `${fields}, social_links, full_name, phone, cover_url, focus, page_published`
+    )
     .eq("id", user.id)
     .maybeSingle();
   let row = first.data;
@@ -36,6 +38,7 @@ export default async function MyPage() {
     row = retry.data as unknown as typeof row;
   }
   const profile = row ?? {
+    focus: null,
     username: null,
     display_name: null,
     bio: null,
@@ -53,10 +56,48 @@ export default async function MyPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-extrabold sm:text-3xl">My page</h1>
+      <h1 className="text-2xl font-extrabold sm:text-3xl">
+        My creator page
+      </h1>
       <p className="mt-1 text-sm text-muted">
-        What donors and supporters see when they open your link.
+        Your own page on Shohay ·{" "}
+        <span className="font-bengali">আপনার নিজের পেজ</span>
       </p>
+
+      {/* The two things are easy to confuse, and confusing them wastes
+          a campaigner's time: they set up a page expecting a goal and a
+          deadline, or start a campaign expecting it to last. Say which
+          is which, once, where the decision is made. */}
+      <Card className="mt-5 bg-brand-tint/60 p-5">
+        <p className="text-sm font-bold text-brand-dark">
+          Your page is not a campaign
+        </p>
+        <ul className="mt-3 space-y-2.5 text-sm leading-relaxed text-body">
+          <li>
+            <b>This page</b> stays open for as long as you want it. No goal,
+            no deadline. People follow it, read your posts and can support
+            you every month.
+          </li>
+          <li>
+            <b>A campaign</b> is one appeal with a goal and an end date —
+            medical bills, school fees, flood relief. You can run as many as
+            you like from this page, and each is checked by our team before
+            it goes live.
+          </li>
+          <li>
+            <b>A donation</b> is a single gift to one campaign. The giver
+            needs no account.
+          </li>
+        </ul>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <ButtonLink href="/start" size="sm">
+            Start a campaign
+          </ButtonLink>
+          <ButtonLink href="/account/supporters" size="sm" variant="secondary">
+            Set up monthly support
+          </ButtonLink>
+        </div>
+      </Card>
 
       <Card className="mt-6 p-5">
         <p className="text-sm font-semibold">Your page address</p>
@@ -80,13 +121,21 @@ export default async function MyPage() {
       </Card>
 
       <div className="mt-6">
-        <CreatorProfileForm profile={profile} email={user.email} />
+        <CreatorProfileForm
+          profile={profile}
+          email={user.email}
+          userId={user.id}
+        />
       </div>
 
       <p className="mt-6 text-sm text-muted">
-        Want tiers and supporters-only posts?{" "}
+        Monthly tiers and supporters-only posts live on your{" "}
         <Link href="/account/supporters" className="font-semibold text-brand">
-          Set those up here
+          supporters page
+        </Link>
+        . Campaigns, with their goals and deadlines, are on your{" "}
+        <Link href="/account" className="font-semibold text-brand">
+          dashboard
         </Link>
         .
       </p>

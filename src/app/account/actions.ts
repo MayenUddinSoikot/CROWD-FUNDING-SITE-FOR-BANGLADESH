@@ -62,6 +62,15 @@ export async function saveCreatorProfile(
     socialLinks[key] = value;
   }
 
+  /* What they raise for. Capped the same way the setup wizard caps it,
+     and stored as null rather than an empty array so "not chosen yet"
+     and "chosen nothing" do not look different to the page. */
+  const focus = formData
+    .getAll("focus")
+    .map((f) => String(f).trim())
+    .filter(Boolean)
+    .slice(0, 8);
+
   const base = {
     username: username || null,
     display_name: displayName || null,
@@ -76,11 +85,14 @@ export async function saveCreatorProfile(
     .from("profiles")
     .update({
       ...base,
+      focus: focus.length > 0 ? focus : null,
       social_links: Object.keys(socialLinks).length > 0 ? socialLinks : null,
     })
     .eq("id", user.id);
 
-  // social_links exists only after creator-page.sql — save the rest anyway.
+  // focus / social_links each arrive with a later SQL file — if this
+  // database has not had them yet, save everything else rather than
+  // failing the whole form.
   if (error?.code === "42703") {
     ({ error } = await supabase
       .from("profiles")

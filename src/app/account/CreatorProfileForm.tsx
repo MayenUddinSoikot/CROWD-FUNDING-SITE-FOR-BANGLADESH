@@ -4,6 +4,8 @@ import { useActionState, useState } from "react";
 import Link from "next/link";
 import { saveCreatorProfile } from "./actions";
 import { SOCIAL_PLATFORMS } from "@/lib/types";
+import { ProfileImageUpload } from "@/components/ProfileImageUpload";
+import { FOCUS_OPTIONS } from "@/lib/creator-focus";
 
 const inputClass =
   "mt-1 w-full rounded-xl border border-foreground/20 bg-card px-4 py-2.5 outline-none focus:border-brand";
@@ -14,6 +16,7 @@ type Profile = {
   bio: string | null;
   avatar_url: string | null;
   cover_url?: string | null;
+  focus?: string[] | null;
   full_name?: string | null;
   phone?: string | null;
   social_links?: Record<string, string> | null;
@@ -22,9 +25,11 @@ type Profile = {
 export function CreatorProfileForm({
   profile,
   email,
+  userId,
 }: {
   profile: Profile;
   email?: string | null;
+  userId: string;
 }) {
   const [state, action, pending] = useActionState(saveCreatorProfile, undefined);
   // Controlled so a validation error (e.g. username taken) never wipes
@@ -36,6 +41,13 @@ export function CreatorProfileForm({
   const [bio, setBio] = useState(profile.bio ?? "");
   const [fullName, setFullName] = useState(profile.full_name ?? "");
   const [phone, setPhone] = useState(profile.phone ?? "");
+  const [focus, setFocus] = useState<string[]>(profile.focus ?? []);
+  const toggleFocus = (option: string) =>
+    setFocus((cur) =>
+      cur.includes(option)
+        ? cur.filter((f) => f !== option)
+        : [...cur, option].slice(0, 8)
+    );
   const [socials, setSocials] = useState<Record<string, string>>(() =>
     Object.fromEntries(
       SOCIAL_PLATFORMS.map((p) => [p.key, profile.social_links?.[p.key] ?? ""])
@@ -122,35 +134,29 @@ export function CreatorProfileForm({
         className={inputClass}
       />
 
-      <label className="mt-3 block text-sm font-medium" htmlFor="avatar_url">
-        Avatar image URL (optional)
-      </label>
-      <input
-        id="avatar_url"
-        name="avatar_url"
-        type="url"
+      <p className="mt-4 text-sm font-medium">Your photo</p>
+      <ProfileImageUpload
+        userId={userId}
         value={avatarUrl}
-        onChange={(e) => setAvatarUrl(e.target.value)}
-        placeholder="https://…"
-        className={inputClass}
+        onChange={setAvatarUrl}
+        shape="round"
+        label="photo"
       />
+      <input type="hidden" name="avatar_url" value={avatarUrl} />
 
-      <label className="mt-3 block text-sm font-medium" htmlFor="cover_url">
-        Cover image URL (optional)
-      </label>
-      <input
-        id="cover_url"
-        name="cover_url"
-        type="url"
-        value={coverUrl}
-        onChange={(e) => setCoverUrl(e.target.value)}
-        placeholder="https://…"
-        className={inputClass}
-      />
-      <p className="mt-1 text-xs opacity-60">
-        The wide banner across the top of your page. Landscape works best —
-        around 1500 x 500.
+      <p className="mt-5 text-sm font-medium">Cover banner</p>
+      <p className="mt-0.5 text-xs opacity-60">
+        The wide picture across the top of your page. A landscape photo
+        works best — roughly 1500 x 500.
       </p>
+      <ProfileImageUpload
+        userId={userId}
+        value={coverUrl}
+        onChange={setCoverUrl}
+        shape="wide"
+        label="cover"
+      />
+      <input type="hidden" name="cover_url" value={coverUrl} />
 
       <label className="mt-3 block text-sm font-medium" htmlFor="bio">
         Short bio
@@ -164,6 +170,35 @@ export function CreatorProfileForm({
         placeholder="What you create and why people should support you."
         className={inputClass}
       />
+
+      <p className="mt-5 text-sm font-medium">What you raise for</p>
+      <p className="mt-0.5 text-xs opacity-60">
+        Shown on your page and used to put you in front of the right
+        people. Pick as many as fit.
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {FOCUS_OPTIONS.map((option) => {
+          const on = focus.includes(option);
+          return (
+            <button
+              key={option}
+              type="button"
+              onClick={() => toggleFocus(option)}
+              aria-pressed={on}
+              className={`press rounded-full px-4 py-2 text-sm font-semibold ${
+                on
+                  ? "bg-brand text-white"
+                  : "border border-foreground/15 bg-card text-body hover:border-brand"
+              }`}
+            >
+              {option}
+            </button>
+          );
+        })}
+      </div>
+      {focus.map((f) => (
+        <input key={f} type="hidden" name="focus" value={f} />
+      ))}
 
       <p className="mt-5 text-sm font-medium">
         Where people can find your work (optional)
