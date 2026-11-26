@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SocialIcon } from "@/components/SocialIcon";
 
 const COLUMNS: { heading: string; links: { label: string; href: string }[] }[] =
   [
@@ -49,11 +50,11 @@ const COLUMNS: { heading: string; links: { label: string; href: string }[] }[] =
     },
   ];
 
-const SOCIALS: { label: string; symbol: string; href: string }[] = [
-  { label: "Facebook", symbol: "f", href: "#" },
-  { label: "YouTube", symbol: "▶", href: "#" },
-  { label: "X", symbol: "𝕏", href: "#" },
-  { label: "Instagram", symbol: "◎", href: "#" },
+const SOCIALS: { label: string; key: string; href: string }[] = [
+  { label: "Facebook", key: "facebook", href: "#" },
+  { label: "Instagram", key: "instagram", href: "#" },
+  { label: "YouTube", key: "youtube", href: "#" },
+  { label: "TikTok", key: "tiktok", href: "#" },
 ];
 
 export function SiteFooter() {
@@ -92,7 +93,11 @@ export function SiteFooter() {
               Shohay
             </span>
           </Link>
-          <div className="flex gap-3">
+          <div>
+            <p className="mb-2.5 text-sm font-semibold text-white/70 sm:text-right">
+              Follow us on social media
+            </p>
+            <div className="flex gap-3">
             {SOCIALS.map((s) => (
               <a
                 key={s.label}
@@ -100,9 +105,10 @@ export function SiteFooter() {
                 aria-label={s.label}
                 className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 text-base text-white no-underline hover:border-white hover:bg-white/10"
               >
-                {s.symbol}
+                <SocialIcon platform={s.key} size={18} />
               </a>
             ))}
+            </div>
           </div>
         </div>
 

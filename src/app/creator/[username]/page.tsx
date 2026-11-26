@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SocialIcon, socialBackground } from "@/components/SocialIcon";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/anon";
@@ -225,20 +226,29 @@ export default async function CreatorProfilePage({
         ) : null}
 
         {socials.length > 0 ? (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {socials.map((s) => (
-              <a
-                key={s.key}
-                href={s.url}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                title={`${name} on ${s.label}`}
-                aria-label={`${name} on ${s.label}`}
-                className={`press flex h-10 w-10 items-center justify-center rounded-full text-base ${s.color}`}
-              >
-                {s.emoji}
-              </a>
-            ))}
+          <div className="mt-5">
+            <p className="text-sm font-semibold text-muted">
+              Follow us on social media ·{" "}
+              <span className="font-bengali">
+                সোশ্যাল মিডিয়ায় আমাদের ফলো করুন
+              </span>
+            </p>
+            <div className="mt-2.5 flex flex-wrap gap-2.5">
+              {socials.map((s) => (
+                <a
+                  key={s.key}
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  title={`${name} on ${s.label}`}
+                  aria-label={`${name} on ${s.label}`}
+                  style={socialBackground(s.key)}
+                  className="press flex h-11 w-11 items-center justify-center rounded-full text-white no-underline transition-transform hover:scale-105"
+                >
+                  <SocialIcon platform={s.key} size={20} />
+                </a>
+              ))}
+            </div>
           </div>
         ) : null}
 

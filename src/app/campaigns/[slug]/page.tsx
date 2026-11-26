@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SocialIcon } from "@/components/SocialIcon";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/anon";
@@ -598,9 +599,10 @@ export default async function CampaignPage({
                             href={s.url}
                             target="_blank"
                             rel="noopener noreferrer nofollow"
-                            className="rounded-full border border-foreground/15 px-3 py-1 text-xs font-medium transition hover:border-brand hover:text-brand"
+                            className="inline-flex items-center gap-1.5 rounded-full border border-foreground/15 px-3 py-1 text-xs font-medium transition hover:border-brand hover:text-brand"
                           >
-                            {s.emoji} {s.label}
+                            <SocialIcon platform={s.key} size={14} />
+                            {s.label}
                           </a>
                         ))}
                       </div>
