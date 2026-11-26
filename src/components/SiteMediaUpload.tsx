@@ -114,7 +114,7 @@ export function SiteMediaUpload({
               setName(null);
               setSizeMb(null);
             }}
-            className="press text-sm font-semibold text-muted hover:text-accent"
+            className="press inline-flex min-h-[44px] items-center text-sm font-semibold text-muted hover:text-accent"
           >
             Remove
           </button>

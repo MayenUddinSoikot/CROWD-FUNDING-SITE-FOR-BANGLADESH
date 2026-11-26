@@ -132,7 +132,7 @@ export function ProfileImageUpload({
             <button
               type="button"
               onClick={() => onChange("")}
-              className="press ml-3 mt-2 inline-block text-sm font-semibold text-muted hover:text-accent sm:mt-0"
+              className="press ml-3 mt-2 inline-flex min-h-[44px] items-center text-sm font-semibold text-muted hover:text-accent sm:mt-0"
             >
               Remove
             </button>
