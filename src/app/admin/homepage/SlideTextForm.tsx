@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { updateSiteMedia } from "./actions";
 import { Button, inputClass } from "@/components/ui";
+import { SiteMediaUpload } from "@/components/SiteMediaUpload";
 
 /* The words on one slide, editable after it is on the page. */
 
@@ -14,6 +15,7 @@ export function SlideTextForm({
   linkUrl,
   position,
   kind,
+  mediaType,
 }: {
   id: string;
   title: string | null;
@@ -22,6 +24,7 @@ export function SlideTextForm({
   linkUrl: string | null;
   position: number;
   kind: "hero" | "faces" | "featured";
+  mediaType: string;
 }) {
   const [state, action, pending] = useActionState(updateSiteMedia, undefined);
   const [open, setOpen] = useState(false);
@@ -31,6 +34,10 @@ export function SlideTextForm({
   const [sub, setSub] = useState(subtitle ?? "");
   const [link, setLink] = useState(linkUrl ?? "");
   const [pos, setPos] = useState(String(position ?? 0));
+  /* Empty unless a new file is picked — saving the words on their own
+     must not disturb the picture that is already there. */
+  const [newUrl, setNewUrl] = useState("");
+  const [newType, setNewType] = useState(mediaType);
 
   if (!open) {
     return (
@@ -40,7 +47,7 @@ export function SlideTextForm({
         size="sm"
         onClick={() => setOpen(true)}
       >
-        Edit words
+        Edit
       </Button>
     );
   }
@@ -48,6 +55,22 @@ export function SlideTextForm({
   return (
     <form action={action} className="w-full">
       <input type="hidden" name="id" value={id} />
+
+      <p className="text-xs font-semibold">Replace the picture or video</p>
+      <p className="mt-0.5 text-xs text-muted">
+        Leave this alone to keep the one that is there.
+      </p>
+      <div className="mt-1">
+        <SiteMediaUpload
+          value={newUrl}
+          onChange={setNewUrl}
+          onKindChange={setNewType}
+        />
+      </div>
+      <input type="hidden" name="url" value={newUrl} />
+      <input type="hidden" name="media_type" value={newType} />
+
+      <div className="mt-4 border-t border-foreground/[0.07] pt-4" />
 
       <label className="block text-xs font-semibold">
         {kind === "hero"
@@ -140,7 +163,7 @@ export function SlideTextForm({
 
       <div className="mt-3 flex gap-2">
         <Button type="submit" size="sm" disabled={pending}>
-          {pending ? "Saving…" : "Save words"}
+          {pending ? "Saving…" : "Save changes"}
         </Button>
         <Button
           type="button"

@@ -138,6 +138,18 @@ export async function updateSiteMedia(
   };
   if (Number.isFinite(position)) patch.position = position;
 
+  /* A replacement picture, if one was chosen. Left out of the patch
+     when empty so saving the words alone never wipes the image. */
+  const url = String(formData.get("url") ?? "").trim();
+  if (url) {
+    if (!/^https:\/\/\S+$/.test(url)) {
+      return { error: "The media link must be a full https:// address." };
+    }
+    patch.url = url;
+    const mediaType = String(formData.get("media_type") ?? "").trim();
+    if (mediaType) patch.media_type = mediaType;
+  }
+
   let { error } = await supabase
     .from("site_media")
     .update({ ...patch, title_bn: titleBn || null })

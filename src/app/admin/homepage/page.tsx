@@ -208,6 +208,7 @@ export default async function HomepageMediaPage() {
                       subtitle={item.subtitle}
                       linkUrl={item.link_url}
                       position={item.position}
+                      mediaType={item.media_type}
                       kind={
                         item.slot === "hero"
                           ? "hero"
