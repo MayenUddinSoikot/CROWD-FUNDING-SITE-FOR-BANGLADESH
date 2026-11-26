@@ -344,9 +344,113 @@ export const HOMEPAGE_GROUPS: FieldGroup[] = [
   },
 ];
 
-/* Flat lookup, built once. */
+
+/* ===== The rest of the site =====
+
+   Everything here is empty by default. An empty value means "use the
+   page as it was built"; write something and it replaces that part of
+   the page. That way nothing has to be re-typed to keep what is
+   already there, and nothing is lost by experimenting. */
+export const SITE_GROUPS: FieldGroup[] = [
+  {
+    section: "social",
+    title: "Social media & contact",
+    blurb:
+      "Where the icons in the footer point, and how people reach Shohay. An icon with no address is hidden rather than linking nowhere.",
+    canHide: false,
+    fields: [
+      { key: "social.facebook", label: "Facebook page address", fallback: "" },
+      { key: "social.instagram", label: "Instagram", fallback: "" },
+      { key: "social.youtube", label: "YouTube", fallback: "" },
+      { key: "social.tiktok", label: "TikTok", fallback: "" },
+      { key: "social.whatsapp", label: "WhatsApp (https://wa.me/880…)", fallback: "" },
+      { key: "contact.email", label: "Contact email", fallback: "" },
+      { key: "contact.phone", label: "Contact phone", fallback: "" },
+      {
+        key: "contact.address",
+        label: "Address shown in the footer",
+        fallback: "",
+        multiline: true,
+      },
+      {
+        key: "footer.tagline",
+        label: "Footer line beside the logo",
+        fallback: "",
+        hint: "Leave empty to keep © Shohay · 0% platform fee · Made in Bangladesh.",
+      },
+    ],
+  },
+  {
+    section: "about",
+    title: "About page",
+    blurb:
+      "Leave empty to keep the About page as built. Write here and your words replace it.",
+    canHide: false,
+    fields: [
+      { key: "about.title", label: "Heading", fallback: "" },
+      {
+        key: "about.body",
+        label: "The whole page",
+        fallback: "",
+        multiline: true,
+        hint: "Blank lines start a new paragraph. A line ending in a colon is shown as a sub-heading.",
+      },
+    ],
+  },
+  {
+    section: "faq",
+    title: "Help & FAQ page",
+    blurb: "Leave empty to keep the questions already on the page.",
+    canHide: false,
+    fields: [
+      { key: "faq.title", label: "Heading", fallback: "" },
+      {
+        key: "faq.body",
+        label: "The whole page",
+        fallback: "",
+        multiline: true,
+        hint: "Write a question on its own line ending in a question mark, then its answer underneath.",
+      },
+    ],
+  },
+  {
+    section: "terms",
+    title: "Terms of use",
+    blurb: "Leave empty to keep the terms already on the page.",
+    canHide: false,
+    fields: [
+      { key: "terms.title", label: "Heading", fallback: "" },
+      {
+        key: "terms.body",
+        label: "The whole page",
+        fallback: "",
+        multiline: true,
+      },
+    ],
+  },
+  {
+    section: "privacy",
+    title: "Privacy policy",
+    blurb: "Leave empty to keep the policy already on the page.",
+    canHide: false,
+    fields: [
+      { key: "privacy.title", label: "Heading", fallback: "" },
+      {
+        key: "privacy.body",
+        label: "The whole page",
+        fallback: "",
+        multiline: true,
+      },
+    ],
+  },
+];
+
+export const ALL_GROUPS: FieldGroup[] = [...HOMEPAGE_GROUPS, ...SITE_GROUPS];
+
+/* Flat lookup, built once — across every group, so the save action
+   accepts a key from any page rather than only the homepage. */
 export const FIELD_DEFAULTS: Record<string, string> = Object.fromEntries(
-  HOMEPAGE_GROUPS.flatMap((g) => g.fields.map((f) => [f.key, f.fallback]))
+  ALL_GROUPS.flatMap((g) => g.fields.map((f) => [f.key, f.fallback]))
 );
 
 export const SECTION_TITLES: Record<string, string> = Object.fromEntries(

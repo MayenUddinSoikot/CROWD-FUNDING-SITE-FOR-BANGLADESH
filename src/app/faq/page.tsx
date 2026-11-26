@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getSiteContent, text } from "@/lib/site-content";
+import { Prose } from "@/components/Prose";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -57,7 +59,25 @@ const FAQS: { q_en: string; q_bn: string; a_en: string; a_bn: string }[] = [
   },
 ];
 
-export default function FaqPage() {
+export default async function FaqPage() {
+  /* Written in /admin/content. Empty means "keep the page as
+     built", so nothing here has to be re-typed to keep it. */
+  const content = await getSiteContent();
+  const customTitle = text(content, "faq.title").trim();
+  const customBody = text(content, "faq.body").trim();
+  if (customBody) {
+    return (
+      <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-12 sm:px-6 sm:py-16">
+        {customTitle ? (
+          <h1 className="text-3xl font-extrabold sm:text-4xl">
+            {customTitle}
+          </h1>
+        ) : null}
+        <Prose text={customBody} />
+      </main>
+    );
+  }
+
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-6 pb-20">
       <header className="mt-10">

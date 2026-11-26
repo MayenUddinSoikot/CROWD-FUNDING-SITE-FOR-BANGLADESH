@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SocialIcon } from "@/components/SocialIcon";
+import { getSiteContent, text } from "@/lib/site-content";
 
 const COLUMNS: { heading: string; links: { label: string; href: string }[] }[] =
   [
@@ -50,15 +51,29 @@ const COLUMNS: { heading: string; links: { label: string; href: string }[] }[] =
     },
   ];
 
-const SOCIALS: { label: string; key: string; href: string }[] = [
-  { label: "Facebook", key: "facebook", href: "#" },
-  { label: "Instagram", key: "instagram", href: "#" },
-  { label: "YouTube", key: "youtube", href: "#" },
-  { label: "TikTok", key: "tiktok", href: "#" },
+const SOCIALS: { label: string; key: string }[] = [
+  { label: "Facebook", key: "facebook" },
+  { label: "Instagram", key: "instagram" },
+  { label: "YouTube", key: "youtube" },
+  { label: "TikTok", key: "tiktok" },
+  { label: "WhatsApp", key: "whatsapp" },
 ];
 
-export function SiteFooter() {
+export async function SiteFooter() {
   const year = new Date().getFullYear();
+
+  /* Addresses are set in /admin/content. An icon with nowhere to go is
+     worse than no icon, so one without an address is left out — these
+     used to all point at "#". */
+  const content = await getSiteContent();
+  const socials = SOCIALS.map((s) => ({
+    ...s,
+    href: text(content, `social.${s.key}`).trim(),
+  })).filter((s) => s.href);
+  const email = text(content, "contact.email").trim();
+  const phone = text(content, "contact.phone").trim();
+  const address = text(content, "contact.address").trim();
+  const tagline = text(content, "footer.tagline").trim();
 
   return (
     <footer className="mt-auto bg-[#0f1211] text-white">
@@ -93,12 +108,13 @@ export function SiteFooter() {
               Shohay
             </span>
           </Link>
+          {socials.length > 0 ? (
           <div>
             <p className="mb-2.5 text-sm font-semibold text-white/70 sm:text-right">
               Follow us on social media
             </p>
             <div className="flex gap-3">
-            {SOCIALS.map((s) => (
+            {socials.map((s) => (
               <a
                 key={s.label}
                 href={s.href}
@@ -110,12 +126,30 @@ export function SiteFooter() {
             ))}
             </div>
           </div>
+          ) : null}
         </div>
+
+        {(email || phone || address) ? (
+          <div className="mt-8 flex flex-col gap-1 text-sm text-white/60 sm:flex-row sm:flex-wrap sm:gap-6">
+            {email ? (
+              <a href={`mailto:${email}`} className="no-underline hover:text-white">
+                {email}
+              </a>
+            ) : null}
+            {phone ? (
+              <a href={`tel:${phone.replace(/[^0-9+]/g, "")}`} className="no-underline hover:text-white">
+                {phone}
+              </a>
+            ) : null}
+            {address ? <span className="whitespace-pre-line">{address}</span> : null}
+          </div>
+        ) : null}
 
         {/* Legal */}
         <div className="mt-8 flex flex-col gap-3 text-sm text-white/55 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {year} Shohay · 0% platform fee · Made in Bangladesh 🇧🇩
+            {tagline ||
+              `© ${year} Shohay · 0% platform fee · Made in Bangladesh 🇧🇩`}
           </p>
           <div className="flex flex-wrap gap-4">
             <Link href="/terms" className="no-underline hover:text-white">

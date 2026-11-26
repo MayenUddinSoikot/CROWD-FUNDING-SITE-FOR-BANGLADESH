@@ -62,7 +62,9 @@ export function ContentEditor({
             {field.hint ? (
               <p className="mt-1 text-xs text-muted">{field.hint}</p>
             ) : null}
-            {!field.hint && values[field.key] !== field.fallback ? (
+            {!field.hint &&
+            field.fallback &&
+            values[field.key] !== field.fallback ? (
               <button
                 type="button"
                 onClick={() => set(field.key, field.fallback)}
