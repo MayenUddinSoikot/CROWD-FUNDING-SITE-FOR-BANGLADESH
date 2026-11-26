@@ -4,11 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Announcement } from "@/lib/types";
 
-/* The bar at the very top of every page. Several short lines rotate
-   every few seconds, with arrows and swipe — the pattern used on
-   kalonbd.com. One message alone just sits still. */
+/* The bar at the very top of every page. Several short lines rotate,
+   with arrows and swipe — the pattern used on kalonbd.com. One message
+   alone just sits still.
 
-const ROTATE_MS = 2000;
+   Five seconds, matching the hero. Two was not long enough to read a
+   line in English and then its Bengali, which is what every one of
+   these carries. */
+
+const ROTATE_MS = 5000;
 
 export function AnnouncementBar({ items }: { items: Announcement[] }) {
   const [index, setIndex] = useState(0);
