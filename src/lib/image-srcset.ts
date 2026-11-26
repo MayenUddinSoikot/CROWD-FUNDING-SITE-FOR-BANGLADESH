@@ -13,6 +13,7 @@
 const OPTIMISABLE = [
   "coeqraamujuixtervqgb.supabase.co",
   "images.unsplash.com",
+  "lh3.googleusercontent.com",
 ];
 
 const WIDTHS = [360, 414, 640, 828, 1080, 1440, 1920];

@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
         pathname: "/storage/v1/object/public/**",
       },
       { protocol: "https", hostname: "images.unsplash.com" },
+      /* Profile photos that come with a Google sign-in. Without this
+         they are served at Google's own size and the optimiser refuses
+         them, so every such avatar falls back to the full-size file. */
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
     ],
     /* The widths a phone, tablet and laptop actually ask for. */
     deviceSizes: [360, 414, 640, 828, 1080, 1440, 1920],
