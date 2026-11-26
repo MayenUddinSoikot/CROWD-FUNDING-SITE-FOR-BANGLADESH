@@ -21,15 +21,19 @@ export async function saveHomepageText(
   if (!supabase) return { error: "Admins only." };
 
   const section = String(formData.get("__section") ?? "");
+  /* An empty box is saved as an empty value, which hides that line.
+
+     It used to delete the row — and a missing row means "use the
+     wording shipped in the code", so emptying a field put the original
+     text straight back and there was no way to remove a line at all.
+     Restoring the original is what the button beside each field is
+     for. */
   const rows: { key: string; value: string }[] = [];
-  const clear: string[] = [];
 
   for (const [key, raw] of formData.entries()) {
     if (key.startsWith("__")) continue;
     if (!(key in FIELD_DEFAULTS)) continue; // ignore anything not ours
-    const value = String(raw).trim();
-    if (value === "") clear.push(key);
-    else rows.push({ key, value });
+    rows.push({ key, value: String(raw).trim() });
   }
 
   if (rows.length > 0) {
@@ -48,17 +52,6 @@ export async function saveHomepageText(
             : "Could not save. Please try again.",
         section,
       };
-    }
-  }
-
-  if (clear.length > 0) {
-    const { error } = await supabase
-      .from("site_content")
-      .delete()
-      .in("key", clear);
-    if (error) {
-      console.error("Failed to clear homepage text:", error.message);
-      return { error: "Saved, but some fields could not be reset.", section };
     }
   }
 

@@ -147,7 +147,7 @@ export default async function Home({
         kind: m.media_type === "video" ? "video" : "image",
         url: m.url,
         title: m.title,
-        titleBn: null,
+        titleBn: m.title_bn ?? null,
         credit: m.subtitle,
         creditHref: m.link_url,
       }))

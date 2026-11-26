@@ -6,6 +6,7 @@ import type { SiteMedia } from "@/lib/types";
 import { Button, Card, EmptyState, StatusBadge } from "@/components/ui";
 import { MediaFrame } from "@/components/MediaTile";
 import { SiteMediaForm } from "./SiteMediaForm";
+import { SlideTextForm } from "./SlideTextForm";
 import { SectionCard } from "./ContentEditor";
 import { HomepagePreview } from "./HomepagePreview";
 import { toggleSection } from "./content-actions";
@@ -21,7 +22,9 @@ export default async function HomepageMediaPage() {
 
   const { data, error } = await supabase
     .from("site_media")
-    .select("id, slot, media_type, url, title, subtitle, link_url, position, published")
+    .select(
+      "id, slot, media_type, url, title, title_bn, subtitle, link_url, position, published"
+    )
     .order("slot", { ascending: true })
     .order("position", { ascending: true });
 
@@ -189,6 +192,18 @@ export default async function HomepageMediaPage() {
                         Remove
                       </Button>
                     </form>
+                  </div>
+
+                  <div className="mt-4 border-t border-foreground/[0.07] pt-4">
+                    <SlideTextForm
+                      id={item.id}
+                      title={item.title}
+                      titleBn={item.title_bn ?? null}
+                      subtitle={item.subtitle}
+                      linkUrl={item.link_url}
+                      position={item.position}
+                      isHero={item.slot === "hero"}
+                    />
                   </div>
                 </div>
               </Card>

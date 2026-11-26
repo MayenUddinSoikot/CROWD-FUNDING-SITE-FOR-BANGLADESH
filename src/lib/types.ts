@@ -175,6 +175,7 @@ export type SiteMedia = {
   media_type: MediaType;
   url: string;
   title: string | null;
+  title_bn?: string | null;
   subtitle: string | null;
   link_url: string | null;
   position: number;

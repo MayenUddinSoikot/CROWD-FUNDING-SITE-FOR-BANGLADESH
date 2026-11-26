@@ -22,8 +22,9 @@ export async function getSiteContent(): Promise<SiteContent> {
     if (error) return map;
     for (const row of data ?? []) {
       const value = (row as { key: string; value: string | null }).value;
-      // A blank row means "use the default", not "show nothing".
-      if (typeof value === "string" && value.trim() !== "") {
+      /* An empty row is a deliberate "show nothing". Only the absence
+         of a row falls back to the wording shipped in the code. */
+      if (typeof value === "string") {
         map.set((row as { key: string }).key, value);
       }
     }

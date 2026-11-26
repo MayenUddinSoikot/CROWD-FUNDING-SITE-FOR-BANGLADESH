@@ -104,3 +104,56 @@ export async function toggleSiteMedia(formData: FormData) {
   revalidatePath("/admin/homepage");
   revalidatePath("/");
 }
+
+/* Change the words on a slide that is already on the homepage.
+
+   Adding a slide always let you set a headline; there was no way to
+   change one afterwards. So every slide added without a headline fell
+   back to the homepage's default line, and three different videos all
+   carried the same sentence with no way to tell them apart. */
+export async function updateSiteMedia(
+  _prev: MediaState,
+  formData: FormData
+): Promise<MediaState> {
+  const supabase = await getAdminClient();
+  if (!supabase) return { error: "Admins only." };
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { error: "Which one?" };
+
+  const title = String(formData.get("title") ?? "").trim();
+  const titleBn = String(formData.get("title_bn") ?? "").trim();
+  const subtitle = String(formData.get("subtitle") ?? "").trim();
+  const linkUrl = String(formData.get("link_url") ?? "").trim();
+  const position = Number(formData.get("position"));
+
+  if (linkUrl && !/^(https:\/\/|\/)\S*$/.test(linkUrl)) {
+    return { error: "The link must start with https:// or /" };
+  }
+
+  const patch: Record<string, unknown> = {
+    title: title || null,
+    subtitle: subtitle || null,
+    link_url: linkUrl || null,
+  };
+  if (Number.isFinite(position)) patch.position = position;
+
+  let { error } = await supabase
+    .from("site_media")
+    .update({ ...patch, title_bn: titleBn || null })
+    .eq("id", id);
+
+  // title_bn arrives with a later SQL file — save the rest regardless.
+  if (error?.code === "42703") {
+    ({ error } = await supabase.from("site_media").update(patch).eq("id", id));
+  }
+
+  if (error) {
+    console.error("Failed to update site media:", error.message);
+    return { error: "Could not save that. Please try again." };
+  }
+
+  revalidatePath("/admin/homepage");
+  revalidatePath("/");
+  return { saved: true };
+}

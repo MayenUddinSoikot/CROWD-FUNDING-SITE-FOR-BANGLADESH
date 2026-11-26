@@ -163,6 +163,14 @@ export function HeroCarousel({
 
   const active = slides[index] ?? slides[0];
 
+  /* A slide's own words win. Falling back only when the slide has
+     none — and an empty string is a real answer, meaning "no line
+     here", not a reason to reach for the default. */
+  const heroTitle = active?.title?.trim() ? active.title : fallbackTitle;
+  const heroTitleBn = active?.titleBn?.trim()
+    ? active.titleBn
+    : fallbackTitleBn;
+
   return (
     <section
       className="relative w-full overflow-hidden bg-[#0b1a14] text-white"
@@ -240,21 +248,31 @@ export function HeroCarousel({
           reads as a banner; one that fills it reads as a front page. */}
       <div className="relative mx-auto flex min-h-[100svh] max-w-[1600px] flex-col justify-end px-5 pb-14 pt-28 sm:px-10 sm:pb-20">
         {/* Keyed on the slide so the words replay each time it changes */}
+        {/* Sized against the column it sits in, not the whole window.
+            At 11vw a long headline ran the full width of a laptop and
+            crowded everything under it; this tops out at a size that
+            still reads as display type but leaves the picture room to
+            be seen. max-w in characters keeps the line length sane at
+            every width rather than only at the ones I happened to
+            check. */}
         <h1
           key={`h-${index}`}
-          className="max-w-[16ch] text-[clamp(3rem,11vw,10.5rem)] font-light leading-[0.86] tracking-[-0.03em]"
+          className="max-w-[11ch] text-[clamp(2.5rem,6.2vw,5.5rem)] font-light leading-[0.95] tracking-[-0.02em] sm:max-w-[13ch]"
         >
-          <Words text={active?.title || fallbackTitle} reduced={reduced} />
+          <Words text={heroTitle} reduced={reduced} />
         </h1>
-        <p
-          key={`b-${index}`}
-          className={`font-bengali mt-5 max-w-2xl text-lg font-semibold text-white/75 sm:text-xl ${
-            reduced ? "" : "fade-up-soft"
-          }`}
-          style={reduced ? undefined : { animationDelay: "320ms" }}
-        >
-          {active?.titleBn || fallbackTitleBn}
-        </p>
+
+        {heroTitleBn ? (
+          <p
+            key={`b-${index}`}
+            className={`font-bengali mt-4 max-w-2xl text-base font-semibold text-white/75 sm:text-lg ${
+              reduced ? "" : "fade-up-soft"
+            }`}
+            style={reduced ? undefined : { animationDelay: "320ms" }}
+          >
+            {heroTitleBn}
+          </p>
+        ) : null}
 
         <div
           key={`c-${index}`}
