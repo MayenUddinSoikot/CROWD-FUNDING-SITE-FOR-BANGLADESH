@@ -32,7 +32,7 @@ export type HeroSlide = {
   creditHref: string | null;
 };
 
-const INTERVAL = 7000;
+const INTERVAL = 3000;
 
 /* Whether this connection should be asked to carry a hero video.
 
@@ -100,6 +100,14 @@ export function HeroCarousel({
 }) {
   const [index, setIndex] = useState(0);
   const [reduced, setReduced] = useState(false);
+  /* Every slide stays mounted so a crossfade has something to fade
+     between — but a mounted <video autoplay> downloads and plays
+     whether or not anyone can see it. With three video slides that was
+     21.7 MB fetched on one page load, three of them playing at once,
+     two of them invisible. Hold a handle on each and drive play/pause
+     from the slide that is actually showing. */
+  const videos = useRef(new Map<string, HTMLVideoElement>());
+
   const heavyOk = useSyncExternalStore(
     subscribeToConnection,
     connectionCarriesVideo,
@@ -139,6 +147,20 @@ export function HeroCarousel({
     return () => document.removeEventListener("visibilitychange", onVis);
   }, []);
 
+  useEffect(() => {
+    slides.forEach((slide, i) => {
+      const el = videos.current.get(slide.id);
+      if (!el) return;
+      if (i === index && heavyOk && !reduced) {
+        void el.play().catch(() => {
+          /* a browser may refuse autoplay; the still frame is fine */
+        });
+      } else if (!el.paused) {
+        el.pause();
+      }
+    });
+  }, [index, slides, heavyOk, reduced]);
+
   const active = slides[index] ?? slides[0];
 
   return (
@@ -162,16 +184,18 @@ export function HeroCarousel({
         >
           {slide.kind === "video" && slide.url && heavyOk ? (
             <video
+              ref={(el) => {
+                if (el) videos.current.set(slide.id, el);
+                else videos.current.delete(slide.id);
+              }}
               src={slide.url}
-              autoPlay={!reduced}
               muted
               loop
               playsInline
-              /* "metadata", not the default "auto": the browser takes
-                 the header and then only what it needs to play, instead
-                 of racing to buffer the whole file against everything
-                 else the page is loading. */
-              preload="metadata"
+              /* Only the slide on screen is worth fetching. The rest
+                 stay at "none" until they come round, and the effect
+                 above starts them. */
+              preload={i === index ? "metadata" : "none"}
               className="h-full w-full object-cover"
             />
           ) : slide.kind === "image" && slide.url ? (

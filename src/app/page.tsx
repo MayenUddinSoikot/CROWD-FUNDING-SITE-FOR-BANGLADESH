@@ -64,7 +64,12 @@ async function getSiteMedia(): Promise<SiteMedia[]> {
       .from("site_media")
       .select("id, slot, media_type, url, title, subtitle, link_url, position, published")
       .eq("published", true)
-      .order("position", { ascending: true });
+      /* created_at breaks the tie. Slides added without a position all
+         sit at 0, and ordering by position alone then leaves the order
+         up to the database — so the hero could deal its slides in a
+         different order on different page loads. */
+      .order("position", { ascending: true })
+      .order("created_at", { ascending: true });
     if (error) return [];
     return (data ?? []) as SiteMedia[];
   } catch {

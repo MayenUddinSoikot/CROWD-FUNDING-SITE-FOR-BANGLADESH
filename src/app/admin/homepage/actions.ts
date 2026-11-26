@@ -21,7 +21,20 @@ export async function addSiteMedia(
   const title = String(formData.get("title") ?? "").trim();
   const subtitle = String(formData.get("subtitle") ?? "").trim();
   const linkUrl = String(formData.get("link_url") ?? "").trim();
-  const position = Number(formData.get("position")) || 0;
+  let position = Number(formData.get("position")) || 0;
+
+  /* Put a new slide after the ones already there, rather than letting
+     everything pile up on 0 where the order stops being predictable. */
+  if (position === 0) {
+    const { data: last } = await supabase
+      .from("site_media")
+      .select("position")
+      .eq("slot", slot)
+      .order("position", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    position = ((last?.position as number | undefined) ?? 0) + 1;
+  }
 
   if (!SLOTS.has(slot) || !TYPES.has(mediaType)) {
     return { error: "Pick a valid place and media type." };
