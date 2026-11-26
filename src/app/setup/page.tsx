@@ -33,7 +33,11 @@ export default async function SetupPage() {
 
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-5 py-12 sm:px-6 sm:py-16">
-      <SetupWizard initialName={initialName} siteUrl={siteUrl} />
+      <SetupWizard
+        userId={user.id}
+        initialName={initialName}
+        siteUrl={siteUrl}
+      />
     </main>
   );
 }

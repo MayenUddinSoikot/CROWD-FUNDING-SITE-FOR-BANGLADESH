@@ -4,6 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveSetup, checkUsername } from "./actions";
 import { FOCUS_OPTIONS } from "@/lib/creator-focus";
+import { ProfileImageUpload } from "@/components/ProfileImageUpload";
 import { Button, inputClass } from "@/components/ui";
 import { SOCIAL_PLATFORMS } from "@/lib/types";
 
@@ -14,12 +15,19 @@ import { SOCIAL_PLATFORMS } from "@/lib/types";
    on screen — so moving back and forth never loses what was typed, and
    the final submit carries everything at once. */
 
-const STEPS = ["Your page address", "What you raise for", "Your links"];
+const STEPS = [
+  "Your page address",
+  "What you raise for",
+  "Your photo",
+  "Your links",
+];
 
 export function SetupWizard({
+  userId,
   initialName,
   siteUrl,
 }: {
+  userId: string;
   initialName: string;
   siteUrl: string;
 }) {
@@ -30,6 +38,8 @@ export function SetupWizard({
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState(initialName);
   const [focus, setFocus] = useState<string[]>([]);
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [coverUrl, setCoverUrl] = useState("");
   const [socials, setSocials] = useState<Record<string, string>>({});
   const [check, setCheck] = useState<{ ok: boolean; message: string }>({
     ok: false,
@@ -210,6 +220,42 @@ export function SetupWizard({
 
         {step === 2 ? (
           <>
+            <h2 className="text-2xl font-extrabold">Your photo</h2>
+            <p className="mt-2 leading-relaxed text-muted">
+              People give to a face, not a blank circle. Add one now and
+              your page is ready — you can change it any time.
+            </p>
+
+            <div className="mt-6">
+              <p className="text-sm font-semibold">Profile photo</p>
+              <ProfileImageUpload
+                userId={userId}
+                value={avatarUrl}
+                onChange={setAvatarUrl}
+                shape="round"
+                label="photo"
+              />
+            </div>
+
+            <div className="mt-7">
+              <p className="text-sm font-semibold">Cover banner</p>
+              <p className="mt-0.5 text-sm text-muted">
+                The wide picture across the top of your page. A landscape
+                photo works best.
+              </p>
+              <ProfileImageUpload
+                userId={userId}
+                value={coverUrl}
+                onChange={setCoverUrl}
+                shape="wide"
+                label="cover"
+              />
+            </div>
+          </>
+        ) : null}
+
+        {step === 3 ? (
+          <>
             <h2 className="text-2xl font-extrabold">
               Where can people already find you?
             </h2>
@@ -294,6 +340,9 @@ export function SetupWizard({
           </Button>
         )}
       </div>
+
+      <input type="hidden" name="avatar_url" value={avatarUrl} />
+      <input type="hidden" name="cover_url" value={coverUrl} />
 
       {step === STEPS.length - 1 ? (
         <button

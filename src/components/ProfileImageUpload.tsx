@@ -87,7 +87,7 @@ export function ProfileImageUpload({
         onChange={(e) => upload(e.target.files?.[0])}
       />
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         {value ? (
           <span
             className={`block shrink-0 overflow-hidden bg-brand-tint ${
@@ -119,7 +119,7 @@ export function ProfileImageUpload({
           </span>
         )}
 
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <button
             type="button"
             disabled={busy}
@@ -132,7 +132,7 @@ export function ProfileImageUpload({
             <button
               type="button"
               onClick={() => onChange("")}
-              className="press ml-3 text-sm font-semibold text-muted hover:text-accent"
+              className="press ml-3 mt-2 inline-block text-sm font-semibold text-muted hover:text-accent sm:mt-0"
             >
               Remove
             </button>

@@ -50,6 +50,8 @@ export async function saveSetup(
     .toLowerCase();
   const displayName = String(formData.get("display_name") ?? "").trim();
   const focus = formData.getAll("focus").map((f) => String(f)).slice(0, 8);
+  const avatarUrl = String(formData.get("avatar_url") ?? "").trim();
+  const coverUrl = String(formData.get("cover_url") ?? "").trim();
 
   if (!/^[a-z0-9_-]{3,30}$/.test(username)) {
     return {
@@ -81,6 +83,8 @@ export async function saveSetup(
     .update({
       ...base,
       focus: focus.length > 0 ? focus : null,
+      avatar_url: avatarUrl || null,
+      cover_url: coverUrl || null,
       social_links: Object.keys(socialLinks).length > 0 ? socialLinks : null,
     })
     .eq("id", user.id);
