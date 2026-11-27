@@ -8,6 +8,7 @@ import { Card, ButtonLink, EmptyState } from "@/components/ui";
 import { CampaignRow } from "@/components/CampaignRow";
 import type { DashboardCampaign } from "@/components/CampaignRow";
 import { SetupChecklist } from "@/components/SetupChecklist";
+import { accountKind } from "@/lib/account-kind";
 import type { ChecklistStep } from "@/components/SetupChecklist";
 
 export const dynamic = "force-dynamic";
@@ -36,7 +37,7 @@ export default async function AccountPage({
   const profileFields = "username, display_name, bio, avatar_url";
   const firstProfile = await supabase
     .from("profiles")
-    .select(`${profileFields}, cover_url, full_name, phone`)
+    .select(`${profileFields}, cover_url, full_name, phone, account_kind`)
     .eq("id", user.id)
     .maybeSingle();
   let profileRow = firstProfile.data;
@@ -56,7 +57,16 @@ export default async function AccountPage({
     cover_url: null,
     full_name: null,
     phone: null,
+    account_kind: null,
   };
+
+  /* Everything below is worded by what this account raises as: a
+     creator runs special projects, a fundraiser runs campaigns, and an
+     occasion account runs occasion fundraisers. Same dashboard, same
+     numbers — the words just stop being wrong for two of the three. */
+  const kind = accountKind(
+    (profile as { account_kind?: string | null }).account_kind
+  );
 
   const [dashboardResult, memberResult, postsResult, referralResult] =
     await Promise.all([
@@ -141,8 +151,13 @@ export default async function AccountPage({
     },
     {
       key: "campaign",
-      title: "Start your first campaign",
-      hint: "Checked by our team before it goes live",
+      title:
+        campaigns.length > 0
+          ? kind.startLabel
+          : kind.key === "creator"
+            ? "Raise for a special project"
+            : `Start your first ${kind.noun}`,
+      hint: kind.startHint,
       href: "/start",
       done: campaigns.length > 0,
     },
@@ -161,13 +176,13 @@ export default async function AccountPage({
           </p>
         </div>
         <ButtonLink href="/start" size="sm" className="shrink-0">
-          Start a campaign
+          {kind.startLabel}
         </ButtonLink>
       </div>
 
       {created ? (
         <p className="mt-5 rounded-xl bg-brand-tint px-4 py-3 text-sm font-semibold text-brand-dark">
-          Submitted — your campaign is with our verification team and will
+          Submitted — your {kind.noun} is with our verification team and will
           appear publicly once approved.
         </p>
       ) : null}
@@ -180,7 +195,7 @@ export default async function AccountPage({
       <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat
           value={formatTaka(totalRaised)}
-          label="Raised, all campaigns"
+          label={`Raised, all ${kind.nounPlural}`}
           hint={
             totalRaised > 0
               ? `≈ ${formatTaka(afterFee)} after bank charges`
@@ -190,7 +205,7 @@ export default async function AccountPage({
         />
         <Stat
           value={totalViews.toLocaleString("en-US")}
-          label="Campaign views"
+          label={`${kind.noun === "project" ? "Project" : "Campaign"} views`}
           hint={totalViews === 0 ? "Counting from today" : undefined}
         />
         <Stat
@@ -228,19 +243,28 @@ export default async function AccountPage({
       ) : null}
 
       {/* ===== Campaigns ===== */}
-      <div className="mt-10 flex items-center justify-between gap-4">
+      <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-bold">
-          Your campaigns{live > 0 ? ` · ${live} live` : ""}
+          Your {kind.nounPlural}
+          {live > 0 ? ` · ${live} live` : ""}
         </h2>
+        {campaigns.length > 0 ? (
+          <Link
+            href="/account/insights"
+            className="text-sm font-bold text-brand"
+          >
+            See which one is raising ↗
+          </Link>
+        ) : null}
       </div>
 
       {campaigns.length === 0 ? (
         <div className="mt-4">
           <EmptyState
-            title="No campaigns yet"
-            bn="এখনো কোনো ক্যাম্পেইন নেই"
-            hint="Every campaign is checked by our team before it goes live, so start early."
-            action={<ButtonLink href="/start">Start a campaign</ButtonLink>}
+            title={`No ${kind.nounPlural} yet`}
+            bn={`এখনো কোনো ${kind.nounBn} নেই`}
+            hint={`Every ${kind.noun} is checked by our team before it goes live, so start early.`}
+            action={<ButtonLink href="/start">{kind.startLabel}</ButtonLink>}
           />
         </div>
       ) : (

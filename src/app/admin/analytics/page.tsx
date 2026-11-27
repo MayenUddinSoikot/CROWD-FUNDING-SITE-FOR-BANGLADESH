@@ -57,7 +57,9 @@ export default async function AnalyticsPage() {
 
   const { data: campaignRows } = await supabase
     .from("campaigns")
-    .select("id, slug, title, status, goal_amount, raised_amount, created_at")
+    .select(
+      "id, slug, title, status, goal_amount, raised_amount, created_at, campaign_type, occasion"
+    )
     .order("created_at", { ascending: false });
   const campaigns = (campaignRows ?? []) as Campaign[];
 
@@ -116,6 +118,38 @@ export default async function AnalyticsPage() {
 
   const totalDonated = donations.reduce((s, d) => s + Number(d.amount), 0);
 
+  /* Shohay runs three different things through one table. Split them
+     here, because "which campaign is raising money" has a different
+     answer for a creator's project than for a medical fundraiser. */
+  const byKind = [
+    {
+      key: "creator",
+      label: "Creator projects",
+      emoji: "☕",
+      match: (c: Campaign) => c.campaign_type === "creator",
+    },
+    {
+      key: "occasion",
+      label: "Occasion fundraisers",
+      emoji: "🎂",
+      match: (c: Campaign) => c.campaign_type !== "creator" && Boolean(c.occasion),
+    },
+    {
+      key: "fundraiser",
+      label: "Fundraisers",
+      emoji: "🤝",
+      match: (c: Campaign) => c.campaign_type !== "creator" && !c.occasion,
+    },
+  ].map((group) => {
+    const mine = rows.filter((r) => group.match(r.campaign));
+    return {
+      ...group,
+      count: mine.length,
+      live: mine.filter((r) => r.campaign.status === "approved").length,
+      raised: mine.reduce((sum, r) => sum + r.amount, 0),
+    };
+  });
+
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-6 pb-16">
       <p className="mt-8 text-sm">
@@ -149,6 +183,20 @@ export default async function AnalyticsPage() {
           sub={formatTaka(totalDonated)}
         />
       </div>
+
+      <section className="mt-10">
+        <h2 className="text-lg font-bold">🧭 What is being raised</h2>
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {byKind.map((group) => (
+            <StatTile
+              key={group.key}
+              label={`${group.emoji} ${group.label}`}
+              value={formatTaka(group.raised)}
+              sub={`${group.count} total · ${group.live} live`}
+            />
+          ))}
+        </div>
+      </section>
 
       <section className="mt-10">
         <h2 className="text-lg font-bold">👀 Most viewed campaigns</h2>

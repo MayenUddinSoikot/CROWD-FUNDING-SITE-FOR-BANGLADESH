@@ -9,6 +9,7 @@ import type { DashboardCampaign } from "@/components/CampaignRow";
 import { ReferralPanel } from "@/components/ReferralPanel";
 import type { ReferralStats, ReferredCampaign } from "@/components/ReferralPanel";
 import { siteUrl } from "@/app/layout";
+import { accountKind } from "@/lib/account-kind";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Insights — Shohay সহায়" };
@@ -26,7 +27,11 @@ export default async function InsightsPage() {
     supabase.rpc("my_campaign_dashboard"),
     supabase.rpc("my_referral_stats", { since: null }),
     supabase.rpc("my_referral_campaigns", { max_rows: 8 }),
-    supabase.from("profiles").select("username").eq("id", user.id).maybeSingle(),
+    supabase
+      .from("profiles")
+      .select("username, account_kind")
+      .eq("id", user.id)
+      .maybeSingle(),
   ]);
 
   const campaigns = (dash.data ?? []) as DashboardCampaign[];
@@ -39,6 +44,9 @@ export default async function InsightsPage() {
     campaigns_helped: 0,
   };
   const referredCampaigns = (referred.data ?? []) as ReferredCampaign[];
+  const kind = accountKind(
+    (profile.data as { account_kind?: string | null } | null)?.account_kind
+  );
 
   const best = [...campaigns].sort(
     (a, b) => Number(b.views) - Number(a.views)
@@ -56,8 +64,8 @@ export default async function InsightsPage() {
         <div className="mt-6">
           <EmptyState
             title="Nothing to measure yet"
-            hint="Numbers appear here once you have a campaign and people start opening it."
-            action={<ButtonLink href="/start">Start a campaign</ButtonLink>}
+            hint={`Numbers appear here once you have a ${kind.noun} and people start opening it.`}
+            action={<ButtonLink href="/start">{kind.startLabel}</ButtonLink>}
           />
         </div>
       ) : (
@@ -66,7 +74,9 @@ export default async function InsightsPage() {
             <table className="w-full min-w-[640px] border-collapse text-sm">
               <thead>
                 <tr className="border-b border-foreground/10 text-left text-xs uppercase tracking-wider text-muted">
-                  <th className="pb-3 pr-4 font-bold">Campaign</th>
+                  <th className="pb-3 pr-4 font-bold">
+                    {kind.noun === "project" ? "Project" : "Campaign"}
+                  </th>
                   <th className="pb-3 pr-4 font-bold">Raised</th>
                   <th className="pb-3 pr-4 font-bold">Views</th>
                   <th className="pb-3 pr-4 font-bold">7 days</th>

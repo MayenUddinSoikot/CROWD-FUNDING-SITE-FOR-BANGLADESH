@@ -7,7 +7,7 @@ import { youtubeEmbedUrl } from "@/lib/types";
 import { inputClass } from "@/components/ui";
 
 const BUCKET = "campaign-media";
-const MAX_PHOTOS = 6;
+const DEFAULT_MAX_PHOTOS = 6;
 const MAX_PHOTO_MB = 15;
 const MAX_VIDEO_MB = 100;
 
@@ -18,7 +18,15 @@ function extensionOf(name: string): string {
   return match ? match[1].toLowerCase() : "dat";
 }
 
-export function MediaUploader({ userId }: { userId: string }) {
+export function MediaUploader({
+  userId,
+  maxPhotos = DEFAULT_MAX_PHOTOS,
+}: {
+  userId: string;
+  /* A creator's special project gets a bigger gallery — showing the work
+     is most of what persuades their own audience to fund it. */
+  maxPhotos?: number;
+}) {
   const [photos, setPhotos] = useState<Item[]>([]);
   const [video, setVideo] = useState<Item | null>(null);
   const [youtube, setYoutube] = useState("");
@@ -40,8 +48,8 @@ export function MediaUploader({ userId }: { userId: string }) {
       const limitMb = kind === "image" ? MAX_PHOTO_MB : MAX_VIDEO_MB;
 
       for (const file of list) {
-        if (kind === "image" && photos.length + added.length >= MAX_PHOTOS) {
-          setError(`You can add up to ${MAX_PHOTOS} photos.`);
+        if (kind === "image" && photos.length + added.length >= maxPhotos) {
+          setError(`You can add up to ${maxPhotos} photos.`);
           break;
         }
         if (!file.type.startsWith(kind === "image" ? "image/" : "video/")) {
@@ -110,7 +118,7 @@ export function MediaUploader({ userId }: { userId: string }) {
     <div>
       {/* ---------- Photos ---------- */}
       <p className="text-sm font-bold">
-        Photos <span className="font-medium text-muted">· up to {MAX_PHOTOS}</span>
+        Photos <span className="font-medium text-muted">· up to {maxPhotos}</span>
       </p>
       <p className="mt-1 text-xs leading-relaxed text-muted">
         A clear photo of the person or the situation raises far more than a
@@ -159,10 +167,10 @@ export function MediaUploader({ userId }: { userId: string }) {
         <button
           type="button"
           onClick={() => photoInput.current?.click()}
-          disabled={busy || photos.length >= MAX_PHOTOS}
+          disabled={busy || photos.length >= maxPhotos}
           className="press mt-4 inline-flex min-h-[44px] items-center justify-center rounded-full bg-brand px-6 py-3 text-sm font-bold text-white shadow-brand hover:bg-brand-dark disabled:opacity-60"
         >
-          {photos.length >= MAX_PHOTOS ? "Photo limit reached" : "Choose photos"}
+          {photos.length >= maxPhotos ? "Photo limit reached" : "Choose photos"}
         </button>
 
         <input

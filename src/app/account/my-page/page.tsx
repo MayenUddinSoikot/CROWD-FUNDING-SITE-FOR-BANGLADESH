@@ -6,13 +6,20 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { Card, ButtonLink } from "@/components/ui";
 import { CreatorProfileForm } from "../CreatorProfileForm";
 import { PublishToggle } from "./PublishToggle";
+import { AccountKindCard } from "@/components/AccountKindCard";
 import { siteUrl } from "@/app/layout";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "My page — Shohay সহায়" };
 
-export default async function MyPage() {
+export default async function MyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string }>;
+}) {
   if (!isSupabaseConfigured()) redirect("/");
+
+  const { saved } = await searchParams;
 
   const supabase = await createServerSupabaseClient();
   const {
@@ -24,7 +31,7 @@ export default async function MyPage() {
   const first = await supabase
     .from("profiles")
     .select(
-      `${fields}, social_links, full_name, phone, cover_url, focus, page_published`
+      `${fields}, social_links, full_name, phone, cover_url, focus, page_published, account_kind`
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -48,6 +55,7 @@ export default async function MyPage() {
     phone: null,
     social_links: null,
     page_published: false,
+    account_kind: null,
   };
 
   if (!profile.username) redirect("/setup");
@@ -119,6 +127,13 @@ export default async function MyPage() {
           <PublishToggle published={profile.page_published !== false} />
         </div>
       </Card>
+
+      <AccountKindCard
+        current={
+          ((profile as { account_kind?: string | null }).account_kind ?? null)
+        }
+        saved={saved === "kind"}
+      />
 
       <div className="mt-6">
         <CreatorProfileForm
