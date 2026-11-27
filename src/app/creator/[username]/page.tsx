@@ -166,6 +166,40 @@ export default async function CreatorProfilePage({
       </ButtonLink>
     ) : null;
 
+  /* The two ways to give, side by side and above everything else.
+
+     This used to be one button that was either monthly or one-off,
+     never both — so a creator with tiers never showed a way to give
+     once, and a creator with neither showed nothing at all and the
+     page had no way to support it anywhere. Each button appears only
+     when it can actually do something; a button that leads to a page
+     with nothing on it is worse than no button. */
+  const lowestTier =
+    tiers.length > 0
+      ? Math.min(...tiers.map((t) => Number(t.amount) || 0))
+      : null;
+
+  const supportActions =
+    tiers.length > 0 || target ? (
+      <div className="flex flex-col gap-3 sm:flex-row">
+        {tiers.length > 0 ? (
+          <ButtonLink href={joinHref} size="lg" className="shadow-brand">
+            Support monthly
+            {lowestTier ? ` · from ${formatTaka(lowestTier)}` : ""}
+          </ButtonLink>
+        ) : null}
+        {target ? (
+          <ButtonLink
+            href={`/campaigns/${target.slug}/donate`}
+            size="lg"
+            variant={tiers.length > 0 ? "secondary" : "primary"}
+          >
+            Give once
+          </ButtonLink>
+        ) : null}
+      </div>
+    ) : null;
+
   const [featured, ...rest] = posts;
 
   return (
@@ -208,14 +242,8 @@ export default async function CreatorProfilePage({
           </div>
           {/* On a phone the button goes below the bio instead, where it
               reads as the next step rather than interrupting the name. */}
-          {tiers.length > 0 ? (
-            <div className="hidden shrink-0 sm:block">
-              <ButtonLink href={joinHref} size="lg" className="shadow-brand">
-                Become a supporter
-              </ButtonLink>
-            </div>
-          ) : joinButton ? (
-            <div className="hidden shrink-0 sm:block">{joinButton}</div>
+          {supportActions ? (
+            <div className="hidden shrink-0 sm:block">{supportActions}</div>
           ) : null}
         </div>
 
@@ -270,12 +298,18 @@ export default async function CreatorProfilePage({
           ) : null}
         </div>
 
-        {tiers.length > 0 ? (
-          <div className="mt-5 sm:hidden">
-            <ButtonLink href={joinHref} size="lg" full className="shadow-brand">
-              Become a supporter
-            </ButtonLink>
-          </div>
+        {supportActions ? (
+          <div className="mt-6 sm:hidden [&_a]:w-full">{supportActions}</div>
+        ) : null}
+
+        {/* Nothing to give to yet. Say so to whoever owns the page —
+            a visitor sees nothing, which is honest, but the creator
+            needs to know why their page cannot be supported. */}
+        {tiers.length === 0 && !target ? (
+          <p className="mt-6 rounded-xl bg-warn-tint px-4 py-3 text-sm leading-relaxed text-warn-ink">
+            <b>Nobody can support this page yet.</b> Add a monthly tier or
+            start a campaign, and the buttons appear here.
+          </p>
         ) : null}
       </div>
 
