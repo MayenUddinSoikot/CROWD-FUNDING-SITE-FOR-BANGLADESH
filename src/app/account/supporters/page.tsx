@@ -1,3 +1,8 @@
+import {
+  netOf,
+  CREATOR_FEE_PCT,
+  BANK_FEE_PCT,
+} from "@/lib/fees";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -88,6 +93,23 @@ export default async function SupportersPage() {
         Monthly support is what lets you plan ahead instead of starting from
         zero with every campaign.
       </p>
+
+      {/* Said before they price anything, not after they have been paid. */}
+      <div className="mt-4 rounded-xl border border-foreground/10 bg-card p-4 text-sm leading-relaxed">
+        <p className="font-bold">
+          You keep {100 - CREATOR_FEE_PCT}% of what your page raises
+        </p>
+        <p className="mt-1 text-body">
+          Shohay&rsquo;s share of a creator page is {CREATOR_FEE_PCT}% — on
+          monthly support and on special projects alike. The payment
+          gateway&rsquo;s charge of about {BANK_FEE_PCT}% comes off on top, so
+          a {formatTaka(500)} pledge reaches you as about{" "}
+          <b>{formatTaka(netOf(500, "creator"))}</b>.{" "}
+          <Link href="/about#fee" className="font-semibold text-brand">
+            What Shohay charges
+          </Link>
+        </p>
+      </div>
 
       {!username ? (
         <p className="mt-4 rounded-xl bg-warn-tint px-4 py-3 text-sm text-warn-ink">

@@ -1,3 +1,4 @@
+import { netOf } from "@/lib/fees";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -14,10 +15,10 @@ import type { ChecklistStep } from "@/components/SetupChecklist";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard — Shohay সহায়" };
 
-/* The bank takes roughly 3% to move money out. Showing the figure net
-   of that is what a campaigner can plan around, rather than a number
-   they'll be disappointed by later. */
-const BANK_FEE = 0.03;
+/* Showing the figure net of what actually comes off — Shohay's share of
+   a creator page, then the bank's charge for moving money out — is what
+   someone can plan around, rather than a number they'll be disappointed
+   by later. */
 
 export default async function AccountPage({
   searchParams,
@@ -112,7 +113,13 @@ export default async function AccountPage({
   );
   const live = campaigns.filter((c) => c.status === "approved").length;
   const averageGift = totalDonations > 0 ? totalRaised / totalDonations : 0;
-  const afterFee = Math.round(totalRaised * (1 - BANK_FEE));
+  // Per campaign: a creator project carries Shohay's share, a fundraiser
+  // does not, and one rate over the combined total would be wrong for
+  // anyone holding both.
+  const afterFee = campaigns.reduce(
+    (sum, c) => sum + netOf(Number(c.raised_amount) || 0, c.campaign_type),
+    0
+  );
 
   const name =
     profile.display_name ??
@@ -198,7 +205,7 @@ export default async function AccountPage({
           label={`Raised, all ${kind.nounPlural}`}
           hint={
             totalRaised > 0
-              ? `≈ ${formatTaka(afterFee)} after bank charges`
+              ? `≈ ${formatTaka(afterFee)} after charges`
               : undefined
           }
           highlight

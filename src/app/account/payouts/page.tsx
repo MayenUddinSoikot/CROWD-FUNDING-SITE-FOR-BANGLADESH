@@ -1,3 +1,9 @@
+import {
+  netOf,
+  platformFee,
+  CREATOR_FEE_PCT,
+  BANK_FEE_PCT,
+} from "@/lib/fees";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -9,7 +15,7 @@ import type { DashboardCampaign } from "@/components/CampaignRow";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Payouts — Shohay সহায়" };
 
-const BANK_FEE = 0.03;
+
 const DAY = 24 * 60 * 60 * 1000;
 /* Money is released three days after a campaign ends, which is the
    window for a chargeback or a complaint to surface. */
@@ -32,7 +38,17 @@ export default async function PayoutsPage() {
     (sum, c) => sum + (Number(c.raised_amount) || 0),
     0
   );
-  const afterFee = Math.round(total * (1 - BANK_FEE));
+  // Per campaign, because a creator project carries Shohay's share and a
+  // fundraiser does not. Summing the gross and taking one rate off it
+  // would quietly overstate what a creator actually receives.
+  const afterFee = earning.reduce(
+    (sum, c) => sum + netOf(Number(c.raised_amount) || 0, c.campaign_type),
+    0
+  );
+  const ourShare = earning.reduce(
+    (sum, c) => sum + platformFee(Number(c.raised_amount) || 0, c.campaign_type),
+    0
+  );
 
   function payoutDate(c: DashboardCampaign): string {
     if (c.is_recurring || !c.ends_at) return "When the campaign ends";
@@ -69,7 +85,9 @@ export default async function PayoutsPage() {
           <p className="text-2xl font-extrabold">{formatTaka(afterFee)}</p>
           <p className="mt-1 text-sm text-body">Reaches your account</p>
           <p className="mt-1 text-xs text-muted">
-            After the bank&rsquo;s ~3% to move the money
+            {ourShare > 0
+              ? `After Shohay's ${CREATOR_FEE_PCT}% on your creator page and the gateway's ~${BANK_FEE_PCT}%`
+              : `After the gateway's ~${BANK_FEE_PCT}% to move the money`}
           </p>
         </Card>
         <Card className="p-5">
@@ -104,7 +122,7 @@ export default async function PayoutsPage() {
                   </span>
                   <span className="shrink-0 text-right">
                     <span className="block font-extrabold text-brand">
-                      {formatTaka(Math.round(raised * (1 - BANK_FEE)))}
+                      {formatTaka(netOf(raised, c.campaign_type))}
                     </span>
                     <span className="block text-xs text-muted">
                       of {formatTaka(raised)} raised
@@ -126,8 +144,21 @@ export default async function PayoutsPage() {
             before the funds leave.
           </li>
           <li>
-            Shohay takes <b>0%</b>. The only deduction is the bank&rsquo;s
-            charge for moving the money, around 3%.
+            {ourShare > 0 ? (
+              <>
+                A creator page pays Shohay <b>{CREATOR_FEE_PCT}%</b> of what it
+                raises — {formatTaka(ourShare)} of the figure above. Raising for
+                a person or a cause is <b>0%</b>. Either way the payment
+                gateway&rsquo;s charge of about {BANK_FEE_PCT}% comes off too.
+              </>
+            ) : (
+              <>
+                Shohay takes <b>0%</b> when you raise for a person or a cause.
+                The only deduction is the gateway&rsquo;s charge for moving the
+                money, around {BANK_FEE_PCT}%. A creator page pays{" "}
+                {CREATOR_FEE_PCT}%.
+              </>
+            )}
           </li>
           <li>
             Tips donors leave for Shohay are separate and never come out of

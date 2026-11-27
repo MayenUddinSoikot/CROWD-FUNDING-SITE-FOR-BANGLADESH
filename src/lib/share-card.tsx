@@ -38,6 +38,7 @@ export async function renderShareCard({
   coverImageUrl,
   shareUrl,
   via,
+  campaignType,
 }: {
   format: CardFormat;
   title: string;
@@ -47,7 +48,11 @@ export async function renderShareCard({
   coverImageUrl: string | null;
   shareUrl: string;
   via: string | null;
+  campaignType?: string | null;
 }): Promise<ImageResponse> {
+  // A creator page pays Shohay a share, so the badge cannot promise 0%
+  // on a card for one of their projects.
+  const feeBadge = campaignType === "creator" ? "Verified" : "0% fee";
   const size = CARD_SIZES[format] ?? CARD_SIZES.story;
   const { width, height } = size;
 
@@ -171,7 +176,7 @@ export async function renderShareCard({
               color: "#5b6459",
             }}
           >
-            0% fee
+            {feeBadge}
           </div>
         </div>
 

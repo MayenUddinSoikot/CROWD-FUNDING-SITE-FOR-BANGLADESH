@@ -27,7 +27,7 @@ const COLUMNS: { heading: string; links: { label: string; href: string }[] }[] =
     {
       heading: "Fees",
       links: [
-        { label: "0% platform fee", href: "/about#fee" },
+        { label: "What Shohay charges", href: "/about#fee" },
         { label: "How the money moves", href: "/about#fee" },
         { label: "Payouts to bKash & bank", href: "/about#how" },
       ],
@@ -149,7 +149,7 @@ export async function SiteFooter() {
         <div className="mt-8 flex flex-col gap-3 text-sm text-white/55 sm:flex-row sm:items-center sm:justify-between">
           <p>
             {tagline ||
-              `© ${year} Shohay · 0% platform fee · Made in Bangladesh 🇧🇩`}
+              `© ${year} Shohay · 0% on donations · Made in Bangladesh 🇧🇩`}
           </p>
           <div className="flex flex-wrap gap-4">
             <Link href="/terms" className="no-underline hover:text-white">

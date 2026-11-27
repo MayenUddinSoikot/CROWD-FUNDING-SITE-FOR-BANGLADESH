@@ -29,7 +29,9 @@ export async function GET(
   const supabase = getSupabaseClient();
   const { data } = await supabase
     .from("campaigns")
-    .select("title, goal_amount, raised_amount, cover_image_url, district")
+    .select(
+      "title, goal_amount, raised_amount, cover_image_url, district, campaign_type"
+    )
     .eq("slug", slug)
     .in("status", ["approved", "completed"])
     .maybeSingle();
@@ -42,6 +44,7 @@ export async function GET(
     raised_amount: number;
     cover_image_url: string | null;
     district: string | null;
+    campaign_type: string | null;
   };
 
   // A cover that isn't really an image (an early campaign has a Google
@@ -65,6 +68,7 @@ export async function GET(
       coverImageUrl: cover,
       shareUrl: `${origin}/campaigns/${slug}${via ? `?via=${via}` : ""}`,
       via,
+      campaignType: campaign.campaign_type,
     });
   } catch (err) {
     console.error("Share card failed to render:", err);

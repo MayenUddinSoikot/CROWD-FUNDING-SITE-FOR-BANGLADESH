@@ -398,6 +398,28 @@ export default async function Home({
               </ButtonLink>
             </div>
 
+            {/* Said here, on the page where a creator decides, rather
+                than buried in a terms link they will never open. */}
+            {t("control.fee_title") || t("control.fee_body") ? (
+              <div className="mt-8 rounded-2xl border border-foreground/10 bg-card p-5 shadow-soft sm:p-6">
+                {t("control.fee_title") ? (
+                  <p className="text-base font-extrabold text-brand-dark">
+                    {t("control.fee_title")}
+                  </p>
+                ) : null}
+                {t("control.fee_body") ? (
+                  <p className="mt-2 text-sm leading-relaxed text-body">
+                    {t("control.fee_body")}
+                  </p>
+                ) : null}
+                {t("control.fee_body_bn") ? (
+                  <p className="font-bengali mt-2 text-sm leading-relaxed text-muted">
+                    {t("control.fee_body_bn")}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+
             {/* A loose stack of pages, the way the reference shows
                 cards of a creator's work. Decorative, so it carries a
                 credit and no caption about who anyone is. */}

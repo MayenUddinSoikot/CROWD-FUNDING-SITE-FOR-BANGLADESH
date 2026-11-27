@@ -121,10 +121,11 @@ export function DonationForm({
           <span className="font-medium text-muted">(optional)</span>
         </p>
         <p className="mt-1.5 text-xs leading-relaxed text-muted">
-          Families and creators pay us <b className="text-foreground">nothing</b> —
-          a 0% platform fee — so every taka reaches the person who needs it. A
-          small tip covers our verification team, our office and the cost of
-          keeping Shohay running for people in need.
+          Families raising for someone pay us{" "}
+          <b className="text-foreground">nothing</b> — a 0% platform fee — so
+          every taka reaches the person who needs it. A small tip covers our
+          verification team, our office and the cost of keeping Shohay running
+          for people in need.
         </p>
         <p className="font-bengali mt-2 text-xs leading-relaxed text-muted">
           সহায় সম্পূর্ণ বিনামূল্যে — প্রতিটি টাকা অভাবী মানুষের কাছে পৌঁছায়।

@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { CREATOR_FEE_PCT, BANK_FEE_PCT } from "@/lib/fees";
 import type { Metadata } from "next";
 import { getCreators } from "@/lib/creators";
 import { CreatorCard } from "@/components/CreatorCard";
@@ -7,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Creators — Shohay সহায়",
   description:
-    "The people raising money for Bangladesh. Support them monthly, or buy them a cha. 0% platform fee.",
+    "The people raising money for Bangladesh. Support them monthly, or buy them a cha.",
 };
 
 export default async function CreatorsPage() {
@@ -26,7 +28,16 @@ export default async function CreatorsPage() {
 
       <p className="mt-3 max-w-2xl leading-relaxed text-body">
         Back the people doing the asking — support them every month, or buy
-        them a cha. Shohay takes 0%.
+        them a cha.
+      </p>
+      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+        Thinking of making a page? A creator page keeps{" "}
+        {100 - CREATOR_FEE_PCT}% of what it raises — Shohay&rsquo;s share is{" "}
+        {CREATOR_FEE_PCT}%, and the gateway charge of about {BANK_FEE_PCT}%
+        comes off on top.{" "}
+        <Link href="/about#fee" className="font-semibold text-brand">
+          What Shohay charges
+        </Link>
       </p>
 
       {creators.length === 0 ? (

@@ -1,3 +1,8 @@
+import {
+  CREATOR_FEE_PCT,
+  BANK_FEE_PCT,
+  FEE_SENTENCE_BN,
+} from "@/lib/fees";
 import type { Metadata } from "next";
 import { getSiteContent, text } from "@/lib/site-content";
 import { Prose } from "@/components/Prose";
@@ -6,7 +11,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "About Shohay — সহায় সম্পর্কে",
   description:
-    "Learn how Shohay works: verified campaigns, 0% platform fee, and secure direct payouts across Bangladesh.",
+    "Learn how Shohay works: verified campaigns, 0% fee on donations, and secure direct payouts across Bangladesh.",
 };
 
 function Section({
@@ -60,7 +65,8 @@ export default async function AboutPage() {
           Shohay is a crowdfunding platform built for Bangladesh — a trusted
           place to raise money for medical care, education, disaster relief,
           and the causes people care about. Every campaign is verified, and we
-          charge a 0% platform fee so every taka reaches the people who need it.
+          charge no platform fee on donations, so every taka reaches the people who
+          need it.
         </p>
         <p className="font-bengali mt-3 leading-relaxed opacity-80">
           সহায় বাংলাদেশের জন্য তৈরি একটি ক্রাউডফান্ডিং প্ল্যাটফর্ম — চিকিৎসা,
@@ -107,17 +113,25 @@ export default async function AboutPage() {
         </ol>
       </Section>
 
-      <Section id="fee" en="0% platform fee" bn="কোনো প্ল্যাটফর্ম ফি নেই">
+      <Section id="fee" en="What Shohay charges" bn="সহায় কত ফি নেয়">
         <p>
-          Shohay does not take a cut of donations. Every taka you give goes to
-          the campaign. (Standard payment-gateway charges from bKash, Nagad, or
-          the card network still apply, the same as anywhere else.)
+          <b>Raising for a person or a cause — 0%.</b> Shohay does not take a
+          cut of a donation to a fundraiser or an occasion fundraiser. Every
+          taka you give goes to the campaign. (Standard payment-gateway charges
+          from bKash, Nagad, or the card network still apply, the same as
+          anywhere else.)
         </p>
-        <p className="font-bengali opacity-80">
-          সহায় দানের কোনো অংশ কেটে রাখে না। আপনার দেওয়া প্রতিটি টাকা ক্যাম্পেইনে
-          যায়। (বিকাশ, নগদ বা কার্ড নেটওয়ার্কের সাধারণ লেনদেন ফি সবখানের মতোই
-          প্রযোজ্য।)
+        <p>
+          <b>A creator page — {CREATOR_FEE_PCT}%.</b> A creator page is a
+          different thing: an ongoing page of your own, monthly supporters,
+          posts, and special projects whenever you need one. Shohay keeps{" "}
+          {CREATOR_FEE_PCT}% of everything such a page raises — monthly support
+          and special projects alike. That pays for the page, for the
+          verification our team does on every project, and for someone to reach
+          when something goes wrong. The gateway charge of about{" "}
+          {BANK_FEE_PCT}% comes off on top of it.
         </p>
+        <p className="font-bengali opacity-80">{FEE_SENTENCE_BN}</p>
       </Section>
 
       <Section id="safety" en="Verified & safe" bn="যাচাইকৃত ও নিরাপদ">

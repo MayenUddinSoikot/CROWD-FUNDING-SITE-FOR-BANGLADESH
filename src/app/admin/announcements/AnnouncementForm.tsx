@@ -43,7 +43,7 @@ export function AnnouncementForm() {
           maxLength={120}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="0% platform fee — every taka reaches the campaign"
+          placeholder="0% fee on donations — every taka reaches the campaign"
           className={inputClass}
         />
         <p className="mt-1 text-xs text-muted">{message.length}/120</p>

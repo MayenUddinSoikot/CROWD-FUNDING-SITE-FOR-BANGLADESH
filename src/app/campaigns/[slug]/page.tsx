@@ -1,3 +1,4 @@
+import { CREATOR_FEE_PCT } from "@/lib/fees";
 import type { Metadata } from "next";
 import { SocialIcon } from "@/components/SocialIcon";
 import Link from "next/link";
@@ -443,7 +444,9 @@ export default async function CampaignPage({
             </div>
 
             <p className="mt-4 text-center text-xs leading-relaxed text-muted">
-              Shohay takes 0% — only bank charges apply
+              {campaign.campaign_type === "creator"
+                ? `Creator page · Shohay keeps ${CREATOR_FEE_PCT}%, plus bank charges`
+                : "Shohay takes 0% — only bank charges apply"}
             </p>
 
             {donations.length > 0 ? (

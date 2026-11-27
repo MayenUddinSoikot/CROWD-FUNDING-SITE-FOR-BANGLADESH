@@ -16,6 +16,7 @@ export type DashboardCampaign = {
   title: string;
   status: string;
   campaign_no: number | null;
+  campaign_type: string;
   goal_amount: number;
   raised_amount: number;
   created_at: string;

@@ -18,8 +18,8 @@ const FAQS: { q_en: string; q_bn: string; a_en: string; a_bn: string }[] = [
   {
     q_en: "How much does Shohay charge?",
     q_bn: "সহায় কত ফি নেয়?",
-    a_en: "Shohay charges a 0% platform fee. Only the standard payment-gateway charges (bKash, Nagad, or card networks) apply.",
-    a_bn: "সহায় কোনো প্ল্যাটফর্ম ফি নেয় না (০%)। শুধু বিকাশ, নগদ বা কার্ড নেটওয়ার্কের সাধারণ লেনদেন ফি প্রযোজ্য।",
+    a_en: "It depends what you are raising. A fundraiser or an occasion fundraiser pays a 0% platform fee — Shohay takes nothing, and only the standard payment-gateway charges (bKash, Nagad, or card networks) apply. A creator page pays 15% of everything it raises, monthly supporters and special projects alike, on top of those gateway charges.",
+    a_bn: "কী সংগ্রহ করছেন তার উপর নির্ভর করে। ফান্ডরেইজার বা উপলক্ষ-ভিত্তিক ক্যাম্পেইনে সহায় কোনো ফি নেয় না (০%) — শুধু বিকাশ, নগদ বা কার্ড নেটওয়ার্কের সাধারণ লেনদেন ফি প্রযোজ্য। ক্রিয়েটর পেজে সংগৃহীত সব অর্থের উপর ১৫% ফি প্রযোজ্য — মাসিক সমর্থন ও বিশেষ প্রজেক্ট দুটোতেই।",
   },
   {
     q_en: "How do I know a campaign is genuine?",

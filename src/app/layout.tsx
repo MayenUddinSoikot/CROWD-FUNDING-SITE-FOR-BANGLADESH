@@ -29,7 +29,7 @@ export const siteUrl =
 
 const title = "Shohay — সহায় | Crowdfunding for Bangladesh";
 const description =
-  "Shohay is a crowdfunding platform for Bangladesh. Support verified campaigns with bKash, Nagad, and cards. 0% platform fee.";
+  "Shohay is a crowdfunding platform for Bangladesh. Support verified campaigns with bKash, Nagad, and cards. 0% fee on donations.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

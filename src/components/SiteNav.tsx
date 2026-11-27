@@ -107,7 +107,7 @@ export function SiteNav({
           setMenu={setMenu}
         />
         <Link href="/about#fee" className="hover:text-brand">
-          0% fee
+          Fees
         </Link>
         <Link href="/faq" className="hover:text-brand">
           Help
@@ -205,8 +205,8 @@ export function SiteNav({
               />
               <DrawerItem
                 href="/about#fee"
-                title="0% fee"
-                subtitle="Every taka reaches the campaign"
+                title="Fees"
+                subtitle="0% on donations · 15% on a creator page"
                 onClick={close}
               />
               <DrawerItem

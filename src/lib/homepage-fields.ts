@@ -1,3 +1,10 @@
+import {
+  CREATOR_FEE_PCT,
+  BANK_FEE_PCT,
+  FEE_SENTENCE,
+  FEE_SENTENCE_BN,
+} from "@/lib/fees";
+
 /* Every word on the homepage that Shohay can change without a deploy.
 
    One registry, used twice: the homepage reads the default from here
@@ -42,7 +49,7 @@ export const HOMEPAGE_GROUPS: FieldGroup[] = [
       {
         key: "hero.title_bn",
         label: "Bengali line",
-        fallback: "০% ফি — প্রতিটি টাকা পৌঁছে যায়",
+        fallback: "অনুদানে ০% ফি — প্রতিটি টাকা পৌঁছে যায়",
       },
       {
         key: "hero.cta_primary",
@@ -138,12 +145,30 @@ export const HOMEPAGE_GROUPS: FieldGroup[] = [
         multiline: true,
       },
       { key: "control.cta", label: "Button", fallback: "Build your page" },
+      {
+        key: "control.fee_title",
+        label: "Fee note — heading",
+        fallback: `What a creator page costs: ${CREATOR_FEE_PCT}%`,
+      },
+      {
+        key: "control.fee_body",
+        label: "Fee note — text",
+        fallback:
+          `Shohay keeps ${CREATOR_FEE_PCT}% of everything a creator page raises — monthly supporters and special projects alike. That pays for the page, the verification our team does on every project, and someone to call when something goes wrong. The payment gateway's charge of about ${BANK_FEE_PCT}% comes off on top. Raising for a person or a cause instead? That stays 0%.`,
+        multiline: true,
+      },
+      {
+        key: "control.fee_body_bn",
+        label: "Fee note — Bengali",
+        fallback: FEE_SENTENCE_BN,
+        multiline: true,
+      },
     ],
   },
   {
     section: "direct",
     title: "Nothing in between",
-    blurb: "The 0% fee argument, stated as directness rather than price.",
+    blurb: "The fee argument, stated as directness rather than price.",
     canHide: true,
     fields: [
       {
@@ -161,7 +186,8 @@ export const HOMEPAGE_GROUPS: FieldGroup[] = [
         key: "direct.body",
         label: "Paragraph",
         fallback:
-          "Shohay takes 0%. No commission, no listing fee, no cut of a donation. The only money that leaves is the bank's charge for moving it, and we show you that figure before you ever ask anyone to give.",
+          FEE_SENTENCE +
+          " No listing fee, no cut of a one-off gift, and we show you every figure before you ask anyone to give.",
         multiline: true,
       },
       { key: "direct.cta", label: "Button", fallback: "How the money moves" },
@@ -294,11 +320,15 @@ export const HOMEPAGE_GROUPS: FieldGroup[] = [
         key: "trust.body",
         label: "Paragraph",
         fallback:
-          "Every campaign is checked with a government ID and documents before it goes live. 0% platform fee, secure bKash, Nagad and card payments, and an independent audit every year.",
+          "Every campaign is checked with a government ID and documents before it goes live. 0% platform fee on donations and fundraisers, secure bKash, Nagad and card payments, and an independent audit every year.",
         multiline: true,
       },
       { key: "trust.stat_one", label: "Number 1", fallback: "0%" },
-      { key: "trust.stat_one_label", label: "Number 1 — label", fallback: "platform fee" },
+      {
+        key: "trust.stat_one_label",
+        label: "Number 1 — label",
+        fallback: "fee on donations",
+      },
       { key: "trust.stat_two", label: "Number 2", fallback: "100%" },
       {
         key: "trust.stat_two_label",
@@ -331,7 +361,7 @@ export const HOMEPAGE_GROUPS: FieldGroup[] = [
         key: "closing.body",
         label: "Paragraph",
         fallback:
-          "Free to start, 0% from Shohay, and our team checks every campaign before it goes live. The people who already follow you are the ones who give first.",
+          `Free to start, 0% from Shohay when you raise for a person or a cause, ${CREATOR_FEE_PCT}% on a creator page — and our team checks every campaign before it goes live. The people who already follow you are the ones who give first.`,
         multiline: true,
       },
       { key: "closing.cta_primary", label: "Main button", fallback: "Create your page" },
@@ -376,7 +406,7 @@ export const SITE_GROUPS: FieldGroup[] = [
         key: "footer.tagline",
         label: "Footer line beside the logo",
         fallback: "",
-        hint: "Leave empty to keep © Shohay · 0% platform fee · Made in Bangladesh.",
+        hint: "Leave empty to keep © Shohay · 0% on donations · Made in Bangladesh.",
       },
     ],
   },

@@ -1,3 +1,4 @@
+import { CREATOR_FEE_PCT } from "@/lib/fees";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -8,14 +9,14 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Start raising — Shohay সহায়",
   description:
-    "Build a page on Shohay and raise for the people who need it. 0% platform fee — every taka reaches them.",
+    "Build a page on Shohay and raise for the people who need it. 0% fee when you raise for a person or a cause.",
 };
 
 const PROMISES = [
   {
     icon: "০%",
-    title: "Keep everything you raise",
-    body: "Shohay takes 0%. The only deduction is the bank's charge for moving the money.",
+    title: "0% when you raise for someone",
+    body: `A fundraiser or an occasion fundraiser pays Shohay nothing — only the bank's charge for moving the money. A creator page pays ${CREATOR_FEE_PCT}%.`,
   },
   {
     icon: "♡",
@@ -50,9 +51,9 @@ export default async function SignupPage() {
         সহায়-এ শুরু করুন
       </p>
       <p className="mx-auto mt-4 max-w-sm text-center leading-relaxed text-body">
-        Shohay takes <b className="text-foreground">0%</b>. Build a page,
-        bring the people who already follow you, and raise for someone who
-        needs it.
+        Raising for a person or a cause costs{" "}
+        <b className="text-foreground">0%</b>. Build a page, bring the people
+        who already follow you, and raise for someone who needs it.
       </p>
 
       <SignupForm />

@@ -132,8 +132,8 @@ export default async function StartCampaignPage({
         <p className="mt-2 text-xl font-semibold">Start a campaign</p>
         <p className="mt-6 max-w-md leading-relaxed text-body">
           Create a free account to open the campaign form. Every campaign is
-          checked by our internal verification team before going live — 0%
-          platform fee, direct payout.
+          checked by our internal verification team before going live, with a
+          direct payout.
         </p>
         <Link
           href="/signup"

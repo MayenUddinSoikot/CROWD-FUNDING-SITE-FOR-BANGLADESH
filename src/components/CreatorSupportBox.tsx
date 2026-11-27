@@ -169,8 +169,8 @@ export function CreatorSupportBox({
           className="mt-0.5 h-4 w-4"
         />
         <span className="opacity-70">
-          Add {formatTaka(Math.round(amount * TIP_RATE))} to keep Shohay free
-          for creators (0% platform fee) — uncheck any time.
+          Add {formatTaka(Math.round(amount * TIP_RATE))} so more of your
+          support reaches them — uncheck any time.
         </span>
       </label>
 
